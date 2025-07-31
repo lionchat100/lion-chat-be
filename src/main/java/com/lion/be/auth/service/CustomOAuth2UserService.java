@@ -55,7 +55,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         try {
             user = userReadService.fetchByEmail(attributes.getEmail());
             log.info("{} 유저 인식 완료.", attributes.getName());
-        } catch (UsernameNotFoundException e) {
+        } catch (RuntimeException e) {
             user = UserConvertor.attributesToUser(attributes);
             userWriteService.save(user);
             log.info("{} 유저 최초 로그인.", attributes.getName());
