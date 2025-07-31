@@ -48,7 +48,7 @@ public class TokenController {
         int cookieMaxAge = (int) (refreshTokenExpireTime / 1000);
         CookieUtil.addCookie(response, "refresh_token", tokens.getRefreshToken(), cookieMaxAge);
 
-        return ResponseEntity.ok(new AuthTokenResponse(tokens.getAccessToken(), tokens.getIsNewUser()));
+        return ResponseEntity.ok(new AuthTokenResponse(tokens.getAccessToken()));
     }
 
     @PostMapping("/api/auth/refresh")
@@ -65,7 +65,7 @@ public class TokenController {
         String email = jwtTokenProvider.getEmailFromToken(refreshToken);
         String savedToken = refreshTokenService.getToken(email);
         if (savedToken == null || !savedToken.equals(refreshToken)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh Token not found or mismatched");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("틀리거나 만료된 refreshToken입니다.");
         }
 
         Authentication authentication = jwtTokenProvider.getAuthentication(refreshToken);

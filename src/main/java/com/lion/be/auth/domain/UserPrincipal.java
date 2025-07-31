@@ -23,12 +23,11 @@ public class UserPrincipal implements UserDetails, OAuth2User {
     }
 
     public UserPrincipal(Long id, String email, Collection<? extends GrantedAuthority> authorities,
-                         Map<String, Object> attributes, boolean isNewUser) {
+                         Map<String, Object> attributes) {
         this.id = id;
         this.email = email;
         this.authorities = authorities;
         this.attributes = attributes;
-        this.isNewUser = isNewUser;
     }
 
     @Override
@@ -38,7 +37,6 @@ public class UserPrincipal implements UserDetails, OAuth2User {
 
     @Override
     public String getName() {
-        // OAuth2에서는 보통 고유 ID를 반환하지만, 우리는 이메일을 고유 식별자로 사용
         return email;
     }
 
@@ -49,12 +47,12 @@ public class UserPrincipal implements UserDetails, OAuth2User {
 
     @Override
     public String getPassword() {
-        return null; // 비밀번호는 사용하지 않음
+        return null;
     }
 
     @Override
     public String getUsername() {
-        return email; // 사용자 이름으로 이메일 사용
+        return email;
     }
 
     @Override
