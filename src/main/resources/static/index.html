@@ -1,0 +1,105 @@
+<!-- src/main/resources/static/index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat with WebSocket and RabbitMQ</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+<div class="container mt-5">
+    <h2 class="text-center">Lion Chat</h2>
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div id="login-form">
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" class="form-control" placeholder="Enter your name">
+                </div>
+                <button id="connect-btn" class="btn btn-primary">Connect</button>
+            </div>
+            <div id="chat-room" class="d-none">
+                <div id="messages" class="border p-3 mb-3" style="height: 300px; overflow-y: scroll;"></div>
+                <form id="message-form" class="form-inline">
+                    <input type="text" id="message" class="form-control flex-grow-1 mr-2" placeholder="Type a message...">
+                    <button type="submit" class="btn btn-success">Send</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let stompClient = null;
+    let username = null;
+
+    const connectBtn = document.getElementById('connect-btn');
+    const loginForm = document.getElementById('login-form');
+    const chatRoom = document.getElementById('chat-room');
+    const messageForm = document.getElementById('message-form');
+    const messageInput = document.getElementById('message');
+    const messagesArea = document.getElementById('messages');
+    const usernameInput = document.getElementById('username');
+
+    connectBtn.addEventListener('click', connect);
+    messageForm.addEventListener('submit', sendMessage);
+
+    function connect(event) {
+        event.preventDefault();
+        username = usernameInput.value.trim();
+        if (username) {
+            loginForm.classList.add('d-none');
+            chatRoom.classList.remove('d-none');
+
+            // 1. SockJS를 통해 WebSocket 연결을 생성합니다.
+            const socket = new SockJS('/ws');
+            stompClient = Stomp.over(socket);
+
+            // 2. STOMP 클라이언트로 서버에 연결합니다.
+            stompClient.connect({}, onConnected, onError);
+        }
+    }
+
+    function onConnected() {
+        // 3. 연결 성공 시, "/topic/public" 토픽을 구독합니다.
+        //    서버에서 이 토픽으로 메시지를 보내면 onMessageReceived 콜백이 호출됩니다.
+        stompClient.subscribe('/topic/public', onMessageReceived);
+
+        displayMessage({ sender: 'System', content: `Welcome, ${username}!` });
+    }
+
+    function onError(error) {
+        displayMessage({ sender: 'System', content: 'Could not connect to WebSocket server. Please refresh this page to try again!' });
+    }
+
+    function sendMessage(event) {
+        event.preventDefault();
+        const messageContent = messageInput.value.trim();
+        if (messageContent && stompClient) {
+            const chatMessage = {
+                sender: username,
+                content: messageContent
+            };
+            // 4. "/app/chat.sendMessage" 목적지로 메시지를 전송합니다.
+            //    이 메시지는 서버의 ChatController로 라우팅됩니다.
+            stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
+            messageInput.value = '';
+        }
+    }
+
+    function onMessageReceived(payload) {
+        const message = JSON.parse(payload.body);
+        displayMessage(message);
+    }
+
+    function displayMessage(message) {
+        const messageElement = document.createElement('div');
+        messageElement.innerHTML = `<strong>[${message.sender}]</strong>: ${message.content}`;
+        messagesArea.appendChild(messageElement);
+        messagesArea.scrollTop = messagesArea.scrollHeight; // Auto-scroll
+    }
+
+</script>
+</body>
+</html>
