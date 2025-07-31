@@ -1,7 +1,7 @@
-package com.lion.acceptance.util;
+package com.lion.be.acceptance.util;
 
-import static com.devbattery.englishteacher.acceptance.util.UserFixture.비회원;
-import static com.devbattery.englishteacher.acceptance.util.UserFixture.회원_원준;
+import static com.lion.be.acceptance.util.UserFixture.비회원;
+import static com.lion.be.acceptance.util.UserFixture.회원_원준;
 
 import java.util.Map;
 

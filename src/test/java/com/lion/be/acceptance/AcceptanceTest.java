@@ -1,10 +1,12 @@
-package com.lion.acceptance;
+package com.lion.be.acceptance;
 
+import static com.lion.be.acceptance.auth.AuthSteps.원준이_로그인한다;
+import static com.lion.be.acceptance.user.UserSteps.원준_회원가입;
 import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.document;
 
-import com.lion.acceptance.util.DatabaseCleanup;
-import com.lion.acceptance.util.SqlFileExecutor;
-import com.lion.acceptance.util.TableCleanup;
+import com.lion.be.acceptance.util.DatabaseCleanup;
+import com.lion.be.acceptance.util.SqlFileExecutor;
+import com.lion.be.acceptance.util.TableCleanup;
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.specification.RequestSpecification;
@@ -25,6 +27,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
@@ -45,16 +48,30 @@ public abstract class AcceptanceTest {
     @Container
     public static final MongoDBContainer MONGO_DB = new MongoDBContainer(DockerImageName.parse("mongo:6.0"));
 
+    @Container
+    public static final RabbitMQContainer RABBITMQ = new RabbitMQContainer(
+            DockerImageName.parse("rabbitmq:3-management"));
+
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {
+        // MySQL 설정
         registry.add("spring.datasource.url", MYSQL::getJdbcUrl);
         registry.add("spring.datasource.username", MYSQL::getUsername);
         registry.add("spring.datasource.password", MYSQL::getPassword);
 
+        // Redis 설정
         registry.add("spring.data.redis.host", REDIS::getHost);
         registry.add("spring.data.redis.port", () -> REDIS.getMappedPort(6379).toString());
 
+        // MongoDB 설정
         registry.add("spring.data.mongodb.uri", MONGO_DB::getReplicaSetUrl);
+
+        // 3. RabbitMQ 설정을 추가합니다.
+        // 스프링 부트의 RabbitMQ 자동 설정 프로퍼티에 컨테이너 정보를 동적으로 연결합니다.
+        registry.add("spring.rabbitmq.host", RABBITMQ::getHost);
+        registry.add("spring.rabbitmq.port", RABBITMQ::getAmqpPort);
+        registry.add("spring.rabbitmq.username", RABBITMQ::getAdminUsername);
+        registry.add("spring.rabbitmq.password", RABBITMQ::getAdminPassword);
     }
 
     @LocalServerPort
@@ -99,18 +116,18 @@ public abstract class AcceptanceTest {
     @BeforeEach
     void setSpec(RestDocumentationContextProvider provider) {
         데이터베이스를_초기화한다();
-//        initAccessToken();
+        initAccessToken();
         this.spec = new RequestSpecBuilder().addFilter(
                 RestAssuredRestDocumentation.documentationConfiguration(provider)).build();
     }
 
-//    private void initAccessToken() {
-//        회원_원준_액세스토큰 = 원준_액세스토큰_요청();
-//    }
+    private void initAccessToken() {
+        회원_원준_액세스토큰 = 원준_액세스토큰_요청();
+    }
 
-//    private static String 원준_액세스토큰_요청() {
-//        원준_회원가입();
-//        return 원준이_로그인한다(new RequestSpecBuilder().build()).jsonPath().getString("accessToken");
-//    }
+    private static String 원준_액세스토큰_요청() {
+        원준_회원가입();
+        return 원준이_로그인한다(new RequestSpecBuilder().build()).jsonPath().getString("accessToken");
+    }
 
 }

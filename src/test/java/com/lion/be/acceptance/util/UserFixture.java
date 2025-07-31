@@ -1,4 +1,4 @@
-package com.lion.acceptance.util;
+package com.lion.be.acceptance.util;
 
 import java.util.Map;
 

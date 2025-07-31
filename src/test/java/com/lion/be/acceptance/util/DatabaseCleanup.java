@@ -1,4 +1,4 @@
-package com.lion.acceptance.util;
+package com.lion.be.acceptance.util;
 
 import jakarta.annotation.PostConstruct;
 import java.util.List;
