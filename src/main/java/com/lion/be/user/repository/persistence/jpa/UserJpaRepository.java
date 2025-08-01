@@ -1,4 +1,4 @@
-package com.lion.be.user.repository;
+package com.lion.be.user.repository.persistence.jpa;
 
 import com.lion.be.user.domain.entity.User;
 import java.util.Optional;
