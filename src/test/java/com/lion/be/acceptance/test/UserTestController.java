@@ -68,7 +68,7 @@ public class UserTestController {
         refreshTokenService.saveToken(user.getEmail(), refreshToken);
 
         // 5. 응답 반환
-        AuthTokenResponse response = new AuthTokenResponse(accessToken, isNewUser);
+        AuthTokenResponse response = new AuthTokenResponse(accessToken);
         return ResponseEntity.ok(response);
     }
 

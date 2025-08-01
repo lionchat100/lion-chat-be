@@ -11,6 +11,5 @@ public class AuthToken {
 
     private String accessToken;
     private String refreshToken;
-    private Boolean isNewUser;
 
 }

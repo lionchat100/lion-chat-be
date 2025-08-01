@@ -43,7 +43,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         refreshTokenService.saveToken(email, refreshToken);
         log.info("Redis에 Refresh Token 저장 완료.");
 
-        AuthToken authToken = new AuthToken(accessToken, refreshToken, isNewUser);
+        AuthToken authToken = new AuthToken(accessToken, refreshToken);
         String authorizationCode = authCodeService.generateTokens(authToken);
         log.info("임시 인증 코드 생성 완료: {}", authorizationCode);
 

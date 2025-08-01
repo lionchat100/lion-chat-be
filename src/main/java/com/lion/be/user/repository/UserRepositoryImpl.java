@@ -1,6 +1,7 @@
 package com.lion.be.user.repository;
 
 import com.lion.be.user.domain.entity.User;
+import com.lion.be.user.repository.persistence.jpa.UserJpaRepository;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;

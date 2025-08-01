@@ -1,5 +1,6 @@
 package com.lion.be.auth.controller;
 
+import com.lion.be.auth.controller.dto.CurrentUserResponse;
 import com.lion.be.auth.domain.UserPrincipal;
 import com.lion.be.user.service.UserReadService;
 import lombok.RequiredArgsConstructor;
@@ -18,12 +19,12 @@ public class AuthController {
     private final UserReadService userReadService;
 
     @GetMapping("/api/users/me")
-    public ResponseEntity<?> fetchCurrentUser(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+    public ResponseEntity<CurrentUserResponse> fetchCurrentUser(@AuthenticationPrincipal UserPrincipal userPrincipal) {
         if (userPrincipal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        var response = userReadService.fetchCurrentUserResponse(userPrincipal.getEmail(), userPrincipal);
+        CurrentUserResponse response = userReadService.fetchCurrentUserResponse(userPrincipal.getId());
         return ResponseEntity.ok(response);
     }
 
