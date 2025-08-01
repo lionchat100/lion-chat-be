@@ -77,13 +77,13 @@
         event.preventDefault();
         const messageContent = messageInput.value.trim();
         if (messageContent && stompClient) {
-            const chatMessage = {
+            const chatMessageValue = {
                 sender: username,
                 content: messageContent
             };
             // 4. "/app/chat.sendMessage" 목적지로 메시지를 전송합니다.
             //    이 메시지는 서버의 ChatController로 라우팅됩니다.
-            stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
+            stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessageValue));
             messageInput.value = '';
         }
     }
