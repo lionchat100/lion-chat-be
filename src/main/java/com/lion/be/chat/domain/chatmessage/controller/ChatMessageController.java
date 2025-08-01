@@ -4,6 +4,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/chatmessages")
+@RequestMapping("/api/chats/")
 public class ChatMessageController {
 }
