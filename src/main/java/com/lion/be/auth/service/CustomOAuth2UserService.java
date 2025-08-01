@@ -53,6 +53,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         User user;
 
         try {
+            // FIXME: 다른 oauth 플랫폼과 이메일이 같은 경우, 재로그인하도록 돌리기 (혹시나 시간이 없으면 카카오만)
             user = userReadService.fetchByEmail(attributes.getEmail());
             log.info("{} 유저 인식 완료.", attributes.getName());
         } catch (RuntimeException e) {
