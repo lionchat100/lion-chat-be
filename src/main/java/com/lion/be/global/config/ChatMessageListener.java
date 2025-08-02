@@ -14,10 +14,11 @@ public class ChatMessageListener {
 
     // RabbitMQ의 'anonymousQueue'를 리스닝합니다.
     // SpEL을 사용하여 `RabbitMQConfig`에서 생성된 익명 큐의 실제 이름을 참조합니다.
-    @RabbitListener(queues = "#{anonymousQueue.name}")
-    public void receiveMessage(ChatMessageValue chatMessageValue) {
-        // 받은 메시지를 WebSocket의 "/topic/public"을 구독하는 클라이언트들에게 보냅니다.
-        messagingTemplate.convertAndSend("/topic/public", chatMessageValue);
-    }
+//    @RabbitListener(queues = "#{}")
+//    public void receiveMessage(ChatMessageValue chatMessageValue) {
+//        // 받은 메시지를 WebSocket의 "/topic/public"을 구독하는 클라이언트들에게 보냅니다.
+//        //TODO: 실제 구현을 할 때는 public이 아닌 메시지에 담긴 Room ID를 이용한 엔드 포인트에 보내야한다.
+//        messagingTemplate.convertAndSend("/topic/public", chatMessageValue);
+//    }
 
 }

@@ -1,11 +1,9 @@
 package com.lion.be.chat.domain.chatroom.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.lion.be.chat.domain.chatroomuser.entity.ChatRoomUser;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import lombok.*;
@@ -18,6 +16,7 @@ import java.time.LocalDateTime;
 public class ChatRoom {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private Boolean isDeleted = false;
@@ -25,11 +24,22 @@ public class ChatRoom {
     private LocalDateTime regDt;
 
     @OneToMany(mappedBy = "chatRoom", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<ChatRoomUser> chatRoomUsers = new ArrayList<>();
 
-    public ChatRoom(Boolean isDeleted, LocalDateTime regDt) {
+    @Setter
+    private String recentMessageContent;
+
+    @Setter
+    private LocalDateTime recentMessageDt;
+
+    public ChatRoom(Boolean isDeleted) {
         this.isDeleted = isDeleted;
-        this.regDt = regDt;
+        this.regDt = LocalDateTime.now();
+    }
+
+    public void addChatRoomUser(ChatRoomUser chatRoomUser) {
+        chatRoomUsers.add(chatRoomUser);
     }
 
 }

@@ -2,10 +2,8 @@ package com.lion.be.chat.domain.chatroomuser.entity;
 
 import com.lion.be.chat.domain.chatroom.entity.ChatRoom;
 import com.lion.be.user.domain.entity.User;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,19 +17,23 @@ import lombok.Setter;
 public class ChatRoomUser {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @Setter
     private ChatRoom chatRoom;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @Setter
     private User user;
 
+    @Setter
     private Boolean isRead;
 
     private LocalDateTime regDt;
 
-    public ChatRoomUser(Boolean isRead, LocalDateTime regDt) {
+    public ChatRoomUser(Boolean isRead) {
         this.isRead = isRead;
         this.regDt = LocalDateTime.now();
     }

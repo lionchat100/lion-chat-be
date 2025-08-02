@@ -2,13 +2,8 @@ package com.lion.be.user.domain.entity;
 
 import com.lion.be.chat.domain.chatroomuser.entity.ChatRoomUser;
 import com.lion.be.user.domain.Role;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
@@ -31,6 +26,7 @@ public class User {
 
     private String imageUrl;
 
+    @Enumerated(value = EnumType.STRING)
     private Role role;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -45,6 +41,10 @@ public class User {
 
     public String getRoleKey() {
         return this.role.getKey();
+    }
+
+    public void addChatRoomUser(ChatRoomUser chatRoomUser) {
+        chatRoomUsers.add(chatRoomUser);
     }
 
 }

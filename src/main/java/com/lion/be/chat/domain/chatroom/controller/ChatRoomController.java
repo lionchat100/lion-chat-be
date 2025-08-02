@@ -1,9 +1,40 @@
 package com.lion.be.chat.domain.chatroom.controller;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.lion.be.auth.domain.UserPrincipal;
+import com.lion.be.chat.domain.chatmessage.service.ChatMessageWriteService;
+import com.lion.be.chat.domain.chatroom.dto.ChatRoomListDto;
+import com.lion.be.chat.domain.chatroom.dto.OpponentUserRequest;
+import com.lion.be.chat.domain.chatroom.entity.ChatRoom;
+import com.lion.be.chat.domain.chatroom.service.ChatRoomReadService;
+import com.lion.be.chat.domain.chatroom.service.ChatRoomWriteService;
+import com.lion.be.chat.domain.chatroomuser.service.ChatRoomUserWriteService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
-@RequestMapping("/api/chats")
+@RequestMapping("/api/chatrooms")
+@RequiredArgsConstructor
 public class ChatRoomController {
+
+    private final ChatRoomWriteService chatRoomWriteService;
+    private final ChatRoomReadService chatRoomReadService;
+    @PostMapping
+    public ChatRoom joinChatRoom(@RequestBody OpponentUserRequest opponentUser){
+        Long opponentId = opponentUser.getId();
+        UserPrincipal currentUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        return chatRoomWriteService.joinChatRoom(currentUser.getId(), opponentId);
+    }
+
+    @GetMapping
+    public List<ChatRoomListDto> getChatRoomList(){
+        UserPrincipal currentUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        return chatRoomReadService.fetchAll(currentUser.getId());
+
+    }
+
 }

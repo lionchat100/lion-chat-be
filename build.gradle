@@ -79,6 +79,13 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     testCompileOnly 'org.projectlombok:lombok:1.18.20'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.20'
+
+    //STOMP relay 의존성
+    // Like Maven, this is often transitive. Add it if you are unsure.
+    implementation 'io.projectreactor.netty:reactor-netty-http'
+
+    //WebSocket 인증
+    implementation 'org.springframework.security:spring-security-messaging'
 }
 
 tasks.named('test') {

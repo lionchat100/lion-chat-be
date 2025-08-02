@@ -1,7 +1,8 @@
 <!-- src/main/resources/static/index.html -->
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
+    <meta charset="UTF-8">
     <title>Chat with WebSocket and RabbitMQ</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
@@ -16,8 +17,17 @@
                 <div class="form-group">
                     <label for="username">Username:</label>
                     <input type="text" id="username" class="form-control" placeholder="Enter your name">
+                    <button id="login-btn" class="btn btn-primary">Login</button>
                 </div>
-                <button id="connect-btn" class="btn btn-primary">Connect</button>
+            </div>
+            <div id="chat-room-list-form" class="d-none">
+                <div class="form-group">
+                    <label for="opponent">Opponent Id:</label>
+                    <input type="text" id="opponent" class="form-control" placeholder="Enter opponent's id">
+                    <button id="connect-btn" class="btn btn-primary">Connect</button>
+                </div>
+                <ul id="chatroomlist" class="border p-3 mb-3" style="height: 300px; overflow-y: scroll;">
+                </ul>
             </div>
             <div id="chat-room" class="d-none">
                 <div id="messages" class="border p-3 mb-3" style="height: 300px; overflow-y: scroll;"></div>
@@ -25,6 +35,7 @@
                     <input type="text" id="message" class="form-control flex-grow-1 mr-2" placeholder="Type a message...">
                     <button type="submit" class="btn btn-success">Send</button>
                 </form>
+                <button type="button" id="load" class="btn btn-secondary mt-2">Load Old Messages</button>
             </div>
         </div>
     </div>
@@ -33,44 +44,128 @@
 <script>
     let stompClient = null;
     let username = null;
-
+    let lastId = null;
     const connectBtn = document.getElementById('connect-btn');
+    const loginBtn = document.getElementById('login-btn');
     const loginForm = document.getElementById('login-form');
     const chatRoom = document.getElementById('chat-room');
+    const chatRoomListForm = document.getElementById('chat-room-list-form');
+    const chatRoomList = document.getElementById('chatroomlist')
     const messageForm = document.getElementById('message-form');
     const messageInput = document.getElementById('message');
     const messagesArea = document.getElementById('messages');
     const usernameInput = document.getElementById('username');
+    const opponentIdInput = document.getElementById('opponent');
+    const loadBtn = document.getElementById('load');
 
     connectBtn.addEventListener('click', connect);
     messageForm.addEventListener('submit', sendMessage);
+    loadBtn.addEventListener('click', fetchOldMessage);
+    loginBtn.addEventListener('click', login);
 
-    function connect(event) {
+    let chatRoomId=0;
+    let opponent = 0;
+
+    async function login(event){
         event.preventDefault();
-        username = usernameInput.value.trim();
-        if (username) {
+        token = usernameInput.value.trim();
+        if(token){
             loginForm.classList.add('d-none');
-            chatRoom.classList.remove('d-none');
+            chatRoomListForm.classList.remove('d-none');
 
-            // 1. SockJS를 통해 WebSocket 연결을 생성합니다.
-            const socket = new SockJS('/ws');
-            stompClient = Stomp.over(socket);
+            const res = await fetch('/api/chatrooms',
+                {
+                    method:'GET',
+                    headers:{
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
 
-            // 2. STOMP 클라이언트로 서버에 연결합니다.
-            stompClient.connect({}, onConnected, onError);
+            const body = await res.json();
+
+            body.forEach(chatRoom => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `Chat Room ID: ${chatRoom.id} - 상대: ${chatRoom.opponentName} - 최근 메시지:${chatRoom.recentMessageContent} - 읽음: ${chatRoom.isRead}`;
+                listItem.addEventListener('click', () => {
+                    joinTheRoom(event, chatRoom.id, chatRoom.opponentId);
+                });
+                chatRoomList.appendChild(listItem);
+            });
         }
     }
 
-    function onConnected() {
+    async function connect(event) {
+        event.preventDefault();
+        opponent = opponentIdInput.value.trim();
+        if (token && opponent) {
+            chatRoomListForm.classList.add('d-none');
+            chatRoom.classList.remove('d-none');
+
+            const res = await fetch('/api/chatrooms', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ id: opponent})
+            });
+
+            const body = await res.json()
+            chatRoomId = body.id;
+
+            // 1. SockJS를 통해 WebSocket 연결 생성
+            const socket = new SockJS('/ws');
+
+            // 2. 전역 Stomp 객체로 클라이언트 생성
+            stompClient = Stomp.over(socket);
+
+            // 3. 서버에 연결 시도
+            stompClient.connect({'Authorization': `Bearer ${token}`}, onConnected, onError);
+        }
+    }
+
+    async function joinTheRoom(event, roomId, opponentId){
+        event.preventDefault();
+
+        chatRoomListForm.classList.add('d-none');
+        chatRoom.classList.remove('d-none');
+
+        chatRoomId = roomId;
+        opponent = opponentId;
+
+        // 1. SockJS를 통해 WebSocket 연결 생성
+        const socket = new SockJS('/ws');
+
+        // 2. 전역 Stomp 객체로 클라이언트 생성
+        stompClient = Stomp.over(socket);
+
+        // 3. 서버에 연결 시도
+        stompClient.connect({'Authorization': `Bearer ${token}`}, onConnected, onError);
+    }
+
+    async function onConnected() {
         // 3. 연결 성공 시, "/topic/public" 토픽을 구독합니다.
         //    서버에서 이 토픽으로 메시지를 보내면 onMessageReceived 콜백이 호출됩니다.
-        stompClient.subscribe('/topic/public', onMessageReceived);
+        stompClient.subscribe(`/topic/chatroom${chatRoomId}`, onMessageReceived);
+        const result = await fetch('/api/chats/'+chatRoomId, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
 
-        displayMessage({ sender: 'System', content: `Welcome, ${username}!` });
+        const body = await result.json();
+        lastId = body[0].id;
+        body.forEach(message => {
+            displayMessage(message);
+        });
+        //displayMessage({ sender: 'System', content: `Welcome, ${username}!` });
     }
 
     function onError(error) {
-        displayMessage({ sender: 'System', content: 'Could not connect to WebSocket server. Please refresh this page to try again!' });
+        displayMessage({ senderName: 'System', content: 'Could not connect to WebSocket server. Please refresh this page to try again!' });
     }
 
     function sendMessage(event) {
@@ -78,26 +173,61 @@
         const messageContent = messageInput.value.trim();
         if (messageContent && stompClient) {
             const chatMessageValue = {
-                sender: username,
-                content: messageContent
+                chatRoomId: chatRoomId,
+                content: messageContent,
+                date: new Date()
             };
             // 4. "/app/chat.sendMessage" 목적지로 메시지를 전송합니다.
             //    이 메시지는 서버의 ChatController로 라우팅됩니다.
-            stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessageValue));
+            stompClient.send("/app/chat.sendMessage", {'Authorization': `Bearer ${token}`}, JSON.stringify(chatMessageValue));
             messageInput.value = '';
+        }
+    }
+
+    async function fetchOldMessage(){
+        if(lastId){
+            const result = await fetch('/api/chats/'+chatRoomId+'?lastId='+lastId, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            const body = await result.json();
+            if(body.length > 0){
+                lastId = body[0].id;
+                body.forEach(message => {
+                    stackMessage(message);
+                });
+            }
         }
     }
 
     function onMessageReceived(payload) {
         const message = JSON.parse(payload.body);
         displayMessage(message);
+        if(message.senderId === opponent) {
+            stompClient.send("/app/chat.ack", {'Authorization': `Bearer ${token}`}, JSON.stringify({
+                chatRoomId: chatRoomId,
+                senderId: message.senderId,
+                date: message.date
+            }));
+        }
     }
 
     function displayMessage(message) {
         const messageElement = document.createElement('div');
-        messageElement.innerHTML = `<strong>[${message.sender}]</strong>: ${message.content}`;
+        messageElement.innerHTML = `<strong>[${message.senderName}]</strong>: ${message.content}`;
         messagesArea.appendChild(messageElement);
         messagesArea.scrollTop = messagesArea.scrollHeight; // Auto-scroll
+    }
+
+    function stackMessage(message){
+        const messageElement = document.createElement('div');
+        messageElement.innerHTML = `<strong>[${message.senderName}]</strong>: ${message.content}`;
+        messagesArea.insertBefore(messageElement, messagesArea.firstChild);
+        messagesArea.scrollTop = 0; // Auto-scroll to top
     }
 
 </script>
