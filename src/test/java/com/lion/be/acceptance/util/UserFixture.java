@@ -1,5 +1,6 @@
 package com.lion.be.acceptance.util;
 
+import java.util.List;
 import java.util.Map;
 
 public enum UserFixture {
@@ -31,4 +32,24 @@ public enum UserFixture {
     public String getImageUrl() {
         return imageUrl;
     }
+
+    public static Map<String, Object> 회원_멋사_온보딩_요청(){
+        return Map.of(
+            "imageUrls", List.of("photo1.jpg", "photo2.jpg"),
+            "gender", "MEN",
+            "university", "멋사대학교",
+            "position", "개발자",
+            "mbti", "ENFP"
+        );
+    }
+    public static Map<String, Object> 비회원_온보딩_요청() {
+        return Map.of(
+            "imageUrls", List.of("photo1.jpg"),
+            "gender", "WOMEN",
+            "university", "연세대학교",
+            "position", "디자이너",
+            "mbti", "INFP"
+        );
+    }
+
 }

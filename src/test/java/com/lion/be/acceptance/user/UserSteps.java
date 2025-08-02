@@ -33,6 +33,35 @@ public class UserSteps {
                 .extract();
     }
 
+    public static ExtractableResponse<Response> 온보딩을_완료한다(
+        Map<String, Object> onboardingRequest,
+        String accessToken,
+        RequestSpecification spec
+    ) {
+        return RestAssured
+            .given()
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .spec(spec)
+            .auth().oauth2(accessToken)
+            .log().all()
+            .body(onboardingRequest)
+            .when()
+            .patch("/api/user/onboarding")
+            .then()
+            .log().all()
+            .extract();
+    }
+
+    public static void 온보딩_완료_응답을_검증한다(ExtractableResponse<Response> response) {
+        Assertions.assertAll(
+            () -> 상태코드를_검증한다(response, HttpStatus.OK),
+            () -> assertThat(response.jsonPath().getString("message"))
+                .isEqualTo("온보딩이 완료되었습니다."),
+            () -> assertThat(response.jsonPath().getString("status"))
+                .isEqualTo("COMPLETED")
+        );
+    }
+
     public static ExtractableResponse<Response> 로그인한다(Map<String, Object> userSaveRequest,
                                                       RequestSpecification spec) {
         return RestAssured
