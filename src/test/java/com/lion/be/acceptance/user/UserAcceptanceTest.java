@@ -53,7 +53,7 @@ class UserAcceptanceTest extends AcceptanceTest {
                 .spec(spec)
                 .auth().oauth2(accessToken)
                 .log().all()  // 요청 로그
-                .body(UserFixture.비회원_온보딩_요청())
+                .body(UserFixture.회원_멋사2_온보딩_요청())
                 .when()
                 .patch("/api/user/onboarding")
                 .then()
@@ -79,7 +79,7 @@ class UserAcceptanceTest extends AcceptanceTest {
             // 첫 번째 사용자 (카드를 조회할 사용자)
             var user1LoginResponse = 비회원이_로그인한다(spec);
             String user1AccessToken = user1LoginResponse.jsonPath().getString("accessToken");
-            온보딩을_완료한다(UserFixture.비회원_온보딩_요청(), user1AccessToken, spec);
+            온보딩을_완료한다(UserFixture.회원_멋사2_온보딩_요청(), user1AccessToken, spec);
 
             // 두 번째 사용자 (매칭될 카드)
             var user2LoginResponse = 원준이_로그인한다(spec);
@@ -99,7 +99,7 @@ class UserAcceptanceTest extends AcceptanceTest {
             // given
             var user1LoginResponse = 비회원이_로그인한다(spec);
             String user1AccessToken = user1LoginResponse.jsonPath().getString("accessToken");
-            온보딩을_완료한다(UserFixture.비회원_온보딩_요청(), user1AccessToken, spec);
+            온보딩을_완료한다(UserFixture.회원_멋사2_온보딩_요청(), user1AccessToken, spec);
 
             var user2LoginResponse = 원준이_로그인한다(spec);
             String user2AccessToken = user2LoginResponse.jsonPath().getString("accessToken");
@@ -119,7 +119,7 @@ class UserAcceptanceTest extends AcceptanceTest {
             // given
             var user1LoginResponse = 비회원이_로그인한다(spec);
             String user1AccessToken = user1LoginResponse.jsonPath().getString("accessToken");
-            온보딩을_완료한다(UserFixture.비회원_온보딩_요청(), user1AccessToken, spec);
+            온보딩을_완료한다(UserFixture.회원_멋사2_온보딩_요청(), user1AccessToken, spec);
 
             // 여러 사용자 생성해서 페이징 효과 확인
             var user2LoginResponse = 원준이_로그인한다(spec);

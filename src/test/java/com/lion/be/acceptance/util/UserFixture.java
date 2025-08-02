@@ -42,7 +42,7 @@ public enum UserFixture {
             "mbti", "ENFP"
         );
     }
-    public static Map<String, Object> 비회원_온보딩_요청() {
+    public static Map<String, Object> 회원_멋사2_온보딩_요청() {
         return Map.of(
             "imageUrls", List.of("photo1.jpg"),
             "gender", "WOMEN",
