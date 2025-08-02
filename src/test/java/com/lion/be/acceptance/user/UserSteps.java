@@ -92,6 +92,100 @@ public class UserSteps {
                 .extract();
     }
 
+    public static ExtractableResponse<Response> 매칭_카드를_조회한다(
+        String accessToken,
+        RequestSpecification spec
+    ) {
+        return RestAssured
+            .given()
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .spec(spec)
+            .auth().oauth2(accessToken)
+            .log().all()
+            .when()
+            .get("/api/user/card")
+            .then()
+            .log().all()
+            .extract();
+    }
+
+    // 필터 조건으로 매칭 카드 조회
+    public static ExtractableResponse<Response> 필터_조건으로_매칭_카드를_조회한다(
+        String accessToken,
+        RequestSpecification spec
+    ) {
+        return RestAssured
+            .given()
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .spec(spec)
+            .auth().oauth2(accessToken)
+            .queryParam("preferredGender", "MEN")
+            .queryParam("preferredMbti", "ENFP")
+            .queryParam("preferredUniversity", "멋사대학교")
+            .log().all()
+            .when()
+            .get("/api/user/card")
+            .then()
+            .log().all()
+            .extract();
+    }
+
+    // 페이지네이션으로 매칭 카드 조회
+    public static ExtractableResponse<Response> 페이지네이션으로_매칭_카드를_조회한다(
+        String accessToken,
+        RequestSpecification spec
+    ) {
+        return RestAssured
+            .given()
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .spec(spec)
+            .auth().oauth2(accessToken)
+            .queryParam("page", 0)
+            .queryParam("size", 5)
+            .log().all()
+            .when()
+            .get("/api/user/card")
+            .then()
+            .log().all()
+            .extract();
+    }
+
+    // 원준이 로그인 (UserFixture에 이미 있는 데이터 활용)
+    public static ExtractableResponse<Response> 원준이_로그인한다(RequestSpecification spec) {
+        return RestAssured
+            .given()
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .spec(spec)
+            .log().all()
+            .body(UserFixture.사용자_원준_회원가입_요청())
+            .when()
+            .post("/api/test/login")
+            .then()
+            .log().all()
+            .extract();
+    }
+
+    // 매칭 카드 조회 응답 검증
+    public static void 매칭_카드_조회_응답을_검증한다(ExtractableResponse<Response> response) {
+        Assertions.assertAll(
+            () -> 상태코드를_검증한다(response, HttpStatus.OK),
+            () -> assertThat(response.jsonPath().getList("$")).isNotNull(),
+            () -> {
+                // 카드가 있다면 첫 번째 카드의 필수 필드들 검증
+                if (!response.jsonPath().getList("$").isEmpty()) {
+                    assertThat(response.jsonPath().getString("[0].userId")).isNotNull();
+                    assertThat(response.jsonPath().getString("[0].name")).isNotNull();
+                    assertThat(response.jsonPath().getString("[0].university")).isNotNull();
+                    assertThat(response.jsonPath().getString("[0].position")).isNotNull();
+                    assertThat(response.jsonPath().getString("[0].mbti")).isNotNull();
+                    assertThat(response.jsonPath().getString("[0].gender")).isNotNull();
+                    assertThat(response.jsonPath().getList("[0].imageUrls")).isNotNull();
+                }
+            }
+        );
+    }
+
+
     public static void 상태코드가_200이다(ExtractableResponse<Response> response) {
         Assertions.assertAll(
                 () -> 상태코드를_검증한다(response, HttpStatus.OK)
@@ -105,12 +199,19 @@ public class UserSteps {
         );
     }
 
+    public static void 상태코드가_400이다(ExtractableResponse<Response> response) {
+        Assertions.assertAll(
+            () -> 상태코드를_검증한다(response, HttpStatus.BAD_REQUEST)
+        );
+    }
+
     public static void 상태코드가_404이다(
             ExtractableResponse<Response> response) {
         Assertions.assertAll(
                 () -> 상태코드를_검증한다(response, HttpStatus.NOT_FOUND)
         );
     }
+
 
     public static AbstractIntegerAssert<?> 상태코드를_검증한다(ExtractableResponse<Response> response,
                                                       HttpStatus expectedHttpStatus) {
