@@ -3,12 +3,11 @@ package com.lion.be.global.config;
 import com.lion.be.auth.service.CustomOAuth2UserService;
 import com.lion.be.global.filter.JwtAuthFilter;
 import com.lion.be.global.handler.OAuth2LoginSuccessHandler;
-import java.util.Arrays;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -19,6 +18,9 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -41,6 +43,8 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .headers(x -> x.frameOptions(FrameOptionsConfig::disable))
                 .authorizeHttpRequests((authorize) -> authorize
+                        // TODO: 로그인 기능 구현 후, 아래 경로 허용 해제
+                        .requestMatchers(HttpMethod.GET, "/api/chats/room").permitAll()
                         .requestMatchers(AuthEndpoints.PERMIT_ALL_PATTERNS).permitAll()
                         .anyRequest().authenticated()
                 ).oauth2Login(
