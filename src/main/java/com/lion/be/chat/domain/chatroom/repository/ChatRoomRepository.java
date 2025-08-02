@@ -29,4 +29,11 @@ where cru_my.user.id = :userId and cru_opponent.user.id != :userId and cr.isDele
 order by cr.recentMessageDt desc
 """)
     List<ChatRoomListDto> findAllChatRoom(Long userId);
+
+
+    @Query("""
+select cr from ChatRoom cr
+where cr.id = :chatRoomId and cr.isDeleted = false
+""")
+    Optional<ChatRoom> findChatRoom(Long chatRoomId);
 }

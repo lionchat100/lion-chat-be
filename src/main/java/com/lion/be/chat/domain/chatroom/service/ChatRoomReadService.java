@@ -1,6 +1,7 @@
 package com.lion.be.chat.domain.chatroom.service;
 
 import com.lion.be.chat.domain.chatroom.dto.ChatRoomListDto;
+import com.lion.be.chat.domain.chatroom.entity.ChatRoom;
 import com.lion.be.chat.domain.chatroom.repository.ChatRoomRepository;
 import com.lion.be.chat.domain.chatroomuser.repository.ChatRoomUserRepository;
 import com.lion.be.user.domain.entity.User;
@@ -25,5 +26,9 @@ public class ChatRoomReadService {
 
        return chatRoomRepository.findAllChatRoom(currentUserId);
 
+    }
+
+    public boolean isThereRoom(Long roomId) {
+        return chatRoomRepository.findChatRoom(roomId).isPresent();
     }
 }
