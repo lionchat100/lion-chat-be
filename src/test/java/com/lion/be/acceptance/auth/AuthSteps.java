@@ -1,5 +1,6 @@
 package com.lion.be.acceptance.auth;
 
+import static com.lion.be.acceptance.user.UserSteps.상태코드를_검증한다;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.lion.be.acceptance.util.AuthFixture;
@@ -35,6 +36,28 @@ public class AuthSteps {
                 .when().post("/api/test/login")
                 .then().log().all()
                 .extract();
+    }
+
+    public static void 토큰과_상태코드_200을_응답하는지_검증한다(ExtractableResponse<Response> response) {
+        Assertions.assertAll(
+                () -> assertThat(response.statusCode()).isEqualTo(200),
+                () -> assertThat(response.jsonPath().getString("accessToken")).isNotNull()
+        );
+    }
+
+    public static ExtractableResponse<Response> 로그아웃_한다(String accessToken, RequestSpecification spec) {
+        return RestAssured
+                .given().log().all()
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .spec(spec)
+                .auth().oauth2(accessToken)
+                .when().post("/api/auth/logout")
+                .then().log().all()
+                .extract();
+    }
+
+    public static void 상태코드가_204임을_검증한다(ExtractableResponse<Response> response) {
+        상태코드를_검증한다(response, HttpStatus.NO_CONTENT);
     }
 
 }

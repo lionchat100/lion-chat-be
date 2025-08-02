@@ -13,4 +13,12 @@
 === 로그인
 
 ==== 성공
-operation::firstLogin_success[snippets='http-request,http-response']
+
+> 아아
+
+operation::login_success[snippets='http-request,http-response']
+
+=== 로그아웃
+
+==== 성공
+operation::logout_success[snippets='http-request,http-response']
