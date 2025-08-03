@@ -9,6 +9,7 @@ import com.lion.be.chat.domain.chatroom.service.ChatRoomReadService;
 import com.lion.be.chat.domain.chatroom.service.ChatRoomWriteService;
 import com.lion.be.chat.domain.chatroomuser.service.ChatRoomUserWriteService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,16 +23,16 @@ public class ChatRoomController {
     private final ChatRoomWriteService chatRoomWriteService;
     private final ChatRoomReadService chatRoomReadService;
     @PostMapping
-    public ChatRoom joinChatRoom(@RequestBody OpponentUserRequest opponentUser){
+    public ChatRoom joinChatRoom(@RequestBody OpponentUserRequest opponentUser, @AuthenticationPrincipal UserPrincipal currentUser){
         Long opponentId = opponentUser.getId();
-        UserPrincipal currentUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        //UserPrincipal currentUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         return chatRoomWriteService.joinChatRoom(currentUser.getId(), opponentId);
     }
 
     @GetMapping
-    public List<ChatRoomListDto> getChatRoomList(){
-        UserPrincipal currentUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    public List<ChatRoomListDto> getChatRoomList(@AuthenticationPrincipal UserPrincipal currentUser){
+        //UserPrincipal currentUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         return chatRoomReadService.fetchAll(currentUser.getId());
 

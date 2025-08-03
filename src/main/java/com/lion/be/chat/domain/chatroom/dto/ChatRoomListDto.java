@@ -8,16 +8,16 @@ import java.time.LocalDateTime;
 @Getter
 @AllArgsConstructor
 public class ChatRoomListDto {
-    private Long id;
+    private Long chatRoomId;
 
-    private LocalDateTime regDt;
+    private String lastChat;
 
-    private String recentMessageContent;
-
-    private LocalDateTime recentMessageDt;
+    private LocalDateTime lastChatTime;
 
     private String opponentName;
     private Long opponentId;
 
     private Boolean isRead;
+
+    private String userImageUrl;
 }

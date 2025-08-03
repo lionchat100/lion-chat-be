@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 public class ChatMessageReadService {
 
     private final ChatMessageRepository chatMessageRepository;
-    private static final int PAGE_SIZE = 20;
+    private static final int PAGE_SIZE = 10;
 
     public List<ChatMessageDto> firstRead(Long chatRoomId){
         Pageable page = PageRequest.of(0, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "_id"));
@@ -47,7 +47,7 @@ public class ChatMessageReadService {
     public List<ChatMessageDto> afterRead(Long chatRoomId, ObjectId lastId){
         Pageable page = PageRequest.of(0, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "_id"));
 
-        return chatMessageRepository.findByChatRoomIdAndIdLessThan(chatRoomId, lastId, page)
+        List<ChatMessageDto> result =  chatMessageRepository.findByChatRoomIdAndIdLessThan(chatRoomId, lastId, page)
                 .stream()
                 .map(msg -> new ChatMessageDto(
                         msg.getId().toHexString(),
@@ -57,5 +57,8 @@ public class ChatMessageReadService {
                         msg.getContent()
                 ))
                 .collect(Collectors.toList());
+
+
+        return result;
     }
 }

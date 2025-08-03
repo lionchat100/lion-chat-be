@@ -1,8 +1,6 @@
 package com.lion.be.global.config;
 
 import com.lion.be.global.interceptor.StompInterceptor;
-import com.lion.be.global.interceptor.WebSocketHandShakeInterceptor;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
@@ -45,7 +43,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         // 클라이언트가 WebSocket 연결을 시작할 엔드포인트
         registry.addEndpoint("/ws")
                 .setAllowedOriginPatterns("*")
-                .addInterceptors(new WebSocketHandShakeInterceptor())
                 .withSockJS();
     }
 

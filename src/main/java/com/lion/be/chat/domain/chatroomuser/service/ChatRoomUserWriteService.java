@@ -12,16 +12,18 @@ public class ChatRoomUserWriteService {
 
     private final ChatRoomUserRepository chatRoomUserRepository;
 
+
     @Transactional
-    public void updateToUnread(Long chatRoomId, Long senderId) {
+    public void updateOpponentToUnread(Long chatRoomId, Long senderId) {
         ChatRoomUser opponent = chatRoomUserRepository.findOpponent(chatRoomId, senderId)
                 .orElseThrow(() -> new IllegalArgumentException("Chat room user not found"));
 
         opponent.setIsRead(false);
     }
 
+
     @Transactional
-    public void updateToRead(Long chatRoomId, Long receiverId) {
+    public void updateReceiverToRead(Long chatRoomId, Long receiverId) {
         ChatRoomUser currentRoomUser = chatRoomUserRepository.findMine(chatRoomId, receiverId)
                 .orElseThrow(() -> new IllegalArgumentException("Chat room user not found"));
 

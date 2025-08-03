@@ -18,6 +18,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,6 +45,8 @@ public class ChatMessageController {
 
     @MessageMapping("/chat.sendMessage")
     public void sendMessage(@Payload ChatMessageRequest chatMessage, Principal principal){
+
+
         Long chatRoomId = chatMessage.getChatRoomId();
         if(!chatRoomReadService.isThereRoom(chatRoomId)){
             throw new IllegalArgumentException("Chat room does not exist.");
@@ -61,6 +64,10 @@ public class ChatMessageController {
 
         LocalDateTime date = chatMessage.getDate();
 
+        chatMessageWriteService.saveMessage(chatRoomId, sender,senderId, content, date);
+        chatRoomWriteService.updateRecentMessage(chatRoomId, content, date);
+        chatRoomUserWriteService.updateOpponentToUnread(chatRoomId, senderId);
+
         messagingTemplate.convertAndSend("/topic/chatroom"+chatRoomId,
             new ChatMessageDto(
                 ObjectId.get().toHexString(),
@@ -70,9 +77,6 @@ public class ChatMessageController {
                 content
             ));
 
-        chatMessageWriteService.saveMessage(chatRoomId, sender,senderId, content, date);
-        chatRoomWriteService.updateRecentMessage(chatRoomId, content, date);
-        chatRoomUserWriteService.updateToUnread(chatRoomId, senderId);
     }
 
     @MessageMapping("/chat.ack")
@@ -91,25 +95,29 @@ public class ChatMessageController {
 
         Instant receiveAt = messageAck.getDate().toInstant(ZoneOffset.UTC);
 
-        if(!senderId.equals(currentUser.getId())) {
+        if(!currentUser.getId().equals(senderId)) {
             chatMessageWriteService.markAsRead(chatRoomId, currentUser.getId(), receiveAt);
+            chatRoomUserWriteService.updateReceiverToRead(chatRoomId, currentUser.getId());
         }
+
     }
 
     @GetMapping("/{roomId}")
-    public List<ChatMessageDto> loadAllMessages(@PathVariable("roomId") Long roomId, @RequestParam(value = "lastId",required = false) String lastId) {
+    public List<ChatMessageDto> loadAllMessages(@PathVariable("roomId") Long roomId,
+                                                @RequestParam(value = "lastId",required = false) String lastId,
+                                                @AuthenticationPrincipal UserPrincipal currentUser) {
         if(!chatRoomReadService.isThereRoom(roomId)){
             throw new IllegalArgumentException("Chat room does not exist.");
         }
 
-        UserPrincipal currentUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        //UserPrincipal currentUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long currentMemberId = currentUser.getId();
         if(!chatRoomUserReadService.isThereRoomUser(roomId, currentMemberId)){
             throw new IllegalArgumentException("You are not a member of this chat room.");
         }
 
         chatMessageWriteService.markAsRead(roomId, currentUser.getId(), Instant.now());
-        chatRoomUserWriteService.updateToRead(roomId, currentUser.getId());
+        chatRoomUserWriteService.updateReceiverToRead(roomId, currentUser.getId());
 
         if(lastId != null && ObjectId.isValid(lastId)) {
             ObjectId lastMessageId = new ObjectId(lastId);

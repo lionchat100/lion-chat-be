@@ -20,7 +20,7 @@ having count(cru.user.id) = 2
 
     @Query("""
 select 
-new com.lion.be.chat.domain.chatroom.dto.ChatRoomListDto(cr.id, cr.regDt, cr.recentMessageContent, cr.recentMessageDt, u.name, u.id, cru_my.isRead) 
+new com.lion.be.chat.domain.chatroom.dto.ChatRoomListDto(cr.id, cr.recentMessageContent, cr.recentMessageDt, u.name, u.id, cru_my.isRead, u.imageUrl) 
 from ChatRoomUser cru_my
 join ChatRoom cr on cru_my.chatRoom = cr
 join ChatRoomUser cru_opponent on cru_my.chatRoom = cru_opponent.chatRoom

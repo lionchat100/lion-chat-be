@@ -15,6 +15,7 @@ public class ChatRoomUserReadService {
     private final ChatRoomUserRepository chatRoomUserRepository;
 
     public boolean isThereRoomUser(Long roomId, Long currentMemberId) {
-        return chatRoomUserRepository.findMine(roomId, currentMemberId).isPresent();
+        return chatRoomUserRepository.findMine(roomId, currentMemberId).isPresent() &&
+               chatRoomUserRepository.findOpponent(roomId, currentMemberId).isPresent();
     }
 }
