@@ -1,6 +1,16 @@
 package com.lion.be.acceptance.auth;
 
-import static com.lion.be.acceptance.auth.AuthSteps.*;
+import static com.lion.be.acceptance.auth.AuthSteps.내_정보가_정상적으로_조회되는지_검증한다;
+import static com.lion.be.acceptance.auth.AuthSteps.내_정보를_조회한다;
+import static com.lion.be.acceptance.auth.AuthSteps.로그아웃_한다;
+import static com.lion.be.acceptance.auth.AuthSteps.로그아웃이_성공했는지_검증한다;
+import static com.lion.be.acceptance.auth.AuthSteps.상태코드가_401임을_검증한다;
+import static com.lion.be.acceptance.auth.AuthSteps.새로운_액세스_토큰이_발급되었는지_검증한다;
+import static com.lion.be.acceptance.auth.AuthSteps.원준이_로그인한다;
+import static com.lion.be.acceptance.auth.AuthSteps.인증_코드로_토큰을_요청한다;
+import static com.lion.be.acceptance.auth.AuthSteps.토큰_발급과_쿠키_생성을_검증한다;
+import static com.lion.be.acceptance.auth.AuthSteps.토큰_재발급을_요청한다;
+import static com.lion.be.acceptance.auth.AuthSteps.토큰과_상태코드_200을_응답하는지_검증한다;
 import static com.lion.be.acceptance.util.UserFixture.회원_원준;
 
 import com.lion.be.acceptance.AcceptanceTest;
@@ -13,7 +23,6 @@ import com.lion.be.user.domain.Role;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.service.UserReadService;
 import io.restassured.RestAssured;
-import io.restassured.builder.RequestSpecBuilder;
 import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -48,7 +57,6 @@ class AuthAcceptanceTest extends AcceptanceTest {
         원준_인증객체 = getAuthentication(원준.getId(), 원준.getEmail(), Role.USER.getKey());
     }
 
-    // 인증 객체를 만들기 위한 헬퍼 메서드
     private Authentication getAuthentication(Long userId, String email, String role) {
         UserPrincipal userPrincipal = new UserPrincipal(
                 userId,
@@ -63,7 +71,7 @@ class AuthAcceptanceTest extends AcceptanceTest {
     }
 
     @Nested
-    @DisplayName("실제 인증 흐름 테스트 (TokenController)")
+    @DisplayName("실제 인증 흐름 테스트")
     class RealAuthFlow {
 
         @DisplayName("유효한 인증 코드로 토큰 교환 요청 시, 토큰과 200 상태코드를 반환한다.")
@@ -116,10 +124,11 @@ class AuthAcceptanceTest extends AcceptanceTest {
             // then
             로그아웃이_성공했는지_검증한다(response);
         }
+
     }
 
     @Nested
-    @DisplayName("인가 흐름 테스트 (AuthController)")
+    @DisplayName("인가 흐름 테스트")
     class AuthorizationFlow {
 
         @DisplayName("유효한 액세스 토큰으로 내 정보를 요청하면, 유저 정보와 200코드를 반환한다.")
@@ -152,11 +161,11 @@ class AuthAcceptanceTest extends AcceptanceTest {
             // then
             상태코드가_401임을_검증한다(response);
         }
+
     }
 
-
     @Nested
-    @DisplayName("테스트용 로그인 인수테스트 (기존)")
+    @DisplayName("테스트용 로그인 인수테스트")
     class LoginWithTestEndpoint {
 
         @DisplayName("회원이 테스트 로그인 요청시 성공하면 토큰을 반환한다.")
@@ -172,4 +181,5 @@ class AuthAcceptanceTest extends AcceptanceTest {
         }
 
     }
+
 }
