@@ -130,8 +130,47 @@ public class UserSteps {
             .extract();
     }
 
-    // 페이지네이션으로 매칭 카드 조회
-    public static ExtractableResponse<Response> 페이지네이션으로_매칭_카드를_조회한다(
+    public static ExtractableResponse<Response> 제외_목록으로_매칭_카드를_조회한다(
+        String accessToken,
+        RequestSpecification spec,
+        String excludeUserIds
+    ) {
+        return RestAssured
+            .given()
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .spec(spec)
+            .auth().oauth2(accessToken)
+            .queryParam("size", 10)
+            .queryParam("excludeUserIds", excludeUserIds)
+            .log().all()
+            .when()
+            .get("/api/user/card")
+            .then()
+            .log().all()
+            .extract();
+    }
+    // 사이즈 제한으로 매칭 카드 조회
+    public static ExtractableResponse<Response> 사이즈_제한으로_매칭_카드를_조회한다(
+        String accessToken,
+        RequestSpecification spec,
+        int size
+    ) {
+        return RestAssured
+            .given()
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .spec(spec)
+            .auth().oauth2(accessToken)
+            .queryParam("size", size)
+            .log().all()
+            .when()
+            .get("/api/user/card")
+            .then()
+            .log().all()
+            .extract();
+    }
+
+    // 필터 + 제외 목록으로 매칭 카드 조회 (기존 메서드 수정)
+    public static ExtractableResponse<Response> 필터_및_제외_목록으로_매칭_카드를_조회한다(
         String accessToken,
         RequestSpecification spec
     ) {
@@ -140,8 +179,9 @@ public class UserSteps {
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .spec(spec)
             .auth().oauth2(accessToken)
-            .queryParam("page", 0)
-            .queryParam("size", 5)
+            .queryParam("preferredGender", "MEN")
+            .queryParam("preferredMbti", "ENFP")
+            .queryParam("excludeUserIds", "999") // 존재하지 않는 ID로 테스트
             .log().all()
             .when()
             .get("/api/user/card")
