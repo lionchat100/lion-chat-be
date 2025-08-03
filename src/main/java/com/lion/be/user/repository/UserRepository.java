@@ -14,5 +14,10 @@ public interface UserRepository {
 
     Optional<User> fetchById(Long userId);
 
-    List<User> findMatchingUsers(Long currentUserId, UserCardFilterRequest request);
+    List<User> findMatchingUsersExcluding(
+        Long currentUserId,
+        UserCardFilterRequest filterRequest,
+        int size,
+        List<Long> excludeUserIds
+    );
 }

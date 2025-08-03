@@ -2,14 +2,17 @@ package com.lion.be.user.service;
 
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.lion.be.auth.controller.dto.CurrentUserResponse;
+import com.lion.be.global.exception.OnboardingNotCompletedException;
 import com.lion.be.user.controller.dto.UserCardFilterRequest;
 import com.lion.be.user.controller.dto.UserCardResponse;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.repository.UserRepository;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -33,10 +36,31 @@ public class UserReadService {
                 .orElseThrow(() -> new RuntimeException("fetchById"));
     }
 
-    public List<UserCardResponse> getMatchingCards(Long currentUserId, UserCardFilterRequest request) {
-        List<User> matchingUsers = userRepository.findMatchingUsers(currentUserId, request);
+    public List<UserCardResponse> getMatchingCards(
+        Long currentUserId,
+        UserCardFilterRequest filterRequest,
+        int size,
+        List<Long> excludeUserIds
+    ) {
+        validateOnboardingCompleted(currentUserId);
+
+        List<User> matchingUsers = userRepository.findMatchingUsersExcluding(
+            currentUserId,
+            filterRequest,
+            size,
+            excludeUserIds
+        );
+
         return matchingUsers.stream()
             .map(UserCardResponse::from)
             .toList();
+    }
+
+    private void validateOnboardingCompleted(Long userId) {
+        User user = fetchById(userId);
+
+        if (!user.isOnboardingCompleted()) {
+            throw new OnboardingNotCompletedException();
+        }
     }
 }

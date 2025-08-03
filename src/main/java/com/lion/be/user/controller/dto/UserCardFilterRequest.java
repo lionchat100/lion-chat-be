@@ -18,7 +18,4 @@ public class UserCardFilterRequest {
 	private String preferredUniversity;
 	private String preferredPosition;
 
-	// 페이지네이션
-	private int page = 0;
-	private int size = 10;
 }

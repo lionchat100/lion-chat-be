@@ -1,3 +1,4 @@
+// UserRepositoryImpl.java - 수정된 버전
 package com.lion.be.user.repository;
 
 import com.lion.be.user.controller.dto.UserCardFilterRequest;
@@ -9,6 +10,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -33,15 +35,36 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public List<User> findMatchingUsers(Long currentUserId, UserCardFilterRequest request) {
-        return userJpaRepository.findMatchingUsers(
-            currentUserId,
-            request.getPreferredGender(),
-            request.getPreferredMbti(),
-            request.getPreferredUniversity(),
-            request.getPreferredPosition(),
-            PageRequest.of(request.getPage(), request.getSize())
-        );
+    public List<User> findMatchingUsersExcluding(
+        Long currentUserId,
+        UserCardFilterRequest filterRequest,
+        int size,
+        List<Long> excludeUserIds
+    ) {
+        Pageable pageable = PageRequest.of(0, size);
+
+        // 제외 목록이 있고 비어있지 않은 경우에만 제외 쿼리 사용
+        if (excludeUserIds != null && !excludeUserIds.isEmpty()) {
+            return userJpaRepository.findMatchingUsersWithExclusion(
+                currentUserId,
+                excludeUserIds,
+                filterRequest.getPreferredGender(),
+                filterRequest.getPreferredMbti(),
+                filterRequest.getPreferredUniversity(),
+                filterRequest.getPreferredPosition(),
+                pageable
+            );
+        } else {
+            // 제외 목록이 없거나 비어있으면 기본 쿼리 사용
+            return userJpaRepository.findMatchingUsers(
+                currentUserId,
+                filterRequest.getPreferredGender(),
+                filterRequest.getPreferredMbti(),
+                filterRequest.getPreferredUniversity(),
+                filterRequest.getPreferredPosition(),
+                pageable
+            );
+        }
     }
 
 }

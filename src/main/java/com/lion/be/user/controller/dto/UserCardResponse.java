@@ -25,11 +25,6 @@ public class UserCardResponse {
 	private Gender gender;
 	private List<String> imageUrls; // 사진 1~3장
 
-	// 페이지네이션 정보 (선택사항)
-	private boolean hasNext; // 다음 페이지 있는지
-	private int currentPage;
-	private int totalElements;
-
 	// User 엔티티에서 변환하는 정적 메서드
 	public static UserCardResponse from(User user) {
 		return UserCardResponse.builder()

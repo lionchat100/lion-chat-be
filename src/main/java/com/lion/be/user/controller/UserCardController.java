@@ -7,6 +7,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lion.be.auth.domain.UserPrincipal;
@@ -28,14 +29,19 @@ public class UserCardController {
 	@GetMapping
 	public ResponseEntity<List<UserCardResponse>> getMatchingCards(
 		@AuthenticationPrincipal UserPrincipal userPrincipal,
-		@ModelAttribute UserCardFilterRequest request
-		){
-		log.info("사용자 {}가 카드 조회 요청 - page: {}, size: {}",
-			userPrincipal.getId(), request.getPage(), request.getSize());
+		@ModelAttribute UserCardFilterRequest filterRequest,
+		@RequestParam(defaultValue = "10") int size,
+		@RequestParam(required = false) List<Long> excludeUserIds
+	) {
+		log.info("사용자 {}가 카드 조회 요청 - size: {}, 제외할 사용자 수: {}",
+			userPrincipal.getId(), size,
+			excludeUserIds != null ? excludeUserIds.size() : 0);
 
 		List<UserCardResponse> cards = userReadService.getMatchingCards(
 			userPrincipal.getId(),
-			request
+			filterRequest,
+			size,
+			excludeUserIds
 		);
 		return ResponseEntity.ok(cards);
 	}
