@@ -1,5 +1,6 @@
 package com.lion.be.acceptance.user;
 
+import static com.lion.be.acceptance.auth.AuthSteps.로그인한다;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.lion.be.acceptance.util.UserFixture;
@@ -21,55 +22,142 @@ public class UserSteps {
         로그인한다(UserFixture.사용자_원준_회원가입_요청(), new RequestSpecBuilder().build()).jsonPath().getString("accessToken");
     }
 
-    public static ExtractableResponse<Response> 회원_id를_가져온다(RequestSpecification spec, String accessToken) {
+    public static ExtractableResponse<Response> 온보딩을_완료한다(
+            Map<String, Object> onboardingRequest,
+            String accessToken,
+            RequestSpecification spec
+    ) {
         return RestAssured
                 .given()
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .spec(spec)
                 .auth().oauth2(accessToken)
                 .log().all()
-                .when().get("/api/users/id")
-                .then().log().all()
+                .body(onboardingRequest)
+                .when()
+                .patch("/api/users/onboarding")
+                .then()
+                .log().all()
                 .extract();
-    }
-
-    public static ExtractableResponse<Response> 온보딩을_완료한다(
-        Map<String, Object> onboardingRequest,
-        String accessToken,
-        RequestSpecification spec
-    ) {
-        return RestAssured
-            .given()
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .spec(spec)
-            .auth().oauth2(accessToken)
-            .log().all()
-            .body(onboardingRequest)
-            .when()
-            .patch("/api/user/onboarding")
-            .then()
-            .log().all()
-            .extract();
     }
 
     public static void 온보딩_완료_응답을_검증한다(ExtractableResponse<Response> response) {
         Assertions.assertAll(
-            () -> 상태코드를_검증한다(response, HttpStatus.OK),
-            () -> assertThat(response.jsonPath().getString("message"))
-                .isEqualTo("온보딩이 완료되었습니다."),
-            () -> assertThat(response.jsonPath().getString("status"))
-                .isEqualTo("COMPLETED")
+                () -> 상태코드를_검증한다(response, HttpStatus.OK),
+                () -> assertThat(response.jsonPath().getString("message"))
+                        .isEqualTo("온보딩이 완료되었습니다."),
+                () -> assertThat(response.jsonPath().getString("status"))
+                        .isEqualTo("COMPLETED")
         );
     }
 
-    public static ExtractableResponse<Response> 로그인한다(Map<String, Object> userSaveRequest,
-                                                      RequestSpecification spec) {
+    public static ExtractableResponse<Response> 매칭_카드를_조회한다(
+            String accessToken,
+            RequestSpecification spec
+    ) {
+        return RestAssured
+                .given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .spec(spec)
+                .auth().oauth2(accessToken)
+                .log().all()
+                .when()
+                .get("/api/users/card")
+                .then()
+                .log().all()
+                .extract();
+    }
+
+    // 필터 조건으로 매칭 카드 조회
+    public static ExtractableResponse<Response> 필터_조건으로_매칭_카드를_조회한다(
+            String accessToken,
+            RequestSpecification spec
+    ) {
+        return RestAssured
+                .given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .spec(spec)
+                .auth().oauth2(accessToken)
+                .queryParam("preferredGender", "MEN")
+                .queryParam("preferredMbti", "ENFP")
+                .queryParam("preferredUniversity", "멋사대학교")
+                .log().all()
+                .when()
+                .get("/api/users/card")
+                .then()
+                .log().all()
+                .extract();
+    }
+
+    public static ExtractableResponse<Response> 제외_목록으로_매칭_카드를_조회한다(
+            String accessToken,
+            RequestSpecification spec,
+            String excludeUserIds
+    ) {
+        return RestAssured
+                .given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .spec(spec)
+                .auth().oauth2(accessToken)
+                .queryParam("size", 10)
+                .queryParam("excludeUserIds", excludeUserIds)
+                .log().all()
+                .when()
+                .get("/api/users/card")
+                .then()
+                .log().all()
+                .extract();
+    }
+
+    // 사이즈 제한으로 매칭 카드 조회
+    public static ExtractableResponse<Response> 사이즈_제한으로_매칭_카드를_조회한다(
+            String accessToken,
+            RequestSpecification spec,
+            int size
+    ) {
+        return RestAssured
+                .given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .spec(spec)
+                .auth().oauth2(accessToken)
+                .queryParam("size", size)
+                .log().all()
+                .when()
+                .get("/api/users/card")
+                .then()
+                .log().all()
+                .extract();
+    }
+
+    // 필터 + 제외 목록으로 매칭 카드 조회 (기존 메서드 수정)
+    public static ExtractableResponse<Response> 필터_및_제외_목록으로_매칭_카드를_조회한다(
+            String accessToken,
+            RequestSpecification spec
+    ) {
+        return RestAssured
+                .given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .spec(spec)
+                .auth().oauth2(accessToken)
+                .queryParam("preferredGender", "MEN")
+                .queryParam("preferredMbti", "ENFP")
+                .queryParam("excludeUserIds", "999") // 존재하지 않는 ID로 테스트
+                .log().all()
+                .when()
+                .get("/api/users/card")
+                .then()
+                .log().all()
+                .extract();
+    }
+
+    // 원준이 로그인 (UserFixture에 이미 있는 데이터 활용)
+    public static ExtractableResponse<Response> 원준이_로그인한다(RequestSpecification spec) {
         return RestAssured
                 .given()
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .spec(spec)
                 .log().all()
-                .body(userSaveRequest)
+                .body(UserFixture.사용자_원준_회원가입_요청())
                 .when()
                 .post("/api/test/login")
                 .then()
@@ -77,154 +165,25 @@ public class UserSteps {
                 .extract();
     }
 
-    public static ExtractableResponse<Response> 회원탈퇴한다(String accessToken,
-                                                       RequestSpecification spec) {
-        return RestAssured
-                .given()
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .spec(spec)
-                .auth().oauth2(accessToken)
-                .log().all()
-                .when()
-                .delete("/api/members/delete")
-                .then()
-                .log().all()
-                .extract();
-    }
-
-    public static ExtractableResponse<Response> 매칭_카드를_조회한다(
-        String accessToken,
-        RequestSpecification spec
-    ) {
-        return RestAssured
-            .given()
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .spec(spec)
-            .auth().oauth2(accessToken)
-            .log().all()
-            .when()
-            .get("/api/user/card")
-            .then()
-            .log().all()
-            .extract();
-    }
-
-    // 필터 조건으로 매칭 카드 조회
-    public static ExtractableResponse<Response> 필터_조건으로_매칭_카드를_조회한다(
-        String accessToken,
-        RequestSpecification spec
-    ) {
-        return RestAssured
-            .given()
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .spec(spec)
-            .auth().oauth2(accessToken)
-            .queryParam("preferredGender", "MEN")
-            .queryParam("preferredMbti", "ENFP")
-            .queryParam("preferredUniversity", "멋사대학교")
-            .log().all()
-            .when()
-            .get("/api/user/card")
-            .then()
-            .log().all()
-            .extract();
-    }
-
-    public static ExtractableResponse<Response> 제외_목록으로_매칭_카드를_조회한다(
-        String accessToken,
-        RequestSpecification spec,
-        String excludeUserIds
-    ) {
-        return RestAssured
-            .given()
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .spec(spec)
-            .auth().oauth2(accessToken)
-            .queryParam("size", 10)
-            .queryParam("excludeUserIds", excludeUserIds)
-            .log().all()
-            .when()
-            .get("/api/user/card")
-            .then()
-            .log().all()
-            .extract();
-    }
-    // 사이즈 제한으로 매칭 카드 조회
-    public static ExtractableResponse<Response> 사이즈_제한으로_매칭_카드를_조회한다(
-        String accessToken,
-        RequestSpecification spec,
-        int size
-    ) {
-        return RestAssured
-            .given()
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .spec(spec)
-            .auth().oauth2(accessToken)
-            .queryParam("size", size)
-            .log().all()
-            .when()
-            .get("/api/user/card")
-            .then()
-            .log().all()
-            .extract();
-    }
-
-    // 필터 + 제외 목록으로 매칭 카드 조회 (기존 메서드 수정)
-    public static ExtractableResponse<Response> 필터_및_제외_목록으로_매칭_카드를_조회한다(
-        String accessToken,
-        RequestSpecification spec
-    ) {
-        return RestAssured
-            .given()
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .spec(spec)
-            .auth().oauth2(accessToken)
-            .queryParam("preferredGender", "MEN")
-            .queryParam("preferredMbti", "ENFP")
-            .queryParam("excludeUserIds", "999") // 존재하지 않는 ID로 테스트
-            .log().all()
-            .when()
-            .get("/api/user/card")
-            .then()
-            .log().all()
-            .extract();
-    }
-
-    // 원준이 로그인 (UserFixture에 이미 있는 데이터 활용)
-    public static ExtractableResponse<Response> 원준이_로그인한다(RequestSpecification spec) {
-        return RestAssured
-            .given()
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .spec(spec)
-            .log().all()
-            .body(UserFixture.사용자_원준_회원가입_요청())
-            .when()
-            .post("/api/test/login")
-            .then()
-            .log().all()
-            .extract();
-    }
-
     // 매칭 카드 조회 응답 검증
     public static void 매칭_카드_조회_응답을_검증한다(ExtractableResponse<Response> response) {
         Assertions.assertAll(
-            () -> 상태코드를_검증한다(response, HttpStatus.OK),
-            () -> assertThat(response.jsonPath().getList("$")).isNotNull(),
-            () -> {
-                // 카드가 있다면 첫 번째 카드의 필수 필드들 검증
-                if (!response.jsonPath().getList("$").isEmpty()) {
-                    assertThat(response.jsonPath().getString("[0].userId")).isNotNull();
-                    assertThat(response.jsonPath().getString("[0].name")).isNotNull();
-                    assertThat(response.jsonPath().getString("[0].university")).isNotNull();
-                    assertThat(response.jsonPath().getString("[0].position")).isNotNull();
-                    assertThat(response.jsonPath().getString("[0].mbti")).isNotNull();
-                    assertThat(response.jsonPath().getString("[0].gender")).isNotNull();
-                    assertThat(response.jsonPath().getList("[0].imageUrls")).isNotNull();
+                () -> 상태코드를_검증한다(response, HttpStatus.OK),
+                () -> assertThat(response.jsonPath().getList("$")).isNotNull(),
+                () -> {
+                    // 카드가 있다면 첫 번째 카드의 필수 필드들 검증
+                    if (!response.jsonPath().getList("$").isEmpty()) {
+                        assertThat(response.jsonPath().getString("[0].userId")).isNotNull();
+                        assertThat(response.jsonPath().getString("[0].name")).isNotNull();
+                        assertThat(response.jsonPath().getString("[0].university")).isNotNull();
+                        assertThat(response.jsonPath().getString("[0].position")).isNotNull();
+                        assertThat(response.jsonPath().getString("[0].mbti")).isNotNull();
+                        assertThat(response.jsonPath().getString("[0].gender")).isNotNull();
+                        assertThat(response.jsonPath().getList("[0].imageUrls")).isNotNull();
+                    }
                 }
-            }
         );
     }
-
 
     public static void 상태코드가_200이다(ExtractableResponse<Response> response) {
         Assertions.assertAll(
@@ -241,7 +200,7 @@ public class UserSteps {
 
     public static void 상태코드가_400이다(ExtractableResponse<Response> response) {
         Assertions.assertAll(
-            () -> 상태코드를_검증한다(response, HttpStatus.BAD_REQUEST)
+                () -> 상태코드를_검증한다(response, HttpStatus.BAD_REQUEST)
         );
     }
 
@@ -251,7 +210,6 @@ public class UserSteps {
                 () -> 상태코드를_검증한다(response, HttpStatus.NOT_FOUND)
         );
     }
-
 
     public static AbstractIntegerAssert<?> 상태코드를_검증한다(ExtractableResponse<Response> response,
                                                       HttpStatus expectedHttpStatus) {

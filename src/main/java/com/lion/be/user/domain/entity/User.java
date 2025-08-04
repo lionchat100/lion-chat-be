@@ -61,7 +61,7 @@ public class User extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private OnboardingStatus onboardingStatus = OnboardingStatus.PENDING;
-    
+
     public User(String name, String email, String imageUrl, Role role) {
         this.name = name;
         this.email = email;
@@ -81,8 +81,8 @@ public class User extends BaseEntity {
         this.position = data.getPosition();
         this.mbti = data.getMbti();
 
-        for (int i = 0; i < data.getImageUrls().size(); i++) {
-            this.userPhotos.add(new UserPhoto(this, data.getImageUrls().get(i), i + 1));
+        for (int i = 0; i < data.getUserPhotos().size(); i++) {
+            this.userPhotos.add(new UserPhoto(this, data.getUserPhotos().get(i), i + 1));
         }
         this.onboardingStatus = OnboardingStatus.COMPLETED;
     }
@@ -102,13 +102,13 @@ public class User extends BaseEntity {
 
     private void validateOnboardingData(OnboardingData data) {
         if (data.getGender() == null || data.getUniversity() == null ||
-            data.getPosition() == null || data.getMbti() == null || data.getImageUrls() == null) {
+                data.getPosition() == null || data.getMbti() == null || data.getUserPhotos() == null) {
             throw new IllegalArgumentException("온보딩 필수 정보가 누락되었습니다.");
         }
-        if (data.getImageUrls().isEmpty()) {
+        if (data.getUserPhotos().isEmpty()) {
             throw new IllegalArgumentException("최소 1장의 사진이 필요합니다.");
         }
-        if (data.getImageUrls().size() > 3) {
+        if (data.getUserPhotos().size() > 3) {
             throw new IllegalArgumentException("사진은 최대 3장까지 업로드 가능합니다.");
         }
     }

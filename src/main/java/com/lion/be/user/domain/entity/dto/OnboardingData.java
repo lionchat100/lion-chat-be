@@ -15,15 +15,15 @@ public class OnboardingData {
 	private final String university;
 	private final String position;
 	private final Mbti mbti;
-	private final List<String> imageUrls;
+	private final List<String> userPhotos;
 
 	public static OnboardingData from(OnboardingRequest request) {
 		return OnboardingData.builder()
-			.gender(request.getGender())
-			.university(request.getUniversity())
-			.position(request.getPosition())
-			.mbti(request.getMbti())
-			.imageUrls(request.getImageUrls())
-			.build();
+				.gender(request.getGender())
+				.university(request.getUniversity())
+				.position(request.getPosition())
+				.mbti(request.getMbti())
+				.userPhotos(request.getUserPhotos())
+				.build();
 	}
 }
