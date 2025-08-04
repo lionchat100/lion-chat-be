@@ -1,4 +1,4 @@
-package com.lion.be.chat.domain.chatroom.dto;
+package com.lion.be.chat.domain.dto;
 
 import java.time.LocalDateTime;
 

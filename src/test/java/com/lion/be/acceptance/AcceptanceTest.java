@@ -67,6 +67,16 @@ public abstract class AcceptanceTest {
         registry.add("spring.rabbitmq.port", RABBITMQ::getAmqpPort);
         registry.add("spring.rabbitmq.username", RABBITMQ::getAdminUsername);
         registry.add("spring.rabbitmq.password", RABBITMQ::getAdminPassword);
+
+        // WebSocketConfig에서 참조하는 프로퍼티 값들을 설정합니다.
+        registry.add("spring.messaging.stomp.broker-relay.host", RABBITMQ::getHost);
+        registry.add("spring.messaging.stomp.broker-relay.port", RABBITMQ::getAmqpPort);
+
+        // RabbitMQContainer의 기본 사용자 정보는 guest/guest 입니다.
+        registry.add("spring.messaging.stomp.broker-relay.client-login", () -> "guest");
+        registry.add("spring.messaging.stomp.broker-relay.client-passcode", () -> "guest");
+        registry.add("spring.messaging.stomp.broker-relay.system-login", () -> "guest");
+        registry.add("spring.messaging.stomp.broker-relay.system-passcode", () -> "guest");
     }
 
     @LocalServerPort

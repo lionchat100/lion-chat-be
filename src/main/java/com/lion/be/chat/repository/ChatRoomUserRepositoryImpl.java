@@ -1,9 +1,8 @@
-package com.lion.be.chat.domain.chatroomuser.repository;
+package com.lion.be.chat.repository;
 
-import com.lion.be.chat.domain.chatmessage.repository.ChatMessageRepository;
-import com.lion.be.chat.domain.chatroom.dto.ChatRoomListResponse;
-import com.lion.be.chat.domain.chatroom.dto.LastMessageInfo;
-import com.lion.be.chat.domain.chatroomuser.entity.ChatRoomUser;
+import com.lion.be.chat.domain.dto.ChatRoomListResponse;
+import com.lion.be.chat.domain.dto.LastMessageInfo;
+import com.lion.be.chat.domain.entity.ChatRoomUser;
 import com.lion.be.user.domain.entity.User;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;

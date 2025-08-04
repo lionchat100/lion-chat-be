@@ -1,6 +1,6 @@
-package com.lion.be.chat.domain.chatroomuser.repository;
+package com.lion.be.chat.repository;
 
-import com.lion.be.chat.domain.chatroom.dto.ChatRoomListResponse;
+import com.lion.be.chat.domain.dto.ChatRoomListResponse;
 
 import java.util.List;
 
