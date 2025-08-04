@@ -29,7 +29,7 @@ public class UserController {
 			@AuthenticationPrincipal UserPrincipal userPrincipal,
 			@Valid @RequestBody OnboardingRequest onboardingRequest
 	) {
-		University university = universityReadService.getByUniversityName(onboardingRequest.getUniversityName());
+		University university = universityReadService.getByUniversityName(onboardingRequest.universityName());
 
 		OnboardingResponse response = userWriteService.completeUserOnboarding(
 				userPrincipal.getId(),
