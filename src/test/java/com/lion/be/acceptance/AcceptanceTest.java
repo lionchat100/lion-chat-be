@@ -37,6 +37,8 @@ import org.testcontainers.utility.DockerImageName;
 @ActiveProfiles("test")
 public abstract class AcceptanceTest {
 
+    private static final RabbitMQContainer rabbitmq;
+
     static {
         // MySQLContainer 시작
         MySQLContainer<?> mysql = new MySQLContainer<>(DockerImageName.parse("mysql:8.0"));
@@ -56,11 +58,14 @@ public abstract class AcceptanceTest {
         mongo.start();
         System.setProperty("MONGO_URI", mongo.getReplicaSetUrl());
 
-        // RabbitMQ 시작
-        RabbitMQContainer rabbitmq = new RabbitMQContainer(DockerImageName.parse("rabbitmq:3-management"));
+        // RabbitMQ 시작 (STOMP 플러그인 활성화)
+        rabbitmq = new RabbitMQContainer(DockerImageName.parse("rabbitmq:3-management"))
+                .withPluginsEnabled("rabbitmq_stomp") // STOMP 플러그인 활성화
+                .withExposedPorts(5672, 15672, 61613); // AMQP, Management, STOMP 포트 노출
         rabbitmq.start();
         System.setProperty("RABBITMQ_HOST", rabbitmq.getHost());
         System.setProperty("RABBITMQ_PORT", String.valueOf(rabbitmq.getAmqpPort()));
+        System.setProperty("RABBITMQ_STOMP_PORT", String.valueOf(rabbitmq.getMappedPort(61613))); // STOMP 포트 설정
         System.setProperty("RABBITMQ_USERNAME", rabbitmq.getAdminUsername());
         System.setProperty("RABBITMQ_PASSWORD", rabbitmq.getAdminPassword());
     }
@@ -77,10 +82,19 @@ public abstract class AcceptanceTest {
 
         registry.add("spring.data.mongodb.uri", () -> System.getProperty("MONGO_URI"));
 
+        // RabbitMQ 설정
         registry.add("spring.rabbitmq.host", () -> System.getProperty("RABBITMQ_HOST"));
         registry.add("spring.rabbitmq.port", () -> System.getProperty("RABBITMQ_PORT"));
         registry.add("spring.rabbitmq.username", () -> System.getProperty("RABBITMQ_USERNAME"));
         registry.add("spring.rabbitmq.password", () -> System.getProperty("RABBITMQ_PASSWORD"));
+
+        // STOMP 설정 추가
+        registry.add("spring.messaging.stomp.broker-relay.host", () -> System.getProperty("RABBITMQ_HOST"));
+        registry.add("spring.messaging.stomp.broker-relay.port", () -> System.getProperty("RABBITMQ_STOMP_PORT"));
+        registry.add("spring.messaging.stomp.broker-relay.system-login", () -> System.getProperty("RABBITMQ_USERNAME"));
+        registry.add("spring.messaging.stomp.broker-relay.system-passcode", () -> System.getProperty("RABBITMQ_PASSWORD"));
+        registry.add("spring.messaging.stomp.broker-relay.client-login", () -> System.getProperty("RABBITMQ_USERNAME"));
+        registry.add("spring.messaging.stomp.broker-relay.client-passcode", () -> System.getProperty("RABBITMQ_PASSWORD"));
     }
 
     @LocalServerPort
