@@ -71,6 +71,7 @@ public class ChatAcceptanceTest extends AcceptanceTest {
     @DisplayName("사용자 간에 채팅방을 생성하고, 메시지를 주고받은 후, 채팅 목록과 메시지 내역을 조회한다.")
     void fullChatFlowTest() throws Exception {
         // 1. 채팅방 생성 (동일)
+        api_문서_타이틀("create_chat_room", spec);
         var createRoomResponse = 채팅방을_생성한다(user1AccessToken, user2Id, spec);
         Long chatRoomId = createRoomResponse.jsonPath().getLong("id");
 
@@ -83,17 +84,14 @@ public class ChatAcceptanceTest extends AcceptanceTest {
 
         // 6. [검증 1] 사용자2의 채팅방 목록 API를 반복적으로 호출하여,
         // 마지막 메시지가 업데이트될 때까지 최대 10초간 기다린다.
-        api_문서_타이틀("get_my_chat_rooms", spec);
         await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
             var chatRoomListResponse = 내_채팅방_목록을_조회한다(user2AccessToken, spec);
-
-            // 검증 로직을 이 안에 넣는다.
             채팅방_목록_응답을_검증한다(chatRoomListResponse, messageContent);
         });
 
-        // 7. [검증 2] 사용자1의 채팅 메시지 내역 API를 호출하여,
-        // 보낸 메시지가 조회될 때까지 최대 10초간 기다린다.
-        api_문서_타이틀("get_chat_messages", spec);
+        api_문서_타이틀("get_my_chat_rooms", spec);
+        내_채팅방_목록을_조회한다(user2AccessToken, spec);
+
         await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
             var chatMessagesResponse = 채팅_메시지_내역을_조회한다(user1AccessToken, chatRoomId, spec);
             JsonPath messageHistory = chatMessagesResponse.jsonPath();
@@ -103,6 +101,9 @@ public class ChatAcceptanceTest extends AcceptanceTest {
             assertThat(messageHistory.getString("[0].senderName")).isEqualTo(user1Name);
             assertThat(messageHistory.getLong("[0].senderId")).isEqualTo(user1Id);
         });
+
+        api_문서_타이틀("get_chat_messages", spec);
+        채팅_메시지_내역을_조회한다(user1AccessToken, chatRoomId, spec);
 
         // 세션 연결 해제
         if (user1Session != null && user1Session.isConnected()) {
