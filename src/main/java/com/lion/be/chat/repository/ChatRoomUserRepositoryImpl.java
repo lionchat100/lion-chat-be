@@ -65,6 +65,7 @@ public class ChatRoomUserRepositoryImpl implements ChatRoomUserCustomRepository 
                             chatRoomId,
                             opponentUser != null ? opponentUser.getImageUrl() : null,
                             opponentUser != null ? opponentUser.getName() : null,
+                            opponentUser != null ? opponentUser.getId() : null,
                             lastMessageInfo != null ? lastMessageInfo.lastChat() : null,
                             lastMessageInfo != null ? lastMessageInfo.lastChatTime() : null,
                             myCru.getIsRead()

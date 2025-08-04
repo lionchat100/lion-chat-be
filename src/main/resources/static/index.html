@@ -73,7 +73,7 @@
             loginForm.classList.add('d-none');
             chatRoomListForm.classList.remove('d-none');
 
-            const res = await fetch('/api/chatrooms',
+            const res = await fetch('/api/chats',
                 {
                     method:'GET',
                     headers:{
@@ -86,9 +86,9 @@
 
             body.forEach(chatRoom => {
                 const listItem = document.createElement('li');
-                listItem.textContent = `Chat Room ID: ${chatRoom.chatRoomId} - 상대: ${chatRoom.opponentName} - 최근 메시지:${chatRoom.lastChat} - 읽음: ${chatRoom.isRead}`;
+                listItem.textContent = `Chat Room ID: ${chatRoom.roomId} - 상대: ${chatRoom.opponentName} - 최근 메시지:${chatRoom.lastChat} - 읽음: ${chatRoom.isRead}`;
                 listItem.addEventListener('click', () => {
-                    joinTheRoom(event, chatRoom.chatRoomId, chatRoom.opponentId);
+                    joinTheRoom(event, chatRoom.roomId, chatRoom.opponentId);
                 });
                 chatRoomList.appendChild(listItem);
             });
@@ -102,7 +102,7 @@
             chatRoomListForm.classList.add('d-none');
             chatRoom.classList.remove('d-none');
 
-            const res = await fetch('/api/chatrooms', {
+            const res = await fetch('/api/chats', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -148,7 +148,7 @@
         // 3. 연결 성공 시, "/topic/public" 토픽을 구독합니다.
         //    서버에서 이 토픽으로 메시지를 보내면 onMessageReceived 콜백이 호출됩니다.
         stompClient.subscribe(`/topic/chatroom${chatRoomId}`, onMessageReceived);
-        const result = await fetch('/api/chats/'+chatRoomId, {
+        const result = await fetch('/api/chatmessages/'+chatRoomId, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -186,7 +186,7 @@
 
     async function fetchOldMessage(){
         if(lastId){
-            const result = await fetch('/api/chats/'+chatRoomId+'?lastId='+lastId, {
+            const result = await fetch('/api/chatmessages/'+chatRoomId+'?lastId='+lastId, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
