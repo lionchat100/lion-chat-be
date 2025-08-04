@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/user/")
+@RequestMapping("/api/users/")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -23,12 +23,12 @@ public class UserController {
 
 	@PatchMapping("/onboarding")
 	public ResponseEntity<OnboardingResponse> onboarding (
-		@AuthenticationPrincipal UserPrincipal userPrincipal,
-		@Valid @RequestBody OnboardingRequest onboardingRequest
+			@AuthenticationPrincipal UserPrincipal userPrincipal,
+			@Valid @RequestBody OnboardingRequest onboardingRequest
 	) {
 		OnboardingResponse response = userWriteService.completeUserOnboarding(
-			userPrincipal.getId(),
-			onboardingRequest
+				userPrincipal.getId(),
+				onboardingRequest
 		);
 		return ResponseEntity.ok(response);
 	}
