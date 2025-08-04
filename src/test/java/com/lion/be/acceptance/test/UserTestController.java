@@ -35,18 +35,14 @@ public class UserTestController {
         String email = request.email();
         String name = request.name();
         String imageUrl = request.imageUrl();
-        boolean isNewUser = false;
 
         User user;
         try {
-            // 1. UserReadService를 통해 사용자 조회
             user = userReadService.fetchByEmail(email);
         } catch (RuntimeException e) {
-            // 2. 사용자가 없으면 UserWriteService를 통해 새로 생성
             User newUser = new User(name, email, imageUrl, Role.USER);
             userWriteService.save(newUser);
-            user = userReadService.fetchByEmail(email); // 저장 후 다시 조회 (ID 포함)
-            isNewUser = true;
+            user = userReadService.fetchByEmail(email);
         }
 
         // 3. Authentication 객체 생성
