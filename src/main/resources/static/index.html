@@ -121,7 +121,9 @@
             stompClient = Stomp.over(socket);
 
             // 3. 서버에 연결 시도
-            stompClient.connect({'Authorization': `Bearer ${token}`}, onConnected, onError);
+            stompClient.connect({'Authorization': `Bearer ${token}`,    // 서버 설정(10000)보다 약간 여유있게 설정하는 것이 좋음
+                "heart-beat": "12000,12000"
+                 }, onConnected, onError);
         }
     }
 

@@ -2,9 +2,11 @@ package com.lion.be.global.config;
 
 import com.lion.be.global.interceptor.StompInterceptor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
@@ -61,6 +63,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .enableStompBrokerRelay("/topic") // '/topic'으로 시작하는 destination을 외부 브로커가 처리
                 .setSystemHeartbeatSendInterval(10000)
                 .setSystemHeartbeatReceiveInterval(10000)
+                .setTaskScheduler(taskScheduler())
                 .setRelayHost(rabbitmqHost)        // RabbitMQ 호스트
                 .setRelayPort(rabbitmqPort)              // RabbitMQ STOMP 플러그인 포트
                 .setClientLogin(rabbitmqClientName)          // RabbitMQ 사용자 ID
@@ -73,6 +76,15 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
         registration.interceptors(stompInterceptor);
+    }
+
+    @Bean
+    public ThreadPoolTaskScheduler taskScheduler() {
+        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        scheduler.setPoolSize(1);
+        scheduler.setThreadNamePrefix("stomp-heartbeat-thread-");
+
+        return scheduler;
     }
 
 
