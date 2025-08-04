@@ -71,7 +71,7 @@ public class TokenController {
         Authentication authentication = jwtTokenProvider.getAuthentication(refreshToken);
         String newAccessToken = jwtTokenProvider.generateAccessToken(authentication);
 
-        return ResponseEntity.ok(Map.of("accessToken", newAccessToken));
+        return ResponseEntity.ok(new AuthTokenResponse(newAccessToken));
     }
 
     @PostMapping("/api/auth/logout")
@@ -88,7 +88,7 @@ public class TokenController {
 
         CookieUtil.deleteCookie(response, "refresh_token");
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
 }

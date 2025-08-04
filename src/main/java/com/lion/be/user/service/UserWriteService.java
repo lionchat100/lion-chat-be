@@ -1,10 +1,16 @@
 package com.lion.be.user.service;
 
-import com.lion.be.user.domain.entity.User;
-import com.lion.be.user.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.lion.be.global.exception.UserNotFoundException;
+import com.lion.be.user.controller.dto.OnboardingRequest;
+import com.lion.be.user.controller.dto.OnboardingResponse;
+import com.lion.be.user.domain.entity.User;
+import com.lion.be.user.domain.entity.dto.OnboardingData;
+import com.lion.be.user.repository.UserRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -17,4 +23,16 @@ public class UserWriteService {
         userRepository.save(user);
     }
 
+    public OnboardingResponse completeUserOnboarding(Long userId, OnboardingRequest request) {
+        User user = userRepository.fetchById(userId)
+            .orElseThrow(UserNotFoundException::new);
+
+        user.completeOnboarding(
+            OnboardingData.from(request)
+        );
+
+        userRepository.save(user);
+
+        return OnboardingResponse.success(userId);
+    }
 }
