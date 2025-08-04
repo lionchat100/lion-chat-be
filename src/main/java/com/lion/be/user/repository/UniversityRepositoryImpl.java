@@ -17,11 +17,6 @@ public class UniversityRepositoryImpl implements UniversityRepository {
 	private final UniversityJpaRepository universityJpaRepository;
 
 	@Override
-	public University save(University university) {
-		return universityJpaRepository.save(university);
-	}
-
-	@Override
 	public Optional<University> fetchByName(String name) {
 		return universityJpaRepository.findByName(name);
 	}

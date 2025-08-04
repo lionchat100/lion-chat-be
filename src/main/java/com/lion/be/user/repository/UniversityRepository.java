@@ -8,6 +8,5 @@ public interface UniversityRepository  {
 
 	Optional<University> fetchByName(String name);
 
-	University save(University university);
 }
 

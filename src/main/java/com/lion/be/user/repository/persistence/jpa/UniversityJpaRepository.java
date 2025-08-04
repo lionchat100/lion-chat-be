@@ -8,8 +8,6 @@ import com.lion.be.user.domain.entity.University;
 
 public interface UniversityJpaRepository extends JpaRepository<University, Long> {
 
-	University save(University university);
-
 	Optional<University> findByName(String name);
 
 }
