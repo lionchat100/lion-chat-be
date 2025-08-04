@@ -43,8 +43,6 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .headers(x -> x.frameOptions(FrameOptionsConfig::disable))
                 .authorizeHttpRequests((authorize) -> authorize
-                        // TODO: 로그인 기능 구현 후, 아래 경로 허용 해제
-                        .requestMatchers(HttpMethod.GET, "/api/chats/room").permitAll()
                         .requestMatchers(AuthEndpoints.PERMIT_ALL_PATTERNS).permitAll()
                         .anyRequest().authenticated()
                 ).oauth2Login(
