@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/user/card")
+@RequestMapping("/api/users/card")
 @RequiredArgsConstructor
 public class UserCardController {
 
@@ -28,20 +28,20 @@ public class UserCardController {
 
 	@GetMapping
 	public ResponseEntity<List<UserCardResponse>> getMatchingCards(
-		@AuthenticationPrincipal UserPrincipal userPrincipal,
-		@ModelAttribute UserCardFilterRequest filterRequest,
-		@RequestParam(defaultValue = "10") int size,
-		@RequestParam(required = false) List<Long> excludeUserIds
+			@AuthenticationPrincipal UserPrincipal userPrincipal,
+			@ModelAttribute UserCardFilterRequest filterRequest,
+			@RequestParam(defaultValue = "10") int size,
+			@RequestParam(required = false) List<Long> excludeUserIds
 	) {
 		log.info("사용자 {}가 카드 조회 요청 - size: {}, 제외할 사용자 수: {}",
-			userPrincipal.getId(), size,
-			excludeUserIds != null ? excludeUserIds.size() : 0);
+				userPrincipal.getId(), size,
+				excludeUserIds != null ? excludeUserIds.size() : 0);
 
 		List<UserCardResponse> cards = userReadService.getMatchingCards(
-			userPrincipal.getId(),
-			filterRequest,
-			size,
-			excludeUserIds
+				userPrincipal.getId(),
+				filterRequest,
+				size,
+				excludeUserIds
 		);
 		return ResponseEntity.ok(cards);
 	}

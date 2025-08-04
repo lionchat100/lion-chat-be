@@ -19,7 +19,7 @@ public class OnboardingRequest {
 
 	@NotEmpty(message = "대표 사진을 최소 1장 추가해주세요.")
 	@Size(max = 3, message = "사진은 최대 3장까지 업로드 가능합니다.")
-	private List<String> imageUrls;
+	private List<String> userPhotos;
 
 	@NotNull(message = "성별을 선택해주세요.")
 	private Gender gender;
