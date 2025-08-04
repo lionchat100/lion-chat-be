@@ -21,6 +21,9 @@ import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.repository.UserRepository;
 import io.restassured.path.json.JsonPath;
 import java.time.Duration;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -104,6 +107,76 @@ public class ChatAcceptanceTest extends AcceptanceTest {
         // 세션 연결 해제
         if (user1Session != null && user1Session.isConnected()) {
             user1Session.disconnect();
+        }
+    }
+
+    @Test
+    @DisplayName("두 사용자가 동시에 메시지를 보내도 데이터 정합성이 유지된다.")
+    void concurrencyMessageSendTest() throws Exception {
+        // 1. 테스트 준비: 채팅방 생성
+        var createRoomResponse = 채팅방을_생성한다(user1AccessToken, user2Id, spec);
+        Long chatRoomId = createRoomResponse.jsonPath().getLong("id");
+
+        // WebSocket 연결
+        StompSession user1Session = STOMP_연결을_하고_세션을_반환한다(port, user1AccessToken);
+        StompSession user2Session = STOMP_연결을_하고_세션을_반환한다(port, user2AccessToken);
+
+        // 2. 동시 요청 준비
+        int threadCount = 2;
+        ExecutorService executorService = Executors.newFixedThreadPool(threadCount); // 2개의 스레드를 가진 스레드 풀 생성
+        CountDownLatch latch = new CountDownLatch(threadCount); // 모든 스레드가 동시에 시작하도록 돕는 도구
+
+        String user1Message = "사용자1의 동시성 테스트 메시지";
+        String user2Message = "사용자2의 동시성 테스트 메시지";
+
+        // 3. 각 스레드가 수행할 작업 정의
+        // 사용자 1의 메시지 전송 작업
+        executorService.submit(() -> {
+            try {
+                latch.countDown(); // "준비 완료" 신호
+                latch.await();     // 다른 스레드가 준비될 때까지 대기
+                채팅_메시지를_전송한다(user1Session, chatRoomId, user1Message);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
+
+        // 사용자 2의 메시지 전송 작업
+        executorService.submit(() -> {
+            try {
+                latch.countDown(); // "준비 완료" 신호
+                latch.await();     // 다른 스레드가 준비될 때까지 대기
+                채팅_메시지를_전송한다(user2Session, chatRoomId, user2Message);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
+
+        // 스레드 풀 종료
+        executorService.shutdown();
+
+        // 4. Awaitility를 사용하여 최종 결과 검증
+        // [검증 1] 채팅 메시지 내역에 두 개의 메시지가 모두 저장되었는지 확인
+        await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
+            var chatMessagesResponse = 채팅_메시지_내역을_조회한다(user1AccessToken, chatRoomId, spec);
+            JsonPath messageHistory = chatMessagesResponse.jsonPath();
+
+            assertThat(messageHistory.getList("$").size()).isEqualTo(2);
+            assertThat(messageHistory.getList("content", String.class)).contains(user1Message, user2Message);
+        });
+
+        // [검증 2] 채팅방 목록의 마지막 메시지가 두 메시지 중 하나로 올바르게 업데이트 되었는지 확인
+        // (어떤 메시지가 마지막이 될지는 실행 시점에 따라 다르므로, 둘 중 하나이면 성공으로 간주)
+        var chatRoomListResponse = 내_채팅방_목록을_조회한다(user1AccessToken, spec);
+        String lastChat = chatRoomListResponse.jsonPath().getString("[0].lastChat");
+        assertThat(lastChat).isIn(user1Message, user2Message);
+
+        // 테스트 종료 후 세션 연결 해제
+        if (user1Session != null && user1Session.isConnected()) {
+            user1Session.disconnect();
+        }
+        if (user2Session != null && user2Session.isConnected()) {
+            user2Session.disconnect();
         }
     }
 
