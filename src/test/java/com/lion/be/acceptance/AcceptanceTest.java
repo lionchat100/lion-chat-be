@@ -54,20 +54,15 @@ public abstract class AcceptanceTest {
 
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {
-        // MySQL 설정
         registry.add("spring.datasource.url", MYSQL::getJdbcUrl);
         registry.add("spring.datasource.username", MYSQL::getUsername);
         registry.add("spring.datasource.password", MYSQL::getPassword);
 
-        // Redis 설정
         registry.add("spring.data.redis.host", REDIS::getHost);
         registry.add("spring.data.redis.port", () -> REDIS.getMappedPort(6379).toString());
 
-        // MongoDB 설정
         registry.add("spring.data.mongodb.uri", MONGO_DB::getReplicaSetUrl);
 
-        // 3. RabbitMQ 설정을 추가합니다.
-        // 스프링 부트의 RabbitMQ 자동 설정 프로퍼티에 컨테이너 정보를 동적으로 연결합니다.
         registry.add("spring.rabbitmq.host", RABBITMQ::getHost);
         registry.add("spring.rabbitmq.port", RABBITMQ::getAmqpPort);
         registry.add("spring.rabbitmq.username", RABBITMQ::getAdminUsername);
