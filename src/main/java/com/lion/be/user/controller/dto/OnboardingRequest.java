@@ -5,33 +5,28 @@ import java.util.List;
 import com.lion.be.user.domain.Gender;
 import com.lion.be.user.domain.Mbti;
 import com.lion.be.user.domain.Position;
-import com.lion.be.user.domain.entity.University;
 
-import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
-@Getter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class OnboardingRequest {
+public record OnboardingRequest(
 
 	@NotEmpty(message = "대표 사진을 최소 1장 추가해주세요.")
 	@Size(max = 3, message = "사진은 최대 3장까지 업로드 가능합니다.")
-	private List<String> userPhotos;
+	List<String> userPhotos,
 
 	@NotNull(message = "성별을 선택해주세요.")
-	private Gender gender;
+	Gender gender,
 
 	@NotBlank(message = "대학교를 입력해주세요.")
-	private String universityName;
+	String universityName,
 
 	@NotNull(message = "직책을 선택해주세요.")
-	private Position position;
+	Position position,
 
 	@NotNull(message = "MBTI를 선택해주세요.")
-	private Mbti mbti;
+	Mbti mbti
+) {
 }

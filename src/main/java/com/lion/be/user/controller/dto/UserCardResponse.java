@@ -9,36 +9,27 @@ import com.lion.be.user.domain.entity.University;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.domain.entity.UserPhoto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
-@Getter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class UserCardResponse {
-	private Long userId;
-	private String name;
-	private University university;
-	private Position position;
-	private Mbti mbti;
-	private Gender gender;
-	private List<String> imageUrls; // 사진 1~3장
-
+public record UserCardResponse (
+	Long userId,
+	String name,
+	University university,
+	Position position,
+	Mbti mbti,
+	Gender gender,
+	List<String> imageUrls
+)
 	// User 엔티티에서 변환하는 정적 메서드
-	public static UserCardResponse from(User user) {
-		return UserCardResponse.builder()
-			.userId(user.getId())
-			.name(user.getName())
-			.university(user.getUniversity())
-			.position(user.getPosition())
-			.mbti(user.getMbti())
-			.gender(user.getGender())
-			.imageUrls(user.getUserPhotos().stream()
+	{public static UserCardResponse from(User user) {
+		return new UserCardResponse(
+			user.getId(),
+			user.getName(),
+			user.getUniversity(),
+			user.getPosition(),
+			user.getMbti(),
+			user.getGender(),
+			user.getUserPhotos().stream()
 				.map(UserPhoto::getImageUrl)
-				.toList())
-			.build();
+				.toList()
+		);
 	}
 }
