@@ -16,14 +16,33 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 import com.lion.be.acceptance.AcceptanceTest;
 import com.lion.be.acceptance.util.UserFixture;
+import com.lion.be.user.domain.entity.University;
+import com.lion.be.user.repository.UniversityRepository;
+
 import io.restassured.RestAssured;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
 @DisplayName("회원 관련 기능 인수테스트")
 class UserAcceptanceTest extends AcceptanceTest {
+
+    @Autowired
+    private UniversityRepository universityRepository;
+
+    @BeforeEach
+    void setUp() {
+        // 테스트용 대학교 데이터 직접 생성
+        University 멋사대학교 = new University(null, "멋사대학교", "https://example.com/likelion.jpg");
+        University 연세대학교 = new University(null, "연세대학교", "https://example.com/yonsei.jpg");
+
+        universityRepository.save(멋사대학교);
+        universityRepository.save(연세대학교);
+    }
 
     @Nested
     @DisplayName("온보딩 인수테스트")

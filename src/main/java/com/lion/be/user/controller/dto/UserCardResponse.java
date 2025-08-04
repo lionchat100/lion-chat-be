@@ -4,6 +4,8 @@ import java.util.List;
 
 import com.lion.be.user.domain.Gender;
 import com.lion.be.user.domain.Mbti;
+import com.lion.be.user.domain.Position;
+import com.lion.be.user.domain.entity.University;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.domain.entity.UserPhoto;
 
@@ -19,8 +21,8 @@ import lombok.NoArgsConstructor;
 public class UserCardResponse {
 	private Long userId;
 	private String name;
-	private String university;
-	private String position;
+	private University university;
+	private Position position;
 	private Mbti mbti;
 	private Gender gender;
 	private List<String> imageUrls; // 사진 1~3장

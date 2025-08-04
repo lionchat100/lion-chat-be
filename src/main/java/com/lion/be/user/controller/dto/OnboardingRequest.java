@@ -4,6 +4,8 @@ import java.util.List;
 
 import com.lion.be.user.domain.Gender;
 import com.lion.be.user.domain.Mbti;
+import com.lion.be.user.domain.Position;
+import com.lion.be.user.domain.entity.University;
 
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -25,10 +27,10 @@ public class OnboardingRequest {
 	private Gender gender;
 
 	@NotBlank(message = "대학교를 입력해주세요.")
-	private String university;
+	private String universityName;
 
-	@NotBlank(message = "직책을 입력해주세요.")
-	private String position;
+	@NotNull(message = "직책을 선택해주세요.")
+	private Position position;
 
 	@NotNull(message = "MBTI를 선택해주세요.")
 	private Mbti mbti;
