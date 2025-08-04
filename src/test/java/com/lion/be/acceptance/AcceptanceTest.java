@@ -28,7 +28,6 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.containers.RabbitMQContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
@@ -38,35 +37,50 @@ import org.testcontainers.utility.DockerImageName;
 @ActiveProfiles("test")
 public abstract class AcceptanceTest {
 
-    @Container
-    public static final MySQLContainer<?> MYSQL = new MySQLContainer<>(DockerImageName.parse("mysql:8.0"));
+    static {
+        // MySQLContainer 시작
+        MySQLContainer<?> mysql = new MySQLContainer<>(DockerImageName.parse("mysql:8.0"));
+        mysql.start();
+        System.setProperty("DB_URL", mysql.getJdbcUrl());
+        System.setProperty("DB_USERNAME", mysql.getUsername());
+        System.setProperty("DB_PASSWORD", mysql.getPassword());
 
-    @Container
-    public static final GenericContainer<?> REDIS = new GenericContainer<>(DockerImageName.parse("redis:7.2"))
-            .withExposedPorts(6379);
+        // Redis 시작
+        GenericContainer<?> redis = new GenericContainer<>(DockerImageName.parse("redis:7.2")).withExposedPorts(6379);
+        redis.start();
+        System.setProperty("REDIS_HOST", redis.getHost());
+        System.setProperty("REDIS_PORT", redis.getMappedPort(6379).toString());
 
-    @Container
-    public static final MongoDBContainer MONGO_DB = new MongoDBContainer(DockerImageName.parse("mongo:6.0"));
+        // MongoDB 시작
+        MongoDBContainer mongo = new MongoDBContainer(DockerImageName.parse("mongo:6.0"));
+        mongo.start();
+        System.setProperty("MONGO_URI", mongo.getReplicaSetUrl());
 
-    @Container
-    public static final RabbitMQContainer RABBITMQ = new RabbitMQContainer(
-            DockerImageName.parse("rabbitmq:3-management"));
+        // RabbitMQ 시작
+        RabbitMQContainer rabbitmq = new RabbitMQContainer(DockerImageName.parse("rabbitmq:3-management"));
+        rabbitmq.start();
+        System.setProperty("RABBITMQ_HOST", rabbitmq.getHost());
+        System.setProperty("RABBITMQ_PORT", String.valueOf(rabbitmq.getAmqpPort()));
+        System.setProperty("RABBITMQ_USERNAME", rabbitmq.getAdminUsername());
+        System.setProperty("RABBITMQ_PASSWORD", rabbitmq.getAdminPassword());
+    }
 
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", MYSQL::getJdbcUrl);
-        registry.add("spring.datasource.username", MYSQL::getUsername);
-        registry.add("spring.datasource.password", MYSQL::getPassword);
+        // static 블록에서 System.setProperty로 설정한 값을 읽어와서 주입
+        registry.add("spring.datasource.url", () -> System.getProperty("DB_URL"));
+        registry.add("spring.datasource.username", () -> System.getProperty("DB_USERNAME"));
+        registry.add("spring.datasource.password", () -> System.getProperty("DB_PASSWORD"));
 
-        registry.add("spring.data.redis.host", REDIS::getHost);
-        registry.add("spring.data.redis.port", () -> REDIS.getMappedPort(6379).toString());
+        registry.add("spring.data.redis.host", () -> System.getProperty("REDIS_HOST"));
+        registry.add("spring.data.redis.port", () -> System.getProperty("REDIS_PORT"));
 
-        registry.add("spring.data.mongodb.uri", MONGO_DB::getReplicaSetUrl);
+        registry.add("spring.data.mongodb.uri", () -> System.getProperty("MONGO_URI"));
 
-        registry.add("spring.rabbitmq.host", RABBITMQ::getHost);
-        registry.add("spring.rabbitmq.port", RABBITMQ::getAmqpPort);
-        registry.add("spring.rabbitmq.username", RABBITMQ::getAdminUsername);
-        registry.add("spring.rabbitmq.password", RABBITMQ::getAdminPassword);
+        registry.add("spring.rabbitmq.host", () -> System.getProperty("RABBITMQ_HOST"));
+        registry.add("spring.rabbitmq.port", () -> System.getProperty("RABBITMQ_PORT"));
+        registry.add("spring.rabbitmq.username", () -> System.getProperty("RABBITMQ_USERNAME"));
+        registry.add("spring.rabbitmq.password", () -> System.getProperty("RABBITMQ_PASSWORD"));
     }
 
     @LocalServerPort
