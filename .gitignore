@@ -212,3 +212,5 @@ src/main/resources/application-local.yml
 src/test/resources/application-test.yml
 
 docker-compose.yml
+
+src/main/generated

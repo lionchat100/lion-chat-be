@@ -59,6 +59,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         // StompBrokerRelay를 사용하도록 설정
         registry.setApplicationDestinationPrefixes("/app")
                 .enableStompBrokerRelay("/topic") // '/topic'으로 시작하는 destination을 외부 브로커가 처리
+                .setSystemHeartbeatSendInterval(10000)
+                .setSystemHeartbeatReceiveInterval(10000)
                 .setRelayHost(rabbitmqHost)        // RabbitMQ 호스트
                 .setRelayPort(rabbitmqPort)              // RabbitMQ STOMP 플러그인 포트
                 .setClientLogin(rabbitmqClientName)          // RabbitMQ 사용자 ID

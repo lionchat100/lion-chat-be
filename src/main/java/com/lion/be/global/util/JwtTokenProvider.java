@@ -13,6 +13,7 @@ import java.security.Key;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -68,6 +69,7 @@ public class JwtTokenProvider {
                 .setSubject(userPrincipal.getUsername())
                 .claim(AUTH_KEY, authorities)
                 .claim(ID_KEY, userPrincipal.getId())
+                .setId(UUID.randomUUID().toString())
                 .setIssuedAt(new Date())
                 .setExpiration(validity)
                 .signWith(key, SignatureAlgorithm.HS256)

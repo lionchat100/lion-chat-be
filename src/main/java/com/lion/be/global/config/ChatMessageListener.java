@@ -1,6 +1,6 @@
 package com.lion.be.global.config;
 
-import com.lion.be.chat.domain.ChatMessageValue;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
