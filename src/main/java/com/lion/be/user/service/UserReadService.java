@@ -28,7 +28,7 @@ public class UserReadService {
 
     public CurrentUserResponse fetchCurrentUserResponse(Long userId) {
         User user = fetchById(userId);
-        return new CurrentUserResponse(user.getId(), user.getName(), user.getName(), user.getImageUrl());
+        return new CurrentUserResponse(user.getId(), user.getEmail(), user.getName(), user.getImageUrl());
     }
 
     public User fetchById(Long userId) {
