@@ -2,6 +2,8 @@ package com.lion.be.acceptance.util;
 
 import com.lion.be.user.domain.Gender;
 import com.lion.be.user.domain.Mbti;
+import com.lion.be.user.domain.Position;
+
 import java.util.List;
 import java.util.Map;
 
@@ -39,8 +41,8 @@ public enum UserFixture {
         return Map.of(
                 "userPhotos", List.of("photo1.jpg", "photo2.jpg"),
                 "gender", Gender.MEN,
-                "university", "멋사대학교",
-                "position", "개발자",
+                "universityName", "멋사대학교",
+                "position", Position.BACKEND,
                 "mbti", Mbti.INFJ
         );
     }
@@ -48,8 +50,8 @@ public enum UserFixture {
         return Map.of(
                 "userPhotos", List.of("photo1.jpg"),
                 "gender", Gender.WOMEN,
-                "university", "연세대학교",
-                "position", "디자이너",
+                "universityName", "멋사대학교",
+                "position", Position.BACKEND,
                 "mbti", Mbti.ENFJ
         );
     }

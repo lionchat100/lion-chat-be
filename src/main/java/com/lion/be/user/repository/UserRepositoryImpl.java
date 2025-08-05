@@ -48,20 +48,20 @@ public class UserRepositoryImpl implements UserRepository {
             return userJpaRepository.findMatchingUsersWithExclusion(
                 currentUserId,
                 excludeUserIds,
-                filterRequest.getPreferredGender(),
-                filterRequest.getPreferredMbti(),
-                filterRequest.getPreferredUniversity(),
-                filterRequest.getPreferredPosition(),
+                filterRequest.preferredGender(),
+                filterRequest.preferredMbti(),
+                filterRequest.preferredUniversityName(),
+                filterRequest.preferredPosition(),
                 pageable
             );
         } else {
             // 제외 목록이 없거나 비어있으면 기본 쿼리 사용
             return userJpaRepository.findMatchingUsers(
                 currentUserId,
-                filterRequest.getPreferredGender(),
-                filterRequest.getPreferredMbti(),
-                filterRequest.getPreferredUniversity(),
-                filterRequest.getPreferredPosition(),
+                filterRequest.preferredGender(),
+                filterRequest.preferredMbti(),
+                filterRequest.preferredUniversityName(),
+                filterRequest.preferredPosition(),
                 pageable
             );
         }

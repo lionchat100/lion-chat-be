@@ -93,6 +93,10 @@ dependencies {
 
     //WebSocket 인증
     implementation 'org.springframework.security:spring-security-messaging'
+
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'
+
+    testImplementation 'org.awaitility:awaitility:4.2.0' // 테스트 의존성 추가
 }
 
 tasks.named('test') {
