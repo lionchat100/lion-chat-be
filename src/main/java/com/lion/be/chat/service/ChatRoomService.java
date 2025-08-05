@@ -1,6 +1,6 @@
 package com.lion.be.chat.service;
 
-import com.lion.be.chat.domain.dto.ChatRoomListDto;
+import com.lion.be.chat.domain.dto.ChatRoomDto;
 import com.lion.be.chat.domain.dto.ChatRoomListResponse;
 import com.lion.be.chat.domain.entity.ChatRoom;
 import com.lion.be.chat.repository.ChatRoomRepository;
@@ -34,21 +34,12 @@ public class ChatRoomService {
         return chatRoomUserRepository.findMyChatRoomListByUserId(userId);
     }
 
-    public List<ChatRoomListDto> fetchAll(Long currentUserId) {
-        User user =userRepository.fetchById(currentUserId).orElseThrow(
-                () -> new IllegalArgumentException("User not found")
-        );
-
-        return chatRoomRepository.findAllChatRoom(currentUserId);
-
-    }
-
     public boolean isThereRoom(Long roomId) {
         return chatRoomRepository.findChatRoom(roomId).isPresent();
     }
 
     @Transactional
-    public ChatRoom joinChatRoom(Long currentUserId, Long opponentUserId) {
+    public ChatRoomDto joinChatRoom(Long currentUserId, Long opponentUserId) {
         User currentUser = userRepository.fetchById(currentUserId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
         User opponentUser = userRepository.fetchById(opponentUserId)
@@ -60,7 +51,7 @@ public class ChatRoomService {
 
         Optional<ChatRoom> optionalChatRoom = chatRoomRepository.findChatRoomIdInTwo(currentUserId, opponentUserId);
         if(optionalChatRoom.isPresent()){
-            return optionalChatRoom.get();
+            return new ChatRoomDto(optionalChatRoom.get().getId());
         }
 
         ChatRoom chatRoom = new ChatRoom(false);
@@ -77,7 +68,9 @@ public class ChatRoomService {
         currentUser.addChatRoomUser(currentUserChatRoom);
         opponentUser.addChatRoomUser(opponentUserChatRoom);
 
-        return chatRoomRepository.save(chatRoom);
+        ChatRoom result = chatRoomRepository.save(chatRoom);
+
+        return new ChatRoomDto(result.getId());
 
     }
 

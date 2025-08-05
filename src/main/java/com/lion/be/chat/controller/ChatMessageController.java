@@ -130,4 +130,24 @@ public class ChatMessageController {
         return chatMessageReadService.firstRead(roomId);
     }
 
+    //재연결 -> 재구독까지 웹소켓으로 날아온 메시지들을 읽기 위한 코드
+    @GetMapping("/{roomId}/unread")
+    public List<ChatMessageDto> loadUnreadMessages(@PathVariable("roomId") Long roomId,
+                                                    @AuthenticationPrincipal UserPrincipal currentUser) {
+        if (!chatRoomService.isThereRoom(roomId)) {
+            throw new IllegalArgumentException("Chat room does not exist.");
+        }
+
+        //UserPrincipal currentUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long currentMemberId = currentUser.getId();
+        if (!chatRoomUserReadService.isThereRoomUser(roomId, currentMemberId)) {
+            throw new IllegalArgumentException("You are not a member of this chat room.");
+        }
+
+        List<ChatMessageDto> result =  chatMessageReadService.unreadMessages(roomId, currentMemberId);
+        chatMessageWriteService.markAsRead(roomId, currentMemberId, Instant.now());
+        return result;
+    }
+
 }
+

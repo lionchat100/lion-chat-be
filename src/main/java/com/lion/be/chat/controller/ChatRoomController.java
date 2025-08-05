@@ -1,6 +1,7 @@
 package com.lion.be.chat.controller;
 
 import com.lion.be.auth.domain.UserPrincipal;
+import com.lion.be.chat.domain.dto.ChatRoomDto;
 import com.lion.be.chat.domain.dto.ChatRoomListResponse;
 import com.lion.be.chat.domain.dto.OpponentUserRequest;
 import com.lion.be.chat.domain.entity.ChatRoom;
@@ -28,19 +29,11 @@ public class ChatRoomController {
 
 
     @PostMapping
-    public ChatRoom joinChatRoom(@RequestBody OpponentUserRequest opponentUser, @AuthenticationPrincipal UserPrincipal currentUser){
+    public ChatRoomDto joinChatRoom(@RequestBody OpponentUserRequest opponentUser, @AuthenticationPrincipal UserPrincipal currentUser){
         Long opponentId = opponentUser.getId();
         //UserPrincipal currentUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         return chatRoomService.joinChatRoom(currentUser.getId(), opponentId);
     }
-
-//    @GetMapping
-//    public List<ChatRoomListDto> getChatRoomList(@AuthenticationPrincipal UserPrincipal currentUser){
-//        //UserPrincipal currentUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-//
-//        return chatRoomService.fetchAll(currentUser.getId());
-//
-//    }
 
 }

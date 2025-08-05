@@ -1,6 +1,8 @@
 package com.lion.be.global.interceptor;
 
 import com.lion.be.global.util.JwtTokenProvider;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
@@ -12,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 @Component
+@Order(Ordered.HIGHEST_PRECEDENCE + 99)
 public class StompInterceptor implements ChannelInterceptor {
 
     private final JwtTokenProvider jwtTokenProvider; // 네가 사용하는 JWT 파서
@@ -24,6 +27,8 @@ public class StompInterceptor implements ChannelInterceptor {
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor =
                 MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+
+        System.out.println("StompInterceptor preSend called: " + accessor);
 
         if (StompCommand.CONNECT.equals(accessor.getCommand())) {
             String token = accessor.getFirstNativeHeader("Authorization");

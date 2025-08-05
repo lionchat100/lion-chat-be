@@ -58,4 +58,15 @@ public class ChatMessageReadService {
 
         return result;
     }
+
+    public List<ChatMessageDto> unreadMessages(Long roomId, Long currentMemberId) {
+        return chatMessageRepository.fetchUnreadMessages(roomId,currentMemberId)
+                .stream().map(msg -> new ChatMessageDto(
+                        msg.getId().toHexString(),
+                        msg.getSenderName(),
+                        msg.getSenderId(),
+                        LocalDateTime.ofInstant(msg.getDate(), ZoneId.of("Asia/Seoul")),
+                        msg.getContent()
+                )).collect(Collectors.toList());
+    }
 }

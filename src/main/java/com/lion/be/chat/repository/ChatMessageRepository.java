@@ -16,8 +16,6 @@ import java.util.List;
 public interface ChatMessageRepository extends MongoRepository<ChatMessage, ObjectId> {
 
     @Modifying
-
-
     @Query("{ 'chatRoomId': ?0, 'senderId': { '$ne': ?1 }, 'date': { '$lte': ?2 } }")
     @Update("{ '$set': { 'isRead': true } }")
     void updateReadStatus(Long chatRoomId, Long receiverId, Instant currentDt);
@@ -29,6 +27,9 @@ public interface ChatMessageRepository extends MongoRepository<ChatMessage, Obje
             "{ '$group': { '_id': '$chatRoomId', 'roomId': { '$first': '$chatRoomId' }, 'lastChat': { '$first': '$content' }, 'lastChatTime': { '$first': '$date' } } }"
     })
     List<LastMessageInfo> findLastMessagesByChatRoomIds(List<Long> chatRoomIds);
+
+    @Query("{ 'chatRoomId': ?0, 'isRead': false, 'senderId':{ $ne: ?1 } }")
+    List<ChatMessage> fetchUnreadMessages(Long chatRoomId, Long receiverId);
 
     // 요청 1과 동일
     List<ChatMessage> findByChatRoomId(Long chatRoomId, Pageable pageable);
