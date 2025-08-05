@@ -20,6 +20,10 @@ import com.lion.be.acceptance.AcceptanceTest;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.repository.UserRepository;
 import io.restassured.path.json.JsonPath;
+
+import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -181,4 +185,57 @@ public class ChatAcceptanceTest extends AcceptanceTest {
         }
     }
 
+    @Test
+    @DisplayName("사용자에게 채팅방이 있을 때, 채팅방 리스트를 반환한다.")
+    void getMyChatRooms_returnsChatRoomList_whenChatRoomsExist() {
+        // Given
+        api_문서_타이틀("get_my_chat_rooms", spec);
+
+        var createRoomResponse = 채팅방을_생성한다(user1AccessToken, user2Id, spec);
+        Long chatRoomId = createRoomResponse.jsonPath().getLong("id");
+
+        String messageContent = "Test message for chat room list";
+        StompSession user1Session;
+        try {
+            user1Session = STOMP_연결을_하고_세션을_반환한다(port, user1AccessToken);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to establish STOMP connection", e);
+        }
+        try {
+            채팅_메시지를_전송한다(user1Session, chatRoomId, messageContent);
+            safeWait(500);
+        } finally {
+            if (user1Session != null && user1Session.isConnected()) {
+                user1Session.disconnect();
+            }
+        }
+
+        // When
+        var chatRoomListResponse = 내_채팅방_목록을_조회한다(user2AccessToken, spec);
+
+        // Then
+        JsonPath chatRoomListPath = chatRoomListResponse.jsonPath();
+        assertThat(chatRoomListPath.getList("$")).isNotNull();
+        assertThat(chatRoomListPath.getLong("[0].roomId")).isEqualTo(chatRoomId);
+        assertThat(chatRoomListPath.getString("[0].userImageUrl")).isNotEmpty();
+        assertThat(chatRoomListPath.getString("[0].opponentName")).isEqualTo(user1Name);
+        assertThat(chatRoomListPath.getString("[0].lastChat")).isEqualTo(messageContent);
+        assertThat(chatRoomListPath.getBoolean("[0].isRead")).isNotNull();
+    }
+
+    @Test
+    @DisplayName("사용자에게 채팅방이 없을 때, 빈 채팅방 리스트를 반환한다.")
+    void getMyChatRooms_returnsEmptyChatRoomList_whenNoChatRoomsExist() {
+        // Given
+        api_문서_타이틀("get_my_chat_rooms_empty", spec);
+
+        // When
+        var chatRoomListResponse = 내_채팅방_목록을_조회한다(user2AccessToken, spec);
+
+        // Then
+        JsonPath jsonPath = chatRoomListResponse.jsonPath();
+        List<?> chatRooms = jsonPath.getList("$");
+
+        assertThat(chatRooms).hasSize(0);
+    }
 }
