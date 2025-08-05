@@ -25,9 +25,9 @@ public class AuthEndpoints {
             "/api/auth/logout",
             "/api/test/login",
             "/api/docs",
+            "/api/health",
             "/api/test.html",
             "/ws/**",
-            "/health"
     };
 
 }
