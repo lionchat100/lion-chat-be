@@ -111,18 +111,14 @@ asciidoctor {
     inputs.dir snippetsDir
     configurations 'asciidoctorExt'
     dependsOn test
-    doLast {
-        copy {
-            from outputDir
-            into 'src/main/resources/static/docs'
-        }
-    }
 }
 
 bootJar {
     dependsOn asciidoctor
+    from("${asciidoctor.outputDir}") {
+        into "BOOT-INF/classes/static/docs"
+    }
 }
-
 tasks.named('test') {
     useJUnitPlatform()
 }
