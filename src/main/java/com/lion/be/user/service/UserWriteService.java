@@ -7,9 +7,9 @@ import com.lion.be.global.exception.UserNotFoundException;
 import com.lion.be.user.controller.dto.OnboardingRequest;
 import com.lion.be.user.controller.dto.OnboardingResponse;
 import com.lion.be.user.domain.entity.User;
+import com.lion.be.user.domain.entity.University;
 import com.lion.be.user.domain.entity.dto.OnboardingData;
 import com.lion.be.user.repository.UserRepository;
-
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -23,13 +23,12 @@ public class UserWriteService {
         userRepository.save(user);
     }
 
-    public OnboardingResponse completeUserOnboarding(Long userId, OnboardingRequest request) {
+    public OnboardingResponse completeUserOnboarding(Long userId, OnboardingRequest request, University university) {
         User user = userRepository.fetchById(userId)
             .orElseThrow(UserNotFoundException::new);
 
-        user.completeOnboarding(
-            OnboardingData.from(request)
-        );
+        OnboardingData data = OnboardingData.from(request);
+        user.completeOnboarding(data, university);
 
         userRepository.save(user);
 

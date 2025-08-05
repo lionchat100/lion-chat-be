@@ -8,6 +8,7 @@ import com.lion.be.global.entity.BaseEntity;
 import com.lion.be.user.domain.Gender;
 import com.lion.be.user.domain.Mbti;
 import com.lion.be.user.domain.OnboardingStatus;
+import com.lion.be.user.domain.Position;
 import com.lion.be.user.domain.Role;
 import com.lion.be.user.domain.entity.dto.OnboardingData;
 
@@ -15,10 +16,13 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -52,9 +56,12 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    private String university;
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "university_id")
+    private University university;
 
-    private String position;
+    @Enumerated(EnumType.STRING)
+    private Position position;
 
     @Enumerated(EnumType.STRING)
     private Mbti mbti;
@@ -77,16 +84,16 @@ public class User extends BaseEntity {
         chatRoomUsers.add(chatRoomUser);
     }
 
-    public void completeOnboarding(OnboardingData data) {
+    public void completeOnboarding(OnboardingData data, University university) {
         validateOnboardingPreconditions();
         validateOnboardingData(data);
-        this.gender = data.getGender();
-        this.university = data.getUniversity();
-        this.position = data.getPosition();
-        this.mbti = data.getMbti();
+        this.gender = data.gender();
+        this.university = university;
+        this.position = data.position();
+        this.mbti = data.mbti();
 
-        for (int i = 0; i < data.getUserPhotos().size(); i++) {
-            this.userPhotos.add(new UserPhoto(this, data.getUserPhotos().get(i), i + 1));
+        for (int i = 0; i < data.userPhotos().size(); i++) {
+            this.userPhotos.add(new UserPhoto(this, data.userPhotos().get(i), i + 1));
         }
         this.onboardingStatus = OnboardingStatus.COMPLETED;
     }
@@ -105,14 +112,14 @@ public class User extends BaseEntity {
     }
 
     private void validateOnboardingData(OnboardingData data) {
-        if (data.getGender() == null || data.getUniversity() == null ||
-                data.getPosition() == null || data.getMbti() == null || data.getUserPhotos() == null) {
+        if (data.gender() == null || data.universityName() == null ||
+                data.position() == null || data.mbti() == null || data.userPhotos() == null) {
             throw new IllegalArgumentException("온보딩 필수 정보가 누락되었습니다.");
         }
-        if (data.getUserPhotos().isEmpty()) {
+        if (data.userPhotos().isEmpty()) {
             throw new IllegalArgumentException("최소 1장의 사진이 필요합니다.");
         }
-        if (data.getUserPhotos().size() > 3) {
+        if (data.userPhotos().size() > 3) {
             throw new IllegalArgumentException("사진은 최대 3장까지 업로드 가능합니다.");
         }
     }
