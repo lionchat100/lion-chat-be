@@ -73,7 +73,7 @@ public class ChatSteps {
         return RestAssured
             .given().spec(spec).log().all()
             .auth().oauth2(accessToken)
-            .when().get("/api/chatmessages/{roomId}", roomId)
+            .when().get("/api/chats/message/{roomId}", roomId)
             .then().log().all()
             .extract();
     }
