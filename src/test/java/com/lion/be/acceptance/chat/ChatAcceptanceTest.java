@@ -80,7 +80,6 @@ public class ChatAcceptanceTest extends AcceptanceTest {
             var chatRoomListResponse = 내_채팅방_목록을_조회한다(user2AccessToken, spec);
             채팅방_목록_응답을_검증한다(chatRoomListResponse, messageContent);
         });
-        api_문서_타이틀("get_my_chat_rooms", spec);
         내_채팅방_목록을_조회한다(user2AccessToken, spec); // 문서화를 위한 추가 호출
 
         // 5. 메시지 내역 조회 및 검증 (비동기 처리 대기)
