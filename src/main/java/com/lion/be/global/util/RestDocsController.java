@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class RestDocsController {
 
-    @GetMapping("/docs")
+    @GetMapping("/api/docs")
     public ResponseEntity<?> getDocs() {
         Resource resource = new ClassPathResource("static/docs/index.html");
 
