@@ -73,7 +73,7 @@ public class ChatAcceptanceTest extends AcceptanceTest {
         // 1. 채팅방 생성 (동일)
         api_문서_타이틀("create_chat_room", spec);
         var createRoomResponse = 채팅방을_생성한다(user1AccessToken, user2Id, spec);
-        Long chatRoomId = createRoomResponse.jsonPath().getLong("id");
+        Long chatRoomId = createRoomResponse.jsonPath().getLong("roomId");
 
         // WebSocket 연결
         StompSession user1Session = STOMP_연결을_하고_세션을_반환한다(port, user1AccessToken);
@@ -116,7 +116,7 @@ public class ChatAcceptanceTest extends AcceptanceTest {
     void concurrencyMessageSendTest() throws Exception {
         // 1. 테스트 준비: 채팅방 생성
         var createRoomResponse = 채팅방을_생성한다(user1AccessToken, user2Id, spec);
-        Long chatRoomId = createRoomResponse.jsonPath().getLong("id");
+        Long chatRoomId = createRoomResponse.jsonPath().getLong("roomId");
 
         // WebSocket 연결
         StompSession user1Session = STOMP_연결을_하고_세션을_반환한다(port, user1AccessToken);
