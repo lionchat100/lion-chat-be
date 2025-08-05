@@ -4,11 +4,11 @@ on:
     branches:
       - dev
     paths:
-      - 'be/**'
+      - '**'
 env:
-  ROOT_PATH: ${{ github.workspace }}/be
-  MAIN_RESOURCE_PATH: ${{ github.workspace }}/be/src/main/resources
-  TEST_RESOURCE_PATH: ${{ github.workspace }}/be/src/test/resources
+  ROOT_PATH: ${{ github.workspace }}
+  MAIN_RESOURCE_PATH: ${{ github.workspace }}/src/main/resources
+  TEST_RESOURCE_PATH: ${{ github.workspace }}/src/test/resources
 
 jobs:
   be-cd:
