@@ -48,6 +48,15 @@ public class ChatAcceptanceTest extends AcceptanceTest {
     private String user1Name;
     private String user2Name;
 
+    private void safeWait(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Thread interrupted while waiting", e);
+        }
+    }
+
     @BeforeEach
     void chatSetup() {
         var user1LoginResponse = 원준이_로그인한다(spec);
