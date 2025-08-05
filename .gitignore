@@ -214,3 +214,4 @@ src/test/resources/application-test.yml
 docker-compose.yml
 
 src/main/generated
+src/main/resources/static/index.html
