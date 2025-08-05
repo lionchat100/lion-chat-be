@@ -11,75 +11,59 @@ env:
   TEST_RESOURCE_PATH: ${{ github.workspace }}/src/test/resources
 
 jobs:
-  # 1. CI(빌드 및 테스트) 작업
-  be-ci:
+  be-cd:
     runs-on: ubuntu-latest
-    outputs:
-      # 다음 작업에서 사용할 수 있도록 태그 이름을 출력으로 정의
-      tags: ${{ steps.meta.outputs.tags }}
     steps:
       - name: 레포지토리를 체크아웃한다
         uses: actions/checkout@v4
-
-      # 개선점 1: Gradle 캐싱을 위한 setup-gradle 액션 사용
-      - name: Gradle을 설치하고 캐시를 설정한다
-        uses: gradle/actions/setup-gradle@v3
+      - name: 자바를 설치한다
+        uses: actions/setup-java@v3
         with:
-          # 여기서 Gradle 버전을 명시할 수도 있습니다.
-          # gradle-version: '8.14.3'
-          # 이 액션이 자동으로 Gradle Wrapper, 의존성 등을 캐시합니다.
-          cache-read-only: ${{ github.ref != 'refs/heads/dev' }} # dev 브랜치가 아니면 캐시를 쓰지 않음 (선택사항)
-
+          distribution: 'corretto'
+          java-version: '17'
       - name: 설정파일을 추가한다
         run: |
           cd ${{ env.TEST_RESOURCE_PATH }}
           printf '%s' "${{ secrets.APPLICATION_TEST_YML }}" > application-test.yml
-
+          
+          # 생성 후 파일 확인 명령어 추가
+          ls -l ${{ env.TEST_RESOURCE_PATH }}/application-test.yml
+          stat ${{ env.TEST_RESOURCE_PATH }}/application-test.yml
       - name: 어플리케이션을 빌드한다
-        # 개선점 4: Gradle 힙 메모리 설정 추가
-        env:
-          GRADLE_OPTS: -Xmx2048m -Dorg.gradle.daemon=false
         run: |
-          chmod +x gradle
+          chmod +x gradlew
+          echo "::group::Gradle Build Logs"
           ./gradlew clean build --info
-        working-directory: ${{ env.ROOT_PATH }}
+          echo "::endgroup::"
 
+        working-directory: ${{ env.ROOT_PATH }}
       - name: 도커 허브에 로그인한다
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-
-      - name: Docker 이미지 메타데이터 생성
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: ${{ secrets.BE_DOCKER_IMAGE_NAME }}
-
       - name: 어플리케이션의 도커 이미지를 빌드하고 도커 허브에 푸시한다
         uses: docker/build-push-action@v4
         with:
           context: .
           file: ./Dockerfile.be
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-
-  # 2. CD(배포) 작업
-  be-cd:
-    # be-ci 작업이 성공해야만 실행되도록 설정
-    needs: be-ci
-    runs-on: ubuntu-latest
-    steps:
+          tags: ${{ secrets.BE_DOCKER_IMAGE_NAME }}
       - name: 어플리케이션을 배포한다
-        # 개선점 3: ssh-action을 사용하여 보안 및 편의성 강화
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST_ADDRESS }}
-          username: ${{ secrets.HOST_USERNAME }}
-          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
-          script: |
+        env:
+          PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          HOST: ${{ secrets.HOST_ADDRESS }}
+          USER: ${{ secrets.HOST_USERNAME }}
+          TAG: ${{ secrets.BE_DOCKER_IMAGE_NAME }}
+        run: |
+          # Private key를 파일로 생성합니다.
+          echo "$PRIVATE_KEY" > private_key.pem
+          chmod 600 private_key.pem
+          
+          # EC2 인스턴스에 SSH로 접속하여 Docker 컨테이너를 관리합니다.
+          ssh -o StrictHostKeyChecking=no -i private_key.pem $USER@$HOST "
             sudo docker compose -f docker-compose-be-app.yml down -v
-            sudo docker image pull ${{ needs.be-ci.outputs.tags }}
+            sudo docker compose -f docker-compose-be-app.yml pull
             sudo docker compose -f docker-compose-be-app.yml up -d
             sudo docker image prune -f
+          "
