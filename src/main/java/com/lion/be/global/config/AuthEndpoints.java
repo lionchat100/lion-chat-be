@@ -24,6 +24,7 @@ public class AuthEndpoints {
             "/api/auth/refresh",
             "/api/auth/logout",
             "/api/test/login",
+            "/api/docs",
             "/ws/**"
     };
 
