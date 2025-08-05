@@ -5,6 +5,7 @@ import static com.lion.be.acceptance.user.UserSteps.원준_회원가입;
 import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.document;
 
 import com.lion.be.acceptance.util.DatabaseCleanup;
+import com.lion.be.acceptance.util.MongoCleanup;
 import com.lion.be.acceptance.util.SqlFileExecutor;
 import com.lion.be.acceptance.util.TableCleanup;
 import io.restassured.RestAssured;
@@ -106,6 +107,9 @@ public abstract class AcceptanceTest {
     protected DatabaseCleanup databaseCleanup;
 
     @Autowired
+    private MongoCleanup mongoCleanup;
+
+    @Autowired
     protected TableCleanup tableCleanup;
 
     @Autowired
@@ -138,7 +142,10 @@ public abstract class AcceptanceTest {
 
     @BeforeEach
     void setSpec(RestDocumentationContextProvider provider) {
-        데이터베이스를_초기화한다();
+        databaseCleanup.execute();
+        mongoCleanup.execute();
+        sqlFileExecutor.execute("data.sql");
+
         initAccessToken();
         this.spec = new RequestSpecBuilder().addFilter(
                 RestAssuredRestDocumentation.documentationConfiguration(provider)).build();

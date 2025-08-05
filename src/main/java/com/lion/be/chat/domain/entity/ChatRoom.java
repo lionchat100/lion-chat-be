@@ -18,6 +18,9 @@ public class ChatRoom {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Version
+    private Long version;
+
     private Boolean isDeleted = false;
 
     private LocalDateTime regDt;

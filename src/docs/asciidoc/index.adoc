@@ -66,20 +66,71 @@ operation::fetch_my_info_fail_no_token[snippets='http-request,http-response']
 
 operation::test_login_success[snippets='http-request,http-response']
 
-[[chat-api]]
-== 채팅 API
+[[chat]]
+== 채팅
 
-[[chat-api-get-my-chat-rooms]]
-=== 채팅방 리스트 조회
+채팅 관련 기능입니다. 채팅방 생성 및 목록 조회는 REST API로, 메시지 송수신은 WebSocket(STOMP)과 REST API를 함께 사용합니다.
 
-로그인한 사용자가 참여하고 있는 채팅방 목록을 최신 메시지 순으로 조회합니다.
+[[chat-room]]
+=== 채팅방
 
-==== 성공 (채팅방이 있을 때)
+[[create-chat-room]]
+==== 채팅방 생성
 
-operation::get_my_chat_rooms[snippets='http-request,http-response,response-fields']
+두 사용자 간의 채팅방을 생성합니다. 이미 두 사용자 간의 채팅방이 존재할 경우, 새로운 방을 만들지 않고 기존 채팅방 정보를 반환합니다.
 
-==== 성공 (채팅방이 없을 때)
+* **요청 본문 예시**
++
+[source,json]
+----
+{
+    "id": 2
+}
+----
 
-사용자에게 채팅방이 없는 경우, 비어있는 리스트를 반환합니다.
+* **설명**: `id`는 채팅을 시작할 상대방의 사용자 ID입니다.
 
-operation::get_my_chat_rooms_empty[snippets='http-request,http-response']
+operation::create_chat_room[snippets='http-request,http-response']
+
+[[get-my-chat-rooms]]
+==== 내 채팅방 목록 조회
+
+현재 로그인한 사용자가 참여하고 있는 모든 채팅방의 목록을 조회합니다. 각 채팅방의 마지막 메시지, 상대방 정보 등을 포함하며, 마지막 메시지 시간 순으로 정렬됩니다.
+
+operation::get_my_chat_rooms[snippets='http-request,http-response']
+
+
+[[chat-message]]
+=== 채팅 메시지
+
+[[send-chat-message]]
+==== 메시지 전송 (WebSocket)
+
+STOMP를 통해 특정 채팅방으로 메시지를 전송합니다. 서버는 이 메시지를 받아 저장한 후, 해당 채팅방을 구독 중인 모든 클라이언트에게 브로드캐스팅합니다.
+
+|===
+| 항목 | 설명 | 예시
+
+| **Endpoint**
+| STOMP SEND 목적지
+| `/app/chat.sendMessage`
+
+| **Subscribe**
+| 구독할 토픽 경로
+| `/topic/chatroom{roomId}`
+
+| **Request Body**
+| 메시지 요청 객체 (JSON)
+| `{"chatRoomId": 1, "content": "안녕하세요!", "date": "2025-08-04T20:42:52.104"}`
+|===
+
+
+[[get-chat-messages]]
+==== 채팅 메시지 내역 조회
+
+특정 채팅방의 메시지 내역을 페이지네이션으로 조회합니다.
+
+* **최초 조회:** `lastId` 쿼리 파라미터 없이 요청하면 가장 최근 메시지부터 조회합니다.
+* **이전 내역 조회:** 응답으로 받은 메시지 중 가장 오래된 메시지의 `id`를 `lastId` 쿼리 파라미터로 포함하여 요청하면, 해당 메시지 이전의 내역을 추가로 조회합니다. (예: `?lastId=689099c1fd4ae17dc1293fe8`)
+
+operation::get_chat_messages[snippets='http-request,http-response']
