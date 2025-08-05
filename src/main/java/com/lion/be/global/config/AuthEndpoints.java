@@ -8,7 +8,7 @@ public class AuthEndpoints {
     public static final String[] PERMIT_ALL_PATTERNS = {
             // 정적 리소스
             "/",
-            "/index.html",
+            "/static/index.html",
             "/css/**",
             "/images/**",
             "/uploads/**",
