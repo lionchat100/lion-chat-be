@@ -65,3 +65,21 @@ operation::fetch_my_info_fail_no_token[snippets='http-request,http-response']
 ==== 성공
 
 operation::test_login_success[snippets='http-request,http-response']
+
+[[chat-api]]
+== 채팅 API
+
+[[chat-api-get-my-chat-rooms]]
+=== 채팅방 리스트 조회
+
+로그인한 사용자가 참여하고 있는 채팅방 목록을 최신 메시지 순으로 조회합니다.
+
+==== 성공 (채팅방이 있을 때)
+
+operation::get_my_chat_rooms[snippets='http-request,http-response,response-fields']
+
+==== 성공 (채팅방이 없을 때)
+
+사용자에게 채팅방이 없는 경우, 비어있는 리스트를 반환합니다.
+
+operation::get_my_chat_rooms_empty[snippets='http-request,http-response']
