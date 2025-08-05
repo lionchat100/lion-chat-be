@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.18">
-<title>English Teacher API Document</title>
+<title>Lion Chat API Document</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -440,16 +440,24 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="book toc2 toc-left">
 <div id="header">
-<h1>English Teacher API Document</h1>
+<h1>Lion Chat API Document</h1>
 <div class="details">
 <span id="revnumber">version 0.0.1-SNAPSHOT</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
-<li><a href="#auth">인증/인가</a>
+<li><a href="#auth-and-authorization">인증 및 인가</a>
 <ul class="sectlevel2">
-<li><a href="#_로그인">로그인</a></li>
+<li><a href="#token-exchange">인증 코드로 토큰 교환</a></li>
+<li><a href="#token-refresh">액세스 토큰 재발급</a></li>
+<li><a href="#logout">로그아웃</a></li>
+<li><a href="#fetch-my-info">내 정보 조회</a></li>
+</ul>
+</li>
+<li><a href="#test-endpoints">테스트용 엔드포인트</a>
+<ul class="sectlevel2">
+<li><a href="#test-login">테스트용 로그인</a></li>
 </ul>
 </li>
 </ul>
@@ -457,31 +465,79 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="auth"><a class="link" href="#auth">인증/인가</a></h2>
+<h2 id="auth-and-authorization"><a class="link" href="#auth-and-authorization">인증 및 인가</a></h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_로그인"><a class="link" href="#_로그인">로그인</a></h3>
+<h3 id="token-exchange"><a class="link" href="#token-exchange">인증 코드로 토큰 교환</a></h3>
+<div class="paragraph">
+<p>클라이언트가 OAuth2 인증 후 발급받은 임시 인증 코드를 서버에 보내 액세스 토큰과 리프레시 토큰(쿠키)을 발급받습니다.</p>
+</div>
 <div class="sect3">
 <h4 id="_성공"><a class="link" href="#_성공">성공</a></h4>
 <div class="sect4">
 <h5 id="_성공_http_request"><a class="link" href="#_성공_http_request">HTTP request</a></h5>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">POST /api/test/login HTTP/1.1
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">POST /api/auth/token HTTP/1.1
 Content-Type: application/json
-Host: localhost:51626
-Content-Length: 89
+Host: localhost:56690
+Content-Length: 53
 
 {
-  "email" : "asd1234@naver.com",
-  "imageUrl" : "https://www",
-  "name" : "성이름"
+  "code" : "d5690057-c77c-4793-8d28-468c9cc53943"
 }</code></pre>
 </div>
 </div>
 </div>
 <div class="sect4">
 <h5 id="_성공_http_response"><a class="link" href="#_성공_http_response">HTTP response</a></h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
+Vary: Origin
+Vary: Access-Control-Request-Method
+Vary: Access-Control-Request-Headers
+Set-Cookie: refresh_token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3ajEyMzRAZ21haWwuY29tIiwiYXV0aCI6IlJPTEVfVVNFUiIsImlkIjoxLCJqdGkiOiJkNjQ2Y2VkNy0zYTY3LTQ3NzctODRlNi1jZDk2NmRhMTY5ZjQiLCJpYXQiOjE3NTQyODk2NTYsImV4cCI6MTc1NTQ5OTI1Nn0.pA5LfrJDaS-2t5ewvbeRD5AJhUxs5rMnyL9UBNKtE1c; Path=/; Max-Age=1209600; Expires=Mon, 18 Aug 2025 06:40:56 GMT; Secure; HttpOnly; SameSite=Strict
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+Content-Type: application/json
+Transfer-Encoding: chunked
+Date: Mon, 04 Aug 2025 06:40:56 GMT
+Keep-Alive: timeout=60
+Connection: keep-alive
+Content-Length: 264
+
+{
+  "accessToken" : "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3ajEyMzRAZ21haWwuY29tIiwiYXV0aCI6IlJPTEVfVVNFUiIsImlkIjoxLCJqdGkiOiJmYWU2YjE1Yy0xYmRhLTRjNGUtOWE2ZS01OGM1ODI1Y2QzZmQiLCJpYXQiOjE3NTQyODk2NTYsImV4cCI6MTc1NDI5MTQ1Nn0.i49WtVe-ALpaeecBrlBzZikO5cvhiArlQtTnFajy8aQ"
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="token-refresh"><a class="link" href="#token-refresh">액세스 토큰 재발급</a></h3>
+<div class="paragraph">
+<p>만료된 액세스 토큰을 갱신하기 위해, 쿠키에 저장된 유효한 리프레시 토큰을 사용하여 새로운 액세스 토큰을 요청합니다.</p>
+</div>
+<div class="sect3">
+<h4 id="_성공_2"><a class="link" href="#_성공_2">성공</a></h4>
+<div class="sect4">
+<h5 id="_성공_2_http_request"><a class="link" href="#_성공_2_http_request">HTTP request</a></h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">POST /api/auth/refresh HTTP/1.1
+Content-Type: application/x-www-form-urlencoded; charset=ISO-8859-1
+Host: localhost:56690
+Cookie: refresh_token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3ajEyMzRAZ21haWwuY29tIiwiYXV0aCI6IlJPTEVfVVNFUiIsImlkIjoxLCJqdGkiOiIwZGFlOGJlMi0zMjFhLTQ5ZWYtODk5Zi1jZWUzODg4YjAxMTAiLCJpYXQiOjE3NTQyODk2NTYsImV4cCI6MTc1NTQ5OTI1Nn0.QxG4asrrJf8mnJO66Qo4_olPq8cHW5Rp2OspXojXNGI</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_성공_2_http_response"><a class="link" href="#_성공_2_http_response">HTTP response</a></h5>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
@@ -495,13 +551,196 @@ Pragma: no-cache
 Expires: 0
 Content-Type: application/json
 Transfer-Encoding: chunked
-Date: Sat, 02 Aug 2025 09:41:37 GMT
+Date: Mon, 04 Aug 2025 06:40:56 GMT
 Keep-Alive: timeout=60
 Connection: keep-alive
-Content-Length: 205
+Content-Length: 264
 
 {
-  "accessToken" : "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhc2QxMjM0QG5hdmVyLmNvbSIsImF1dGgiOiJST0xFX1VTRVIiLCJpZCI6MiwiaWF0IjoxNzU0MTI3Njk3LCJleHAiOjE3NTQxMjk0OTd9.INT-15W4w3ona0swvU4XOi5AIaPn46R5Sr6oSTrG3lY"
+  "accessToken" : "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3ajEyMzRAZ21haWwuY29tIiwiYXV0aCI6IlJPTEVfVVNFUiIsImlkIjoxLCJqdGkiOiIwN2VhMjBjYS01Yzc2LTRiMTgtOTM0ZS01NTM1ZDY5YTZmNDYiLCJpYXQiOjE3NTQyODk2NTYsImV4cCI6MTc1NDI5MTQ1Nn0.DYbl3_KqjEOFwmjD3YBoGzD2phBF8dWZVxKIRUvAdfY"
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="logout"><a class="link" href="#logout">로그아웃</a></h3>
+<div class="paragraph">
+<p>쿠키에 저장된 리프레시 토큰을 서버에서 무효화하고, 클라이언트의 쿠키를 삭제합니다.</p>
+</div>
+<div class="sect3">
+<h4 id="_성공_3"><a class="link" href="#_성공_3">성공</a></h4>
+<div class="sect4">
+<h5 id="_성공_3_http_request"><a class="link" href="#_성공_3_http_request">HTTP request</a></h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">POST /api/auth/logout HTTP/1.1
+Content-Type: application/x-www-form-urlencoded; charset=ISO-8859-1
+Host: localhost:56690
+Cookie: refresh_token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3ajEyMzRAZ21haWwuY29tIiwiYXV0aCI6IlJPTEVfVVNFUiIsImlkIjoxLCJqdGkiOiI0MjA3OGM1OC1jZWYwLTRjMjctYmYwNS1mMjU0ZWExZGExNDciLCJpYXQiOjE3NTQyODk2NTYsImV4cCI6MTc1NTQ5OTI1Nn0.2ZppXYiKkqgpsUn0TY4xp_38ewyU3srKE-B082nk9OM</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_성공_3_http_response"><a class="link" href="#_성공_3_http_response">HTTP response</a></h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 204 No Content
+Vary: Origin
+Vary: Access-Control-Request-Method
+Vary: Access-Control-Request-Headers
+Set-Cookie: refresh_token=; Path=/; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; HttpOnly; SameSite=Strict
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+Date: Mon, 04 Aug 2025 06:40:56 GMT
+Keep-Alive: timeout=60
+Connection: keep-alive</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="fetch-my-info"><a class="link" href="#fetch-my-info">내 정보 조회</a></h3>
+<div class="paragraph">
+<p>유효한 액세스 토큰을 사용하여 현재 로그인된 사용자의 정보를 조회합니다.</p>
+</div>
+<div class="sect3">
+<h4 id="_성공_4"><a class="link" href="#_성공_4">성공</a></h4>
+<div class="sect4">
+<h5 id="_성공_4_http_request"><a class="link" href="#_성공_4_http_request">HTTP request</a></h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /api/users/me HTTP/1.1
+Host: localhost:56690</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_성공_4_http_response"><a class="link" href="#_성공_4_http_response">HTTP response</a></h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
+Vary: Origin
+Vary: Access-Control-Request-Method
+Vary: Access-Control-Request-Headers
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+Content-Type: application/json
+Transfer-Encoding: chunked
+Date: Mon, 04 Aug 2025 06:40:55 GMT
+Keep-Alive: timeout=60
+Connection: keep-alive
+Content-Length: 100
+
+{
+  "id" : 1,
+  "email" : "wj1234@gmail.com",
+  "name" : "정원준",
+  "imageUrl" : "https://www"
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_실패_토큰_없음"><a class="link" href="#_실패_토큰_없음">실패 (토큰 없음)</a></h4>
+<div class="paragraph">
+<p>인증 토큰 없이 요청 시 401 Unauthorized 에러를 반환합니다.</p>
+</div>
+<div class="sect4">
+<h5 id="_실패_토큰_없음_http_request"><a class="link" href="#_실패_토큰_없음_http_request">HTTP request</a></h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /api/users/me HTTP/1.1
+Host: localhost:56690</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_실패_토큰_없음_http_response"><a class="link" href="#_실패_토큰_없음_http_response">HTTP response</a></h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 401 Unauthorized
+Vary: Origin
+Vary: Access-Control-Request-Method
+Vary: Access-Control-Request-Headers
+Set-Cookie: JSESSIONID=F686F0A998782B677312D98B93693F62; Path=/; HttpOnly
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+Date: Mon, 04 Aug 2025 06:40:55 GMT
+Keep-Alive: timeout=60
+Connection: keep-alive</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="test-endpoints"><a class="link" href="#test-endpoints">테스트용 엔드포인트</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>개발 및 테스트 환경(<code>test</code> 프로필)에서만 활성화되는 API입니다.</p>
+</div>
+<div class="sect2">
+<h3 id="test-login"><a class="link" href="#test-login">테스트용 로그인</a></h3>
+<div class="paragraph">
+<p>이메일, 이름, 이미지 URL을 보내 즉시 액세스 토큰을 발급받습니다.
+실제 OAuth2 인증 과정을 생략합니다.</p>
+</div>
+<div class="sect3">
+<h4 id="_성공_5"><a class="link" href="#_성공_5">성공</a></h4>
+<div class="sect4">
+<h5 id="_성공_5_http_request"><a class="link" href="#_성공_5_http_request">HTTP request</a></h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">POST /api/test/login HTTP/1.1
+Content-Type: application/json
+Host: localhost:56690
+Content-Length: 88
+
+{
+  "email" : "wj1234@gmail.com",
+  "name" : "정원준",
+  "imageUrl" : "https://www"
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_성공_5_http_response"><a class="link" href="#_성공_5_http_response">HTTP response</a></h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
+Vary: Origin
+Vary: Access-Control-Request-Method
+Vary: Access-Control-Request-Headers
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+Content-Type: application/json
+Transfer-Encoding: chunked
+Date: Mon, 04 Aug 2025 06:40:55 GMT
+Keep-Alive: timeout=60
+Connection: keep-alive
+Content-Length: 264
+
+{
+  "accessToken" : "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3ajEyMzRAZ21haWwuY29tIiwiYXV0aCI6IlJPTEVfVVNFUiIsImlkIjoxLCJqdGkiOiIwMjM4YzU2MS00MWYzLTRlMGYtOGRlOC1kN2JmOTljYmMwZDEiLCJpYXQiOjE3NTQyODk2NTUsImV4cCI6MTc1NDI5MTQ1NX0.lHQLyXXf8w9VeRUSWGYFE7kTJtpmunH5bY9K8wek1jI"
 }</code></pre>
 </div>
 </div>
@@ -514,7 +753,7 @@ Content-Length: 205
 <div id="footer">
 <div id="footer-text">
 Version 0.0.1-SNAPSHOT<br>
-Last updated 2025-08-01 10:20:05 +0900
+Last updated 2025-08-04 10:38:37 +0900
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
