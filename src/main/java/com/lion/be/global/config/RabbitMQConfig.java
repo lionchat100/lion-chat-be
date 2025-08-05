@@ -3,17 +3,17 @@ package com.lion.be.global.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.config.RetryInterceptorBuilder;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.retry.RejectAndDontRequeueRecoverer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.retry.interceptor.RetryOperationsInterceptor;
 
 @Configuration
 public class RabbitMQConfig {
@@ -22,6 +22,11 @@ public class RabbitMQConfig {
     public static final String CHAT_QUEUE_NAME = "chat.queue";
     // 라우팅 키 패턴. "chat.message.123" 같은 형식의 키를 가진 메시지를 바인딩
     public static final String ROUTING_KEY_PATTERN = "chat.message.*";
+
+    // DLQ 설정 추가
+    public static final String DEAD_LETTER_EXCHANGE_NAME = "dead.letter.exchange";
+    public static final String DEAD_LETTER_QUEUE_NAME = "dead.letter.chat.queue";
+    public static final String DEAD_LETTER_ROUTING_KEY = "dead.letter.chat.message";
 
     /**
      * TopicExchange: 라우팅 키를 기반으로 메시지를 큐에 전달하는 유연한 방식의 Exchange
@@ -36,7 +41,10 @@ public class RabbitMQConfig {
      */
     @Bean
     public Queue chatQueue() {
-        return new Queue(CHAT_QUEUE_NAME, true);
+        return QueueBuilder.durable(CHAT_QUEUE_NAME)
+                .deadLetterExchange(DEAD_LETTER_EXCHANGE_NAME) // DLQ 설정
+                .deadLetterRoutingKey(DEAD_LETTER_ROUTING_KEY) // DLQ 라우팅 키 설정
+                .build();
     }
 
     /**
@@ -47,6 +55,33 @@ public class RabbitMQConfig {
         return BindingBuilder.bind(chatQueue)
                 .to(chatExchange)
                 .with(ROUTING_KEY_PATTERN);
+    }
+
+    /**
+     * Dead Letter Exchange (DLX)를 생성합니다.
+     * 일반 Topic Exchange와 동일하지만, 처리 실패한 메시지를 받는 용도로 사용됩니다.
+     */
+    @Bean
+    public TopicExchange deadLetterExchange() {
+        return new TopicExchange(DEAD_LETTER_EXCHANGE_NAME, true, false);
+    }
+
+    /**
+     * Dead Letter Queue (DLQ)를 생성합니다.
+     */
+    @Bean
+    public Queue deadLetterQueue() {
+        return new Queue(DEAD_LETTER_QUEUE_NAME, true);
+    }
+
+    /**
+     * Dead Letter Exchange와 Dead Letter Queue를 바인딩합니다.
+     */
+    @Bean
+    public Binding deadLetterBinding(Queue deadLetterQueue, TopicExchange deadLetterExchange) {
+        return BindingBuilder.bind(deadLetterQueue)
+                .to(deadLetterExchange)
+                .with(DEAD_LETTER_ROUTING_KEY); // 특정 라우팅 키로 바인딩
     }
 
     // ✨✨✨✨✨✨✨✨ 아래 내용을 추가합니다 ✨✨✨✨✨✨✨✨
@@ -88,8 +123,24 @@ public class RabbitMQConfig {
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory);
         factory.setMessageConverter(messageConverter);
+
+        // ⭐ 이 부분을 활성화해야 합니다!
+        factory.setAdviceChain(retryInterceptor()); // 재시도 정책 설정
+
+        factory.setDefaultRequeueRejected(false);
+
         // 필요에 따라 다른 설정 추가 가능 (e.g., 동시 소비자 수, prefetch count 등)
         return factory;
+    }
+
+    //재시도 정책을 결정
+    @Bean
+    public RetryOperationsInterceptor retryInterceptor() {
+        return RetryInterceptorBuilder.stateless()
+                .maxAttempts(3) // 최대 3번 재시도
+                .backOffOptions(1000, 2.0, 5000) // 초기 1초, 2배씩 증가, 최대 5초
+                .recoverer(new RejectAndDontRequeueRecoverer())// 재시도 후 실패 시 버림 (재큐 안함)
+                .build();
     }
 
 }

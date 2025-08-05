@@ -67,9 +67,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .setRelayHost(rabbitmqHost)        // RabbitMQ 호스트
                 .setRelayPort(rabbitmqPort)              // RabbitMQ STOMP 플러그인 포트
                 .setClientLogin(rabbitmqClientName)          // RabbitMQ 사용자 ID
-                .setClientPasscode(rabbitmqClientPassword)      // RabbitMQ 비밀번호
+                .setClientPasscode(rabbitmqClientPassword)    // RabbitMQ 비밀번호
                 .setSystemLogin(rabbitmqSystemName)          // 시스템 사용자 Id
-                .setSystemPasscode(rabbitmqSystemPassword);      // 시스템 비밀번호
+                .setSystemPasscode(rabbitmqSystemPassword)      // 시스템 비밀번호
+        ;
 
     }
 
