@@ -55,13 +55,8 @@ public class ChatRoomService {
         }
 
         ChatRoom chatRoom = new ChatRoom(false);
-        ChatRoomUser currentUserChatRoom = new ChatRoomUser(false);
-        ChatRoomUser opponentUserChatRoom = new ChatRoomUser(false);
-
-        currentUserChatRoom.setUser(currentUser);
-        opponentUserChatRoom.setUser(opponentUser);
-        currentUserChatRoom.setChatRoom(chatRoom);
-        opponentUserChatRoom.setChatRoom(chatRoom);
+        ChatRoomUser currentUserChatRoom = new ChatRoomUser(chatRoom, currentUser,false);
+        ChatRoomUser opponentUserChatRoom = new ChatRoomUser(chatRoom, opponentUser,false);
 
         chatRoom.addChatRoomUser(currentUserChatRoom);
         chatRoom.addChatRoomUser(opponentUserChatRoom);

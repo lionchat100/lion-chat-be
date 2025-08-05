@@ -20,11 +20,9 @@ public class ChatRoomUser {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @Setter
     private ChatRoom chatRoom;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @Setter
     private User user;
 
     @Setter
@@ -32,7 +30,9 @@ public class ChatRoomUser {
 
     private LocalDateTime regDt;
 
-    public ChatRoomUser(Boolean isRead) {
+    public ChatRoomUser(ChatRoom chatRoom, User user, Boolean isRead) {
+        this.chatRoom = chatRoom;
+        this.user = user;
         this.isRead = isRead;
         this.regDt = LocalDateTime.now();
     }

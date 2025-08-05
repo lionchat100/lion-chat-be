@@ -201,7 +201,7 @@ public class ChatAcceptanceTest extends AcceptanceTest {
         api_문서_타이틀("get_my_chat_rooms", spec);
 
         var createRoomResponse = 채팅방을_생성한다(user1AccessToken, user2Id, spec);
-        Long chatRoomId = createRoomResponse.jsonPath().getLong("id");
+        Long chatRoomId = createRoomResponse.jsonPath().getLong("roomId");
 
         String messageContent = "Test message for chat room list";
         StompSession user1Session;
