@@ -99,10 +99,6 @@ dependencies {
     testImplementation 'org.awaitility:awaitility:4.2.0' // 테스트 의존성 추가
 }
 
-tasks.named('test') {
-    useJUnitPlatform()
-}
-
 ext {
     snippetsDir = file('build/generated-snippets')
 }
@@ -130,4 +126,3 @@ bootJar {
 tasks.named('test') {
     useJUnitPlatform()
 }
-
