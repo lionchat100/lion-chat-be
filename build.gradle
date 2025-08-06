@@ -51,7 +51,7 @@ dependencies {
 
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
 
-    implementation 'org.springframework.boot:spring-boot-starter-amqp'
+    implementation 'org.springframework.boot:spring-boot-starter-activemq'
 
     // QueryDSL
     implementation "com.querydsl:querydsl-jpa:5.0.0:jakarta"
