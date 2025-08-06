@@ -9,7 +9,7 @@ import com.lion.be.chat.service.ChatMessageWriteService;
 import com.lion.be.chat.service.ChatRoomService;
 import com.lion.be.chat.service.ChatRoomUserReadService;
 import com.lion.be.chat.service.ChatRoomUserWriteService;
-import com.lion.be.global.config.RabbitMQConfig;
+import com.lion.be.global.config.ActiveMQConfig;
 import java.security.Principal;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -17,7 +17,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class ChatMessageController {
 
-    private final RabbitTemplate rabbitTemplate;
+    private final JmsTemplate jmsTemplate;
     private final ChatRoomService chatRoomService;
     private final ChatRoomUserReadService chatRoomUserReadService;
     private final ChatMessageReadService chatMessageReadService; // REST API용으로 유지
@@ -50,7 +50,6 @@ public class ChatMessageController {
                             Principal principal) {
         Long chatRoomId = chatMessageRequest.getChatRoomId();
 
-        // ✨ Principal에서 UserPrincipal을 꺼내오는 로직 추가
         UserPrincipal currentUser = (UserPrincipal) ((UsernamePasswordAuthenticationToken) principal).getPrincipal();
 
         // 1. 유효성 검사 (빠르게 실패시키기 위해 Controller 단에서 수행)
@@ -67,11 +66,10 @@ public class ChatMessageController {
         // 2. DTO에 발신자 정보 추가
         chatMessageRequest.setSenderId(currentUser.getId());
 
-        // 3. RabbitMQ로 메시지 발행
-        String routingKey = "chat.message." + chatRoomId;
-        log.info("Publishing message to RabbitMQ. RoutingKey: {}, Payload: {}", routingKey,
-                chatMessageRequest.getContent());
-        rabbitTemplate.convertAndSend(RabbitMQConfig.CHAT_EXCHANGE_NAME, routingKey, chatMessageRequest);
+        // ✨ 3. [수정] ActiveMQ Topic으로 메시지 발행
+        log.info("Publishing message to ActiveMQ Topic. Destination: {}, Payload: {}",
+                ActiveMQConfig.CHAT_TOPIC, chatMessageRequest.getContent());
+        jmsTemplate.convertAndSend(ActiveMQConfig.CHAT_TOPIC, chatMessageRequest);
     }
 
     /**

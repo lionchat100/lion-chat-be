@@ -1,6 +1,5 @@
 package com.lion.be.global.config;
 
-
 import com.lion.be.chat.domain.dto.ChatMessageDto;
 import com.lion.be.chat.domain.dto.ChatMessageRequest;
 import com.lion.be.chat.domain.entity.ChatMessage;
@@ -9,15 +8,14 @@ import com.lion.be.chat.service.ChatRoomService;
 import com.lion.be.chat.service.ChatRoomUserWriteService;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.service.UserReadService;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.jms.annotation.JmsListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 
 @Slf4j
 @Component
@@ -31,11 +29,12 @@ public class ChatMessageListener {
     private final UserReadService userReadService;
 
     @Transactional
-    @RabbitListener(queues = RabbitMQConfig.CHAT_QUEUE_NAME)
+    @JmsListener(destination = ActiveMQConfig.CHAT_TOPIC, containerFactory = "jmsListenerContainerFactory")
     public void handleChatMessage(ChatMessageRequest messageRequest) {
-        log.info("Received message from RabbitMQ for chat room {}: {}", messageRequest.getChatRoomId(), messageRequest.getContent());
+        log.info("Received message from ActiveMQ for chat room {}: {}", messageRequest.getChatRoomId(),
+                messageRequest.getContent());
 
-        // 1. 발신자 정보 조회 (DTO에 senderId가 있으므로 DB에서 전체 엔티티 조회)
+        // 1. 발신자 정보 조회
         User sender = userReadService.fetchById(messageRequest.getSenderId());
 
         // 2. 메시지 저장 (MongoDB)
@@ -47,7 +46,7 @@ public class ChatMessageListener {
                 messageRequest.getDate()
         );
 
-        // 3. 채팅방 정보 업데이트 (RDBMS, 낙관적 락 적용됨)
+        // 3. 채팅방 정보 업데이트 (RDBMS)
         chatRoomService.updateRecentMessage(
                 messageRequest.getChatRoomId(),
                 messageRequest.getContent(),
@@ -66,10 +65,11 @@ public class ChatMessageListener {
                 savedMessage.getContent()
         );
 
-        // [중요] 토픽 경로 수정: 기존 코드와 일치시키기
+        // STOMP 구독자에게 메시지 전송
         String destination = "/topic/chatroom" + messageRequest.getChatRoomId();
         messagingTemplate.convertAndSend(destination, messageDto);
 
-        log.info("Processed and sent message to destination: {}", destination);
+        log.info("Processed and sent message to STOMP destination: {}", destination);
     }
+
 }
