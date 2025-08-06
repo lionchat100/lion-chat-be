@@ -66,7 +66,7 @@ public class ChatAcceptanceTest extends AcceptanceTest {
         // 1. 채팅방 생성
         api_문서_타이틀("create_chat_room", spec);
         var createRoomResponse = 채팅방을_생성한다(user1AccessToken, user2.getId(), spec);
-        Long chatRoomId = createRoomResponse.jsonPath().getLong("roomId");
+        Long chatRoomId = createRoomResponse.jsonPath().getLong("id");
 
         // 2. WebSocket 연결
         StompSession user1Session = STOMP_연결을_하고_세션을_반환한다(port, user1AccessToken);
@@ -117,7 +117,7 @@ public class ChatAcceptanceTest extends AcceptanceTest {
 
         // 채팅방 생성
         var createRoomResponse = 채팅방을_생성한다(user1AccessToken, user2.getId(), spec);
-        Long chatRoomId = createRoomResponse.jsonPath().getLong("roomId");
+        Long chatRoomId = createRoomResponse.jsonPath().getLong("id");
 
         // WebSocket 연결
         StompSession user1Session = STOMP_연결을_하고_세션을_반환한다(port, user1AccessToken);
@@ -190,7 +190,7 @@ public class ChatAcceptanceTest extends AcceptanceTest {
         User user2 = userRepository.fetchByEmail(비회원_로그인_요청().get("email").toString()).get();
 
         var createRoomResponse = 채팅방을_생성한다(user1AccessToken, user2.getId(), spec);
-        Long chatRoomId = createRoomResponse.jsonPath().getLong("roomId");
+        Long chatRoomId = createRoomResponse.jsonPath().getLong("id");
 
         String messageContent = "Test message for chat room list";
         StompSession user1Session = STOMP_연결을_하고_세션을_반환한다(port, user1AccessToken);
