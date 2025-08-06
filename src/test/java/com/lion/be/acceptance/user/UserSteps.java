@@ -201,6 +201,12 @@ public class UserSteps {
         );
     }
 
+    public static void 상태코드가_401이다(ExtractableResponse<Response> response) {
+        Assertions.assertAll(
+                () -> 상태코드를_검증한다(response, HttpStatus.UNAUTHORIZED)
+        );
+    }
+
     public static void 상태코드가_404이다(
             ExtractableResponse<Response> response) {
         Assertions.assertAll(
