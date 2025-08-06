@@ -33,7 +33,7 @@ public class ChatMessageListener {
     @Transactional
     @JmsListener(
             destination = "chat.queue",               // ✨ 구독할 토픽 이름. 토픽을 구독해둬야 분산된 서버가 각각 메시지를 받을 수 있다.
-            containerFactory = "jmsQueueListenerContainerFactory" // ✨ ActiveMQConfig에 정의한 Queue용 팩토리 지정
+            containerFactory = "jmsQueueListenerContainerFactory" // ✨ ActiveMQConfig에 정의한 Queue용 팩토리 지정g
     )
     public void handleChatMessage(ChatMessageRequest messageRequest) {
         log.info("Received message from ActiveMQ for chat room {}: {}", messageRequest.getChatRoomId(), messageRequest.getContent());
