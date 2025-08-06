@@ -1,71 +1,31 @@
 package com.lion.be.acceptance.user;
 
-import static com.lion.be.acceptance.auth.AuthSteps.*;
-import static com.lion.be.acceptance.user.UserSteps.*;
-import static com.lion.be.acceptance.user.UserSteps.원준이_로그인한다;
+import static com.lion.be.acceptance.auth.AuthSteps.비회원이_로그인한다;
+import static com.lion.be.acceptance.auth.AuthSteps.원준이_로그인한다;
+import static com.lion.be.acceptance.user.UserSteps.매칭_카드_조회_응답을_검증한다;
+import static com.lion.be.acceptance.user.UserSteps.매칭_카드를_조회한다;
+import static com.lion.be.acceptance.user.UserSteps.사이즈_제한으로_매칭_카드를_조회한다;
+import static com.lion.be.acceptance.user.UserSteps.상태코드가_200이다;
+import static com.lion.be.acceptance.user.UserSteps.상태코드가_400이다;
+import static com.lion.be.acceptance.user.UserSteps.온보딩_완료_응답을_검증한다;
+import static com.lion.be.acceptance.user.UserSteps.온보딩을_완료한다;
+import static com.lion.be.acceptance.user.UserSteps.제외_목록으로_매칭_카드를_조회한다;
+import static com.lion.be.acceptance.user.UserSteps.필터_및_제외_목록으로_매칭_카드를_조회한다;
+import static com.lion.be.acceptance.user.UserSteps.필터_조건으로_매칭_카드를_조회한다;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.*;
-import static org.mockito.Mockito.*;
 
-import java.util.Optional;
-
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.lion.be.acceptance.AcceptanceTest;
 import com.lion.be.acceptance.util.UserFixture;
-import com.lion.be.user.domain.entity.University;
-import com.lion.be.user.repository.UniversityRepository;
-import com.lion.be.user.service.UniversityReadService;
 
 import io.restassured.RestAssured;
 
 @DisplayName("회원 관련 기능 인수테스트")
-@ContextConfiguration(classes = UserAcceptanceTest.TestConfig.class)
 class UserAcceptanceTest extends AcceptanceTest {
-
-    @Autowired
-    private UniversityRepository universityRepository;
-    //mockbean 이제 사용안해서 우회하기위한 방법 더 좋은 방식있으면 알려주시면 감사합니다.
-    @TestConfiguration
-    static class TestConfig {
-
-        @Bean
-        @Primary  // 실제 Bean을 Override
-        public UniversityRepository universityRepository() {
-            return mock(UniversityRepository.class);
-        }
-
-        @Bean
-        @Primary
-        public UniversityReadService universityReadService() {
-            return mock(UniversityReadService.class);
-        }
-    }
-    @Autowired
-    private UniversityReadService universityReadService;
-
-    @BeforeEach
-    void setUp() {
-        // Mock 초기화
-        reset(universityRepository);
-
-        // Mock 데이터 설정
-        University 멋사대학교 = new University(1L, "멋사대학교", "https://example.com/likelion.jpg");
-        University 연세대학교 = new University(2L, "연세대학교", "https://example.com/yonsei.jpg");
-
-        // Mock 동작 정의
-        when(universityRepository.fetchByName("멋사대학교")).thenReturn(Optional.of(멋사대학교));
-        when(universityRepository.fetchByName("연세대학교")).thenReturn(Optional.of(연세대학교));
-        when(universityRepository.fetchByName("존재하지않는대학")).thenReturn(Optional.empty());
-    }
 
     @Nested
     @DisplayName("온보딩 인수테스트")
@@ -84,22 +44,21 @@ class UserAcceptanceTest extends AcceptanceTest {
                     .contentType(MediaType.APPLICATION_JSON_VALUE)
                     .spec(spec)
                     .auth().oauth2(accessToken)
-                    .log().all()  // 요청 로그
-                    .body(UserFixture.회원_멋사2_온보딩_요청())
+                    .log().all()
+                    .body(UserFixture.회원_멋사2_온보딩_요청()) // "멋사대학교"를 사용
                     .when()
                     .patch("/api/users/onboarding")
                     .then()
-                    .log().all()  // 응답 로그
+                    .log().all()
                     .extract();
 
-            // 일단 상태코드만 확인
+            // then
             온보딩_완료_응답을_검증한다(onboardingResponse);
         }
-
     }
 
     @Nested
-    @DisplayName("사용자 카드 조회 인수테스트")
+    @DisplayName("사용자 카드 조회 인수테이스")
     class UserCardQueryTest {
 
         @DisplayName("온보딩 완료한 회원이 매칭 카드를 조회하면, 상태코드 200과 카드 목록을 반환한다.")
@@ -214,7 +173,5 @@ class UserAcceptanceTest extends AcceptanceTest {
             // then
             상태코드가_400이다(response);
         }
-
     }
-
 }

@@ -99,10 +99,6 @@ dependencies {
     testImplementation 'org.awaitility:awaitility:4.2.0' // 테스트 의존성 추가
 }
 
-tasks.named('test') {
-    useJUnitPlatform()
-}
-
 ext {
     snippetsDir = file('build/generated-snippets')
 }
@@ -115,19 +111,14 @@ asciidoctor {
     inputs.dir snippetsDir
     configurations 'asciidoctorExt'
     dependsOn test
-    doLast {
-        copy {
-            from outputDir
-            into 'src/main/resources/static/docs'
-        }
-    }
 }
 
 bootJar {
     dependsOn asciidoctor
+    from("${asciidoctor.outputDir}") {
+        into "BOOT-INF/classes/static/docs"
+    }
 }
-
 tasks.named('test') {
     useJUnitPlatform()
 }
-

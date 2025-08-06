@@ -1,5 +1,6 @@
 package com.lion.be.acceptance.user;
 
+import static com.lion.be.acceptance.auth.AuthSteps.로그인한다;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.lion.be.acceptance.util.UserFixture;
@@ -61,22 +62,6 @@ public class UserSteps {
                 .isEqualTo("COMPLETED")
         );
     }
-
-    public static ExtractableResponse<Response> 로그인한다(Map<String, Object> userSaveRequest,
-                                                      RequestSpecification spec) {
-        return RestAssured
-                .given()
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .spec(spec)
-                .log().all()
-                .body(userSaveRequest)
-                .when()
-                .post("/api/test/login")
-                .then()
-                .log().all()
-                .extract();
-    }
-
 
     public static ExtractableResponse<Response> 매칭_카드를_조회한다(
         String accessToken,
@@ -171,21 +156,6 @@ public class UserSteps {
             .log().all()
             .when()
             .get("/api/users/card")
-            .then()
-            .log().all()
-            .extract();
-    }
-
-    // 원준이 로그인 (UserFixture에 이미 있는 데이터 활용)
-    public static ExtractableResponse<Response> 원준이_로그인한다(RequestSpecification spec) {
-        return RestAssured
-            .given()
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .spec(spec)
-            .log().all()
-            .body(UserFixture.사용자_원준_회원가입_요청())
-            .when()
-            .post("/api/test/login")
             .then()
             .log().all()
             .extract();

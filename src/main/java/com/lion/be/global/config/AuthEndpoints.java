@@ -24,7 +24,10 @@ public class AuthEndpoints {
             "/api/auth/refresh",
             "/api/auth/logout",
             "/api/test/login",
-            "/ws/**"
+            "/api/docs",
+            "/api/health",
+            "/api/test.html",
+            "/ws/**",
     };
 
 }
