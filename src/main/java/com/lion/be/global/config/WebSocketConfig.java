@@ -16,22 +16,22 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Value("${spring.messaging.stomp.broker-relay.host}")
-    private String rabbitmqHost;
+    private String brokerHost;
 
     @Value("${spring.messaging.stomp.broker-relay.port}")
-    private int rabbitmqPort;
+    private int brokerPort;
 
     @Value("${spring.messaging.stomp.broker-relay.client-login}")
-    private String rabbitmqClientName;
+    private String clientLogin;
 
     @Value("${spring.messaging.stomp.broker-relay.client-passcode}")
-    private String rabbitmqClientPassword;
+    private String clientPasscode;
 
     @Value("${spring.messaging.stomp.broker-relay.system-login}")
-    private String rabbitmqSystemName;
+    private String systemLogin;
 
     @Value("${spring.messaging.stomp.broker-relay.system-passcode}")
-    private String rabbitmqSystemPassword;
+    private String systemPasscode;
 
     private final StompInterceptor stompInterceptor;
 
@@ -64,13 +64,12 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .setSystemHeartbeatSendInterval(10000)
                 .setSystemHeartbeatReceiveInterval(10000)
                 .setTaskScheduler(taskScheduler())
-                .setRelayHost(rabbitmqHost)        // RabbitMQ 호스트
-                .setRelayPort(rabbitmqPort)              // RabbitMQ STOMP 플러그인 포트
-                .setClientLogin(rabbitmqClientName)          // RabbitMQ 사용자 ID
-                .setClientPasscode(rabbitmqClientPassword)    // RabbitMQ 비밀번호
-                .setSystemLogin(rabbitmqSystemName)          // 시스템 사용자 Id
-                .setSystemPasscode(rabbitmqSystemPassword)      // 시스템 비밀번호
-        ;
+                .setRelayHost(brokerHost)
+                .setRelayPort(brokerPort)
+                .setClientLogin(clientLogin)
+                .setClientPasscode(clientPasscode)
+                .setSystemLogin(systemLogin)
+                .setSystemPasscode(systemPasscode);
 
     }
 

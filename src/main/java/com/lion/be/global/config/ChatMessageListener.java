@@ -11,7 +11,7 @@ import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.service.UserReadService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.jms.annotation.JmsListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,9 +31,12 @@ public class ChatMessageListener {
     private final UserReadService userReadService;
 
     @Transactional
-    @RabbitListener(queues = RabbitMQConfig.CHAT_QUEUE_NAME)
+    @JmsListener(
+            destination = "chat.queue",               // ✨ 구독할 토픽 이름. 토픽을 구독해둬야 분산된 서버가 각각 메시지를 받을 수 있다.
+            containerFactory = "jmsQueueListenerContainerFactory" // ✨ ActiveMQConfig에 정의한 Queue용 팩토리 지정
+    )
     public void handleChatMessage(ChatMessageRequest messageRequest) {
-        log.info("Received message from RabbitMQ for chat room {}: {}", messageRequest.getChatRoomId(), messageRequest.getContent());
+        log.info("Received message from ActiveMQ for chat room {}: {}", messageRequest.getChatRoomId(), messageRequest.getContent());
 
         // 1. 발신자 정보 조회 (DTO에 senderId가 있으므로 DB에서 전체 엔티티 조회)
         User sender = userReadService.fetchById(messageRequest.getSenderId());

@@ -13,7 +13,7 @@ public class RestDocsController {
 
     @GetMapping("/api/docs")
     public ResponseEntity<?> getDocs() {
-        Resource resource = new ClassPathResource("static/docs/index.html");
+        Resource resource = new ClassPathResource("static/index.html");
 
         if (!resource.exists()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

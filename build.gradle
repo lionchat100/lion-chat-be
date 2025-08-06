@@ -51,7 +51,7 @@ dependencies {
 
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
 
-    implementation 'org.springframework.boot:spring-boot-starter-amqp'
+    implementation 'org.springframework.boot:spring-boot-starter-activemq'
 
     // QueryDSL
     implementation "com.querydsl:querydsl-jpa:5.0.0:jakarta"
@@ -67,7 +67,7 @@ dependencies {
     testImplementation 'org.testcontainers:junit-jupiter:1.18.3'
     testImplementation 'org.testcontainers:mysql:1.18.3'
     testImplementation "org.testcontainers:mongodb:1.21.3"
-    testImplementation "org.testcontainers:rabbitmq"
+    testImplementation "org.testcontainers:activemq:1.21.3"
 
     // Rest Assured
     testImplementation 'io.rest-assured:rest-assured:5.5.5'
@@ -93,8 +93,6 @@ dependencies {
 
     //WebSocket 인증
     implementation 'org.springframework.security:spring-security-messaging'
-
-    implementation 'org.springframework.boot:spring-boot-starter-amqp'
 
     testImplementation 'org.awaitility:awaitility:4.2.0' // 테스트 의존성 추가
 }

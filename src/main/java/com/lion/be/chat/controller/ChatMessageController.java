@@ -9,7 +9,6 @@ import com.lion.be.chat.service.ChatMessageWriteService;
 import com.lion.be.chat.service.ChatRoomService;
 import com.lion.be.chat.service.ChatRoomUserReadService;
 import com.lion.be.chat.service.ChatRoomUserWriteService;
-import com.lion.be.global.config.RabbitMQConfig;
 import java.security.Principal;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -17,7 +16,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -34,7 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class ChatMessageController {
 
-    private final RabbitTemplate rabbitTemplate;
+    private final JmsTemplate jmsTemplate;
     private final ChatRoomService chatRoomService;
     private final ChatRoomUserReadService chatRoomUserReadService;
     private final ChatMessageReadService chatMessageReadService; // REST API용으로 유지
@@ -42,8 +41,7 @@ public class ChatMessageController {
     private final ChatRoomUserWriteService chatRoomUserWriteService; // REST API용으로 유지
 
     /**
-     * STOMP 메시지 수신 및 RabbitMQ 발행
-     * 기존 동기 처리 로직을 RabbitMQ에 메시지를 보내는 역할로 변경
+     * STOMP 메시지 수신 및 ActiveMQ 발행
      */
     @MessageMapping("/chat.sendMessage")
     public void sendMessage(@Payload ChatMessageRequest chatMessageRequest,
@@ -67,11 +65,16 @@ public class ChatMessageController {
         // 2. DTO에 발신자 정보 추가
         chatMessageRequest.setSenderId(currentUser.getId());
 
-        // 3. RabbitMQ로 메시지 발행
-        String routingKey = "chat.message." + chatRoomId;
-        log.info("Publishing message to RabbitMQ. RoutingKey: {}, Payload: {}", routingKey,
+        // 3. ActiveMQ로 메시지 발행
+        String destination = "chat.queue"; // ActiveMQ queue name
+
+
+        // ✨ JmsTemplate이 Topic을 사용하도록 명시적으로 설정
+        jmsTemplate.setPubSubDomain(false);
+
+        log.info("Publishing message to ActiveMQ. Destination: {}, Payload: {}", destination,
                 chatMessageRequest.getContent());
-        rabbitTemplate.convertAndSend(RabbitMQConfig.CHAT_EXCHANGE_NAME, routingKey, chatMessageRequest);
+        jmsTemplate.convertAndSend(destination, chatMessageRequest);
     }
 
     /**
