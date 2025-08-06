@@ -54,16 +54,4 @@ public class ActiveMQConfig {
         return factory;
     }
 
-    /**
-     * JmsTemplate을 설정합니다.
-     * JmsTemplate은 JMS Topic/Queue에 메시지를 보낼 때 사용됩니다.
-     */
-    @Bean
-    public JmsTemplate jmsTemplate(ConnectionFactory connectionFactory, MessageConverter messageConverter) {
-        JmsTemplate jmsTemplate = new JmsTemplate(connectionFactory);
-        jmsTemplate.setMessageConverter(messageConverter);
-        jmsTemplate.setPubSubDomain(true); // Topic 사용을 위해 true로 설정
-        return jmsTemplate;
-    }
-
 }
