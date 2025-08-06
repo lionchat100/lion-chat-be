@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.jms.annotation.JmsListener;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,12 +29,12 @@ public class ChatMessageListener {
     private final UserReadService userReadService;
 
     @Transactional
-    @JmsListener(destination = ActiveMQConfig.CHAT_TOPIC, containerFactory = "jmsListenerContainerFactory")
+    @RabbitListener(queues = RabbitMQConfig.CHAT_QUEUE_NAME)
     public void handleChatMessage(ChatMessageRequest messageRequest) {
-        log.info("Received message from ActiveMQ for chat room {}: {}", messageRequest.getChatRoomId(),
+        log.info("Received message from RabbitMQ for chat room {}: {}", messageRequest.getChatRoomId(),
                 messageRequest.getContent());
 
-        // 1. 발신자 정보 조회
+        // 1. 발신자 정보 조회 (DTO에 senderId가 있으므로 DB에서 전체 엔티티 조회)
         User sender = userReadService.fetchById(messageRequest.getSenderId());
 
         // 2. 메시지 저장 (MongoDB)
@@ -46,7 +46,7 @@ public class ChatMessageListener {
                 messageRequest.getDate()
         );
 
-        // 3. 채팅방 정보 업데이트 (RDBMS)
+        // 3. 채팅방 정보 업데이트 (RDBMS, 낙관적 락 적용됨)
         chatRoomService.updateRecentMessage(
                 messageRequest.getChatRoomId(),
                 messageRequest.getContent(),
@@ -65,11 +65,11 @@ public class ChatMessageListener {
                 savedMessage.getContent()
         );
 
-        // STOMP 구독자에게 메시지 전송
+        // [중요] 토픽 경로 수정: 기존 코드와 일치시키기
         String destination = "/topic/chatroom" + messageRequest.getChatRoomId();
         messagingTemplate.convertAndSend(destination, messageDto);
 
-        log.info("Processed and sent message to STOMP destination: {}", destination);
+        log.info("Processed and sent message to destination: {}", destination);
     }
 
 }
