@@ -47,7 +47,7 @@ public class SecurityConfig {
         // AuthEndpoints.PERMIT_ALL_PATTERNS에 있는 경로들을 포함하여
         // Spring Security 필터를 거치지 않도록 설정합니다.
         return (web) -> web.ignoring()
-                .requestMatchers(AuthEndpoints.PERMIT_ALL_PATTERNS)
+                .requestMatchers(AuthEndpoints.STATIC_RESOURCES_PATTERNS)
                 // Spring Boot의 기본 정적 리소스 경로들도 무시하도록 추가할 수 있습니다.
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
     }

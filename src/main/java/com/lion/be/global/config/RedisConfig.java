@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
@@ -17,18 +18,34 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Slf4j
 public class RedisConfig {
 
-    private static final String REDISSON_HOST_PREFIX = "redis://";
-
     private final RedisProperties redisProperties;
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
-        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
-        config.setHostName(redisProperties.getHost());
-        config.setPort(redisProperties.getPort());
-        config.setPassword(redisProperties.getPassword());
-        LettuceConnectionFactory lettuceConnectionFactory = new LettuceConnectionFactory(config);
-        log.info("LettuceConnectionFactory 생성 완료.");
+        RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
+        redisStandaloneConfiguration.setHostName(redisProperties.getHost());
+        redisStandaloneConfiguration.setPort(redisProperties.getPort());
+        redisStandaloneConfiguration.setPassword(redisProperties.getPassword());
+
+        LettuceClientConfiguration.LettuceClientConfigurationBuilder lettuceClientConfigurationBuilder =
+                LettuceClientConfiguration.builder();
+
+        if (redisProperties.getSsl().isEnabled()) {
+            // ✨✨✨ 이 부분을 usingSsl() 에서 useSsl() 로 수정했습니다 ✨✨✨
+            lettuceClientConfigurationBuilder.useSsl();
+            log.info("Redis SSL 연결이 활성화되었습니다.");
+        }
+
+        LettuceClientConfiguration lettuceClientConfiguration = lettuceClientConfigurationBuilder.build();
+
+        LettuceConnectionFactory lettuceConnectionFactory = new LettuceConnectionFactory(
+                redisStandaloneConfiguration,
+                lettuceClientConfiguration
+        );
+
+        log.info("LettuceConnectionFactory 생성 완료: host={}, port={}, ssl={}",
+                redisProperties.getHost(), redisProperties.getPort(), redisProperties.getSsl().isEnabled());
+
         return lettuceConnectionFactory;
     }
 

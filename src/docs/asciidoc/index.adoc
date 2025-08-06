@@ -10,6 +10,13 @@
 == 인증 및 인가
 
 [[token-exchange]]
+
+=== Security 로그인 링크
+
+`https://api.lionchat.co.kr/oauth2/authorization/kakao`
+
+위 링크로 접속할 시, 바로 Kakao 로그인 페이지로 이동합니다.
+
 === 인증 코드로 토큰 교환
 
 클라이언트가 OAuth2 인증 후 발급받은 임시 인증 코드를 서버에 보내 액세스 토큰과 리프레시 토큰(쿠키)을 발급받습니다.

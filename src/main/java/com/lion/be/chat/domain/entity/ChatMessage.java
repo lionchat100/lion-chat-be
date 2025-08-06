@@ -1,12 +1,11 @@
 package com.lion.be.chat.domain.entity;
 
 import jakarta.persistence.Id;
+import java.time.Instant;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
-
-import java.time.Instant;
 
 @Document(collection = "chat_message")
 @Getter
@@ -24,7 +23,8 @@ public class ChatMessage {
     private String content;
     private Boolean isRead;
 
-    public ChatMessage(Long senderId, String senderName, Long chatRoomId, Instant date, String content, Boolean isRead) {
+    public ChatMessage(Long senderId, String senderName, Long chatRoomId, Instant date, String content,
+                       Boolean isRead) {
         this.senderId = senderId;
         this.senderName = senderName;
         this.chatRoomId = chatRoomId;

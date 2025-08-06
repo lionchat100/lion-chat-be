@@ -24,6 +24,7 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
+        // TODO: User response 필드 (프론트와 상의 후)
         CurrentUserResponse response = userReadService.fetchCurrentUserResponse(userPrincipal.getId());
         return ResponseEntity.ok(response);
     }
