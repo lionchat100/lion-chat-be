@@ -3,6 +3,7 @@ package com.lion.be.acceptance.util;
 import com.lion.be.user.domain.Gender;
 import com.lion.be.user.domain.Mbti;
 import com.lion.be.user.domain.Position;
+import com.lion.be.user.domain.University;
 
 import java.util.List;
 import java.util.Map;
@@ -41,18 +42,24 @@ public enum UserFixture {
         return Map.of(
                 "userPhotos", List.of("photo1.jpg", "photo2.jpg"),
                 "gender", Gender.MEN,
-                "universityName", "멋사대학교",
-                "position", Position.BACKEND,
-                "mbti", Mbti.INFJ
+                "university", University.LIKELION,
+                "position", Position.FRONTEND,
+                "mbti", Mbti.ENFJ,
+                "bio","안녕하세요 멋진호랑이 입니다.",
+                "requiredAgreements", true,
+                "marketingAgreements", false
         );
     }
     public static Map<String, Object> 회원_멋사2_온보딩_요청() {
         return Map.of(
                 "userPhotos", List.of("photo1.jpg"),
                 "gender", Gender.WOMEN,
-                "universityName", "멋사대학교",
+                "university", University.LIKELION,
                 "position", Position.BACKEND,
-                "mbti", Mbti.ENFJ
+                "mbti", Mbti.ENFP,
+                "bio","안녕하세요 멋진사자 입니다.",
+                "requiredAgreements", true,
+                "marketingAgreements", false
         );
     }
 

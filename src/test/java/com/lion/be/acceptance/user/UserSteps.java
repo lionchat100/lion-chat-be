@@ -63,10 +63,7 @@ public class UserSteps {
         );
     }
 
-    public static ExtractableResponse<Response> 매칭_카드를_조회한다(
-        String accessToken,
-        RequestSpecification spec
-    ) {
+    public static ExtractableResponse<Response> 온보딩_라벨을_조회한다(RequestSpecification spec, String accessToken) {
         return RestAssured
             .given()
             .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -74,110 +71,27 @@ public class UserSteps {
             .auth().oauth2(accessToken)
             .log().all()
             .when()
-            .get("/api/users/card")
+            .get("/api/users/onboarding/labels")
             .then()
             .log().all()
             .extract();
     }
 
-    // 필터 조건으로 매칭 카드 조회
-    public static ExtractableResponse<Response> 필터_조건으로_매칭_카드를_조회한다(
-        String accessToken,
-        RequestSpecification spec
-    ) {
-        return RestAssured
-            .given()
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .spec(spec)
-            .auth().oauth2(accessToken)
-            .queryParam("preferredGender", "MEN")
-            .queryParam("preferredMbti", "ENFP")
-            .queryParam("preferredUniversity", "멋사대학교")
-            .log().all()
-            .when()
-            .get("/api/users/card")
-            .then()
-            .log().all()
-            .extract();
-    }
-
-    public static ExtractableResponse<Response> 제외_목록으로_매칭_카드를_조회한다(
-        String accessToken,
-        RequestSpecification spec,
-        String excludeUserIds
-    ) {
-        return RestAssured
-            .given()
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .spec(spec)
-            .auth().oauth2(accessToken)
-            .queryParam("size", 10)
-            .queryParam("excludeUserIds", excludeUserIds)
-            .log().all()
-            .when()
-            .get("/api/users/card")
-            .then()
-            .log().all()
-            .extract();
-    }
-    // 사이즈 제한으로 매칭 카드 조회
-    public static ExtractableResponse<Response> 사이즈_제한으로_매칭_카드를_조회한다(
-        String accessToken,
-        RequestSpecification spec,
-        int size
-    ) {
-        return RestAssured
-            .given()
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .spec(spec)
-            .auth().oauth2(accessToken)
-            .queryParam("size", size)
-            .log().all()
-            .when()
-            .get("/api/users/card")
-            .then()
-            .log().all()
-            .extract();
-    }
-
-    // 필터 + 제외 목록으로 매칭 카드 조회 (기존 메서드 수정)
-    public static ExtractableResponse<Response> 필터_및_제외_목록으로_매칭_카드를_조회한다(
-        String accessToken,
-        RequestSpecification spec
-    ) {
-        return RestAssured
-            .given()
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .spec(spec)
-            .auth().oauth2(accessToken)
-            .queryParam("preferredGender", "MEN")
-            .queryParam("preferredMbti", "ENFP")
-            .queryParam("excludeUserIds", "999") // 존재하지 않는 ID로 테스트
-            .log().all()
-            .when()
-            .get("/api/users/card")
-            .then()
-            .log().all()
-            .extract();
-    }
-
-    // 매칭 카드 조회 응답 검증
-    public static void 매칭_카드_조회_응답을_검증한다(ExtractableResponse<Response> response) {
+    public static void 온보딩_라벨_조회_응답을_검증한다(ExtractableResponse<Response> response) {
         Assertions.assertAll(
             () -> 상태코드를_검증한다(response, HttpStatus.OK),
-            () -> assertThat(response.jsonPath().getList("$")).isNotNull(),
-            () -> {
-                // 카드가 있다면 첫 번째 카드의 필수 필드들 검증
-                if (!response.jsonPath().getList("$").isEmpty()) {
-                    assertThat(response.jsonPath().getString("[0].userId")).isNotNull();
-                    assertThat(response.jsonPath().getString("[0].name")).isNotNull();
-                    assertThat(response.jsonPath().getString("[0].university")).isNotNull();
-                    assertThat(response.jsonPath().getString("[0].position")).isNotNull();
-                    assertThat(response.jsonPath().getString("[0].mbti")).isNotNull();
-                    assertThat(response.jsonPath().getString("[0].gender")).isNotNull();
-                    assertThat(response.jsonPath().getList("[0].imageUrls")).isNotNull();
-                }
-            }
+            () -> assertThat(response.jsonPath().getList("genders")).isNotEmpty(),
+            () -> assertThat(response.jsonPath().getList("universities")).isNotEmpty(),
+            () -> assertThat(response.jsonPath().getList("positions")).isNotEmpty(),
+            () -> assertThat(response.jsonPath().getList("mbtis")).isNotEmpty(),
+            () -> assertThat(response.jsonPath().getString("genders[0].code")).isNotNull(),
+            () -> assertThat(response.jsonPath().getString("genders[0].name")).isNotNull(),
+            () -> assertThat(response.jsonPath().getString("universities[0].code")).isNotNull(),
+            () -> assertThat(response.jsonPath().getString("universities[0].name")).isNotNull(),
+            () -> assertThat(response.jsonPath().getString("positions[0].code")).isNotNull(),
+            () -> assertThat(response.jsonPath().getString("positions[0].name")).isNotNull(),
+            () -> assertThat(response.jsonPath().getString("mbtis[0].code")).isNotNull(),
+            () -> assertThat(response.jsonPath().getString("mbtis[0].name")).isNotNull()
         );
     }
 
