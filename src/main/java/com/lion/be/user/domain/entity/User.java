@@ -1,5 +1,6 @@
 package com.lion.be.user.domain.entity;
 
+import com.lion.be.feed_comment.domain.entity.FeedComment;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,6 +53,9 @@ public class User extends BaseEntity {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserPhoto> userPhotos = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FeedComment> feedComments = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     private Gender gender;
