@@ -60,7 +60,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
     }
 
     protected String determineTargetUrl(String code) {
-        String targetUrl = url + "/auth/callback";
+        String targetUrl = url + "/callback";
 
         return UriComponentsBuilder.fromUriString(targetUrl)
                 .queryParam("code", code)
