@@ -3,11 +3,10 @@ package com.lion.be.feed.controller;
 import com.lion.be.auth.domain.UserPrincipal;
 import com.lion.be.feed.domain.dto.FeedListResponse;
 import com.lion.be.feed.domain.dto.FeedWriteRequest;
-import com.lion.be.feed.domain.entity.Feed;
-import com.lion.be.feed.service.FeedService;
+import com.lion.be.feed.service.FeedReadService;
+import com.lion.be.feed.service.FeedWriteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,34 +14,35 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 public class FeedController {
-    private final FeedService feedService;
+    private final FeedReadService feedReadService;
+    private final FeedWriteService feedWriteService;
 
     @GetMapping("/api/feeds")
     public List<FeedListResponse> showRecentFeeds(@RequestParam(value = "lastId", required = false) Long lastId) {
         if(lastId != null && lastId > 0)
-            return feedService.getRecentFeedsAfter(lastId);
+            return feedReadService.getRecentFeedsAfter(lastId);
 
-        return feedService.getRecentFeedsFirst();
+        return feedReadService.getRecentFeedsFirst();
     }
 
     @GetMapping("/api/feeds/hot")
     public List<FeedListResponse> showHotFeeds(@RequestParam(value = "lastLikeCount", required = false) Long lastLikeCount,
                                                               @RequestParam(value = "lastId", required = false) Long lastId) {
         if (lastLikeCount != null && lastId != null && lastLikeCount > 0 && lastId > 0) {
-            return feedService.getHotFeedsAfter(lastLikeCount, lastId);
+            return feedReadService.getHotFeedsAfter(lastLikeCount, lastId);
         }
-        return feedService.getHotFeedsFirst();
+        return feedReadService.getHotFeedsFirst();
     }
 
     @DeleteMapping("/api/feeds/{feedId}")
     public void deleteFeed(@PathVariable("feedId") Long feedId, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         Long currentUserId = userPrincipal.getId();
-        feedService.deleteFeed(currentUserId, feedId);
+        feedWriteService.deleteFeed(currentUserId, feedId);
     }
 
     @PostMapping("/api/feeds")
     public void writeFeed(@RequestBody FeedWriteRequest feedWriteRequest, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         Long userId = userPrincipal.getId();
-        feedService.writeFeed(feedWriteRequest.getTitle(), feedWriteRequest.getContent(), userId);
+        feedWriteService.writeFeed(feedWriteRequest.getTitle(), feedWriteRequest.getContent(), userId);
     }
 }
