@@ -16,8 +16,8 @@ public enum ErrorCode {
 
     UNIVERSITY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 대학교입니다."),
 
-    SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버에 오류가 발생했습니다.");
-
+    SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버에 오류가 발생했습니다."),
+    CLUSTERING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR,"클러스터링 수행 중 오류 발생");
     private final HttpStatus status;
     private final String message;
 
