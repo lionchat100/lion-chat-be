@@ -5,10 +5,10 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import com.lion.be.auth.domain.UserPrincipal;
+import com.lion.be.user.controller.dto.OnboardingLabelsResponse;
 import com.lion.be.user.controller.dto.OnboardingRequest;
 import com.lion.be.user.controller.dto.OnboardingResponse;
-import com.lion.be.user.domain.entity.University;
-import com.lion.be.user.service.UniversityReadService;
+import com.lion.be.user.service.UserReadService;
 import com.lion.be.user.service.UserWriteService;
 
 import jakarta.validation.Valid;
@@ -22,19 +22,26 @@ import lombok.extern.slf4j.Slf4j;
 public class UserController {
 
 	private final UserWriteService userWriteService;
-	private final UniversityReadService universityReadService;
+	private final UserReadService userReadService;
 
 	@PatchMapping("/onboarding")
 	public ResponseEntity<OnboardingResponse> onboarding (
 			@AuthenticationPrincipal UserPrincipal userPrincipal,
 			@Valid @RequestBody OnboardingRequest onboardingRequest
 	) {
-		University university = universityReadService.getByUniversityName(onboardingRequest.universityName());
-
 		OnboardingResponse response = userWriteService.completeUserOnboarding(
 				userPrincipal.getId(),
-				onboardingRequest,
-				university
+				onboardingRequest
+		);
+		return ResponseEntity.ok(response);
+	}
+
+	@GetMapping("/onboarding/labels")
+	public ResponseEntity<OnboardingLabelsResponse> getOnboardinglabels(
+		@AuthenticationPrincipal UserPrincipal userPrincipal
+	){
+		OnboardingLabelsResponse response = userReadService.getOnboardingOptions(
+			userPrincipal
 		);
 		return ResponseEntity.ok(response);
 	}
