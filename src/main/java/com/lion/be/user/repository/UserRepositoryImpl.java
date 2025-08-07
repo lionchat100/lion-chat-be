@@ -1,9 +1,8 @@
-// UserRepositoryImpl.java - 수정된 버전
 package com.lion.be.user.repository;
 
-import com.lion.be.user.controller.dto.UserCardFilterRequest;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.repository.persistence.jpa.UserJpaRepository;
+import com.lion.be.user.repository.persistence.querydsl.UserQueryDslRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,6 +17,7 @@ import org.springframework.stereotype.Repository;
 public class UserRepositoryImpl implements UserRepository {
 
     private final UserJpaRepository userJpaRepository;
+    private final UserQueryDslRepository userQueryDslRepository;
 
     @Override
     public Optional<User> fetchByEmail(String email) {
@@ -34,37 +34,60 @@ public class UserRepositoryImpl implements UserRepository {
         return userJpaRepository.findById(userId);
     }
 
+    // 사용자 조회 (순서 통일)
     @Override
-    public List<User> findMatchingUsersExcluding(
+    public List<User> fetchCompletedUsersExcluding(
         Long currentUserId,
-        UserCardFilterRequest filterRequest,
+        List<Long> excludeUserIds,
+        int size
+    ) {
+        Pageable pageable = PageRequest.of(0, size);
+
+        return userQueryDslRepository.findCompletedUsersExcluding(
+            currentUserId,
+            excludeUserIds != null ? excludeUserIds : List.of(),
+            pageable
+        );
+    }
+
+    @Override
+    public List<User> fetchUsersByClusterExcluding(
+        Integer clusterId,
+        Long currentUserId,
+        List<Long> excludeUserIds,
+        int size
+    ) {
+        return userQueryDslRepository.findUsersByClusterExcluding(
+            clusterId,
+            currentUserId,
+            excludeUserIds != null ? excludeUserIds : List.of(),
+            size
+        );
+    }
+
+    @Override
+    public List<User> fetchRandomUsersExcluding(
+        Long currentUserId,
         int size,
         List<Long> excludeUserIds
     ) {
         Pageable pageable = PageRequest.of(0, size);
 
-        // 제외 목록이 있고 비어있지 않은 경우에만 제외 쿼리 사용
-        if (excludeUserIds != null && !excludeUserIds.isEmpty()) {
-            return userJpaRepository.findMatchingUsersWithExclusion(
-                currentUserId,
-                excludeUserIds,
-                filterRequest.preferredGender(),
-                filterRequest.preferredMbti(),
-                filterRequest.preferredUniversityName(),
-                filterRequest.preferredPosition(),
-                pageable
-            );
-        } else {
-            // 제외 목록이 없거나 비어있으면 기본 쿼리 사용
-            return userJpaRepository.findMatchingUsers(
-                currentUserId,
-                filterRequest.preferredGender(),
-                filterRequest.preferredMbti(),
-                filterRequest.preferredUniversityName(),
-                filterRequest.preferredPosition(),
-                pageable
-            );
-        }
+        return userQueryDslRepository.findRandomUsersWithExclusion(
+            currentUserId,
+            excludeUserIds != null ? excludeUserIds : List.of(),
+            pageable
+        );
     }
 
+    @Override
+    public List<User> fetchAllCompletedUsersExcluding(
+        Long currentUserId,
+        List<Long> excludeUserIds
+    ) {
+        return userQueryDslRepository.findAllCompletedUsersExcluding(
+            currentUserId,
+            excludeUserIds != null ? excludeUserIds : List.of()
+        );
+    }
 }
