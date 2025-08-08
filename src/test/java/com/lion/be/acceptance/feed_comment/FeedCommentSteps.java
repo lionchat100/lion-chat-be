@@ -6,6 +6,7 @@ import io.restassured.RestAssured;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
+import java.util.List;
 import java.util.Map;
 import org.assertj.core.api.AbstractIntegerAssert;
 import org.assertj.core.api.AbstractStringAssert;
@@ -27,8 +28,8 @@ public class FeedCommentSteps {
                 .extract();
     }
 
-    public static Map<String, Object> feedCommentSaveRequest_생성() {
-        return Map.of("content", "이것은 댓글 내용입니다.");
+    public static Map<String, Object> feedCommentSaveRequest_생성(String content) {
+        return Map.of("content", content);
     }
 
     public static ExtractableResponse<Response> 피드의_댓글을_작성한다(
@@ -51,11 +52,63 @@ public class FeedCommentSteps {
                 .extract();
     }
 
+    public static ExtractableResponse<Response> 피드의_모든_댓글을_조회한다(
+            Long feedId,
+            String accessToken,
+            RequestSpecification spec
+    ) {
+        return RestAssured
+                .given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .spec(spec)
+                .auth().oauth2(accessToken)
+                .log().all()
+                .when()
+                .get("/api/feeds/{feedId}/comments", feedId)
+                .then()
+                .log().all()
+                .extract();
+    }
+
     public static void 피드_댓글_작성_응답을_검증한다(ExtractableResponse<Response> response) {
         Assertions.assertAll(
                 () -> 상태코드를_검증한다(response, HttpStatus.OK),
                 () -> assertThat(response.jsonPath().getString("commentId"))
                         .isNotEmpty()
+        );
+    }
+
+    public static void 피드_댓글_전체_조회_응답을_검증한다(ExtractableResponse<Response> response) {
+        int expectedCommentCount = 4;
+
+        List<Map<String, Object>> content = response.jsonPath().getList("content");
+
+        Assertions.assertAll(
+                () -> 상태코드를_검증한다(response, HttpStatus.OK),
+
+                () -> assertThat(content)
+                        .isNotNull()
+                        .hasSize(expectedCommentCount),
+
+                () -> {
+                    Map<String, Object> firstComment = content.get(0);
+
+                    assertThat(firstComment).containsKeys("id", "feedId", "feedCommentUserResponse", "content",
+                            "createdAt", "updatedAt");
+                    assertThat(firstComment.get("content")).isEqualTo("댓글1"); // 생성 순서에 따라 검증
+
+                    assertThat(firstComment.get("feedCommentUserResponse")).isInstanceOf(Map.class);
+
+                    Map<String, Object> userResponse = (Map<String, Object>) firstComment.get(
+                            "feedCommentUserResponse");
+                    assertThat(userResponse).containsKeys("userId", "name", "imageUrl");
+                },
+
+                () -> {
+                    assertThat(response.jsonPath().getMap("pageable")).isNotNull();
+                    assertThat(response.jsonPath().getBoolean("last")).isNotNull();
+                    assertThat(response.jsonPath().getInt("numberOfElements")).isEqualTo(expectedCommentCount);
+                }
         );
     }
 
