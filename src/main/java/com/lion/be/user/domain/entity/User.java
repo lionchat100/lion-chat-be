@@ -119,7 +119,6 @@ public class User extends BaseEntity {
 
     public void addUserFeed(Feed feed){ userFeeds.add(feed); }
 
-    public void completeOnboarding(OnboardingData data, University university) {
     public void completeOnboarding(OnboardingData data) {
         validateOnboardingPreconditions();
         validateOnboardingData(data);
