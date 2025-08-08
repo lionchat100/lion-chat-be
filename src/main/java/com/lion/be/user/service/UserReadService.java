@@ -14,6 +14,7 @@ import com.lion.be.user.controller.dto.OnboardingLabelsResponse;
 import com.lion.be.user.domain.Gender;
 import com.lion.be.user.domain.Mbti;
 import com.lion.be.user.domain.Position;
+import com.lion.be.user.domain.PreferenceType;
 import com.lion.be.user.domain.University;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.repository.UserRepository;
@@ -66,7 +67,8 @@ public class UserReadService {
             createGenderOptions(),
             createUniversityOptions(),
             createPositionOptions(),
-            createMbtiOptions()
+            createMbtiOptions(),
+			createPreferenceOptions()
         );
     }
 
@@ -96,4 +98,12 @@ public class UserReadService {
             .map(mbti -> new OnboardingLabelsResponse.MbtiOption(mbti.name(), mbti.name()))
             .toList();
     }
+
+	private List<OnboardingLabelsResponse.PreferenceTypeOption> createPreferenceOptions() {
+		return Arrays.stream(PreferenceType.values())
+			.map(preferenceType -> new OnboardingLabelsResponse.PreferenceTypeOption(
+				preferenceType.name(),
+				preferenceType.getKoreanName()))
+			.toList();
+	}
 }

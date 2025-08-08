@@ -90,4 +90,11 @@ public class UserRepositoryImpl implements UserRepository {
             excludeUserIds != null ? excludeUserIds : List.of()
         );
     }
+
+	@Override
+	public boolean existsByNickname(
+		String nickname
+	) {
+		return userJpaRepository.existsByNickname(nickname);
+	}
 }

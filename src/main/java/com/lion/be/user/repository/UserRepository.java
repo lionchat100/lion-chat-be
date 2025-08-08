@@ -48,4 +48,6 @@ public interface UserRepository {
         Long currentUserId,
         List<Long> excludeUserIds
     );
+
+	boolean existsByNickname(String nickname);
 }
