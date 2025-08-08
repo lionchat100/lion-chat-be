@@ -7,7 +7,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum PreferenceType {
 	MBTI_FOCUSED("MBTI 중시"),
-	POSITION_FOCUSED("거리/직무 중시");
+	POSITION_FOCUSED("직무 중시"),
+	BOTH_FOCUSED("모두 중시");
 
 	private final String koreanName;
 }

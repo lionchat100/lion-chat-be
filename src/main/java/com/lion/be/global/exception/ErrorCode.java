@@ -25,7 +25,8 @@ public enum ErrorCode {
     CLUSTERING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR,"클러스터링 수행 중 오류 발생"),
 	MINIMUM_PHOTOS_REQUIRED(HttpStatus.BAD_REQUEST, "최소 1장의 사진이 필요합니다."),
 	MAXIMUM_PHOTOS_REQUIRED(HttpStatus.BAD_REQUEST, "최대 3장의 사진입니다."),
-	INVALID_CLUSTER_ID(HttpStatus.BAD_REQUEST, "유효하지 않은 클러스터 ID입니다.");
+	INVALID_CLUSTER_ID(HttpStatus.BAD_REQUEST, "유효하지 않은 클러스터 ID입니다."),
+	INVALID_PREFERENCE_TYPE(HttpStatus.BAD_REQUEST,"지원하지 않은 타입입니다." );
 	private final HttpStatus status;
     private final String message;
 

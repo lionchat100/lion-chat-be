@@ -34,7 +34,6 @@ public class UserRepositoryImpl implements UserRepository {
         return userJpaRepository.findById(userId);
     }
 
-    // 사용자 조회 (순서 통일)
     @Override
     public List<User> fetchCompletedUsersExcluding(
         Long currentUserId,

@@ -119,18 +119,15 @@ public class UserCardFilterUtil {
 			return 0.7 * mbtiCompatibility + 0.3 * positionSimilarity;
 		} else if (preference == PreferenceType.POSITION_FOCUSED) {
 			return 0.3 * mbtiCompatibility + 0.7 * positionSimilarity;
-		} else {
-			// 기본값 (null인 경우나 기타) 현재는 Null 값 없음
+		} else if (preference == PreferenceType.BOTH_FOCUSED){
 			return 0.5 * mbtiCompatibility + 0.5 * positionSimilarity;
+		} else {
+			throw new CustomException(ErrorCode.INVALID_PREFERENCE_TYPE);
 		}
 	}
 
 	/**
 	 * 두 사용자의 포지션 유사도 계산
-	 *
-	 * 기존 방식: 같은 포지션이면 1.0, 다르면 0.0 (이분법적)
-	 * 개선 방식: 포지션 간 유사도를 반영한 연속적 점수 계산
-	 *
 	 * 예시:
 	 * - BACKEND vs BACKEND: 1.0 (동일)
 	 * - BACKEND vs FULLSTACK: 0.8 (높은 유사도)
