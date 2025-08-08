@@ -6,6 +6,7 @@ import com.lion.be.feed.domain.dto.FeedWriterDto;
 import com.lion.be.feed.domain.entity.Feed;
 import com.lion.be.feed.domain.dto.FeedResponse;
 import com.lion.be.feed.repository.FeedRepository;
+import com.lion.be.global.exception.FeedNotFoundException;
 import com.lion.be.user.repository.UserRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,7 @@ public class FeedReadService {
 
     public Feed fetchById(Long id) {
         return feedRepository.findById(id)
-                .orElseThrow(IllegalAccessError::new); // TODO: feed exception 추가
+                .orElseThrow(FeedNotFoundException::new);
     }
 
     public List<FeedResponse> getRecentFeedsFirst() {

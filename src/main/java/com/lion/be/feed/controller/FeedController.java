@@ -1,11 +1,10 @@
 package com.lion.be.feed.controller;
 
 import com.lion.be.auth.domain.UserPrincipal;
-import com.lion.be.feed.domain.dto.FeedResponse;
-import com.lion.be.feed.domain.dto.FeedUpdateRequest;
+import com.lion.be.feed.domain.dto.*;
 import com.lion.be.feed.controller.dto.FeedSaveResponse;
 import com.lion.be.feed.domain.dto.FeedResponse;
-import com.lion.be.feed.domain.dto.FeedWriteRequest;
+import com.lion.be.feed.domain.entity.Feed;
 import com.lion.be.feed.service.FeedReadService;
 import com.lion.be.feed.service.FeedWriteService;
 import java.util.List;
@@ -62,5 +61,21 @@ public class FeedController {
                              @AuthenticationPrincipal UserPrincipal userPrincipal) {
         Long userId = userPrincipal.getId();
         feedWriteService.updateFeed(feedId, feedUpdateRequest.getTitle(), feedUpdateRequest.getContent(), userId);
+    }
+
+    @GetMapping("/api/feeds/{feedId}")
+    public ResponseEntity<FeedDto> getFeedById(@PathVariable("feedId") Long feedId) {
+        Feed feedResponse = feedReadService.fetchById(feedId);
+        FeedDto feedDto = new FeedDto(
+                feedResponse.getId(),
+                feedResponse.getTitle(),
+                feedResponse.getContent(),
+                feedResponse.getCreatedAt(),
+                0L, // Placeholder for like count
+                false, // Placeholder for isLiked
+                0L // Placeholder for comment count
+        );
+
+        return ResponseEntity.ok(feedDto);
     }
 }
