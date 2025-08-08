@@ -2,11 +2,12 @@ package com.lion.be.user.service;
 
 import java.util.List;
 
+import com.lion.be.global.exception.CustomException;
+import com.lion.be.global.exception.ErrorCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.lion.be.auth.controller.dto.CurrentUserResponse;
-import com.lion.be.global.exception.OnboardingNotCompletedException;
 import com.lion.be.user.controller.dto.UserCardFilterRequest;
 import com.lion.be.user.controller.dto.UserCardResponse;
 import com.lion.be.user.domain.entity.User;
@@ -60,7 +61,7 @@ public class UserReadService {
         User user = fetchById(userId);
 
         if (!user.isOnboardingCompleted()) {
-            throw new OnboardingNotCompletedException();
+            throw new CustomException(ErrorCode.USER_ONBOARDING_NOT_COMPLETED);
         }
     }
 }

@@ -3,9 +3,7 @@ package com.lion.be.feed.service;
 import com.lion.be.feed.controller.dto.FeedSaveResponse;
 import com.lion.be.feed.domain.entity.Feed;
 import com.lion.be.feed.repository.FeedRepository;
-import com.lion.be.global.exception.FeedNotFoundException;
-import com.lion.be.global.exception.UserNotFoundException;
-import com.lion.be.global.exception.UserUnauthorizedException;
+import com.lion.be.global.exception.*;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,14 +21,14 @@ public class FeedWriteService {
     @Transactional
     public void deleteFeed(Long currentUserId, Long feedId){
         User user = userRepository.fetchById(currentUserId)
-                .orElseThrow(UserNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         Feed feed = feedRepository.fetchById(feedId)
-                .orElseThrow(FeedNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ErrorCode.FEED_NOT_FOUND));
 
         Long feedWriterId = feed.getUser().getId();
         if(!feedWriterId.equals(user.getId())) {
-            throw new UserUnauthorizedException();
+            throw new CustomException(ErrorCode.USER_UNAUTHORIZED);
         }
 
         feed.delete();
@@ -39,7 +37,7 @@ public class FeedWriteService {
     @Transactional
     public FeedSaveResponse writeFeed(String title, String content, Long userID){
         User user = userRepository.fetchById(userID)
-                .orElseThrow(UserNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         Feed feed = new Feed(title, content, user);
         user.addUserFeed(feed);
@@ -51,14 +49,14 @@ public class FeedWriteService {
     @Transactional
     public void updateFeed(Long feedId, String title, String content, Long userId) {
         User user = userRepository.fetchById(userId)
-                .orElseThrow(UserNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         Feed feed = feedRepository.fetchById(feedId)
-                .orElseThrow(FeedNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ErrorCode.FEED_NOT_FOUND));
 
         Long feedWriterId = feed.getUser().getId();
         if (!feedWriterId.equals(user.getId())) {
-            throw new UserUnauthorizedException();
+            throw new CustomException(ErrorCode.USER_UNAUTHORIZED);
         }
 
         feed.update(title, content);

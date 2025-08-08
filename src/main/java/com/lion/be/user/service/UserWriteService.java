@@ -1,9 +1,10 @@
 package com.lion.be.user.service;
 
+import com.lion.be.global.exception.CustomException;
+import com.lion.be.global.exception.ErrorCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.lion.be.global.exception.UserNotFoundException;
 import com.lion.be.user.controller.dto.OnboardingRequest;
 import com.lion.be.user.controller.dto.OnboardingResponse;
 import com.lion.be.user.domain.entity.User;
@@ -25,7 +26,7 @@ public class UserWriteService {
 
     public OnboardingResponse completeUserOnboarding(Long userId, OnboardingRequest request, University university) {
         User user = userRepository.fetchById(userId)
-            .orElseThrow(UserNotFoundException::new);
+            .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         OnboardingData data = OnboardingData.from(request);
         user.completeOnboarding(data, university);

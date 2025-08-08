@@ -1,14 +1,11 @@
 package com.lion.be.feed.service;
 
-import com.lion.be.feed.domain.dto.FeedDto;
 import com.lion.be.feed.domain.dto.FeedResponse;
-import com.lion.be.feed.domain.dto.FeedWriterDto;
 import com.lion.be.feed.domain.entity.Feed;
-import com.lion.be.feed.domain.dto.FeedResponse;
 import com.lion.be.feed.repository.FeedRepository;
-import com.lion.be.global.exception.FeedNotFoundException;
+import com.lion.be.global.exception.CustomException;
+import com.lion.be.global.exception.ErrorCode;
 import com.lion.be.user.repository.UserRepository;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,7 +24,7 @@ public class FeedReadService {
 
     public Feed fetchById(Long id) {
         return feedRepository.findFeed(id)
-                .orElseThrow(FeedNotFoundException::new);
+                .orElseThrow(()->new CustomException(ErrorCode.FEED_NOT_FOUND));
     }
 
     public Slice<FeedResponse> getRecentFeedsFirst(Integer size) {
