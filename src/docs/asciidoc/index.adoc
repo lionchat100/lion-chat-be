@@ -208,6 +208,12 @@ operation::random_supplement[snippets='http-request,http-response']
 
 operation::backend_cluster_recommendation[snippets='http-request,http-response']
 
+=== 본인 카드 조회 (qr용)
+
+유저 id를 통해 유저 프로필카드를 볼 수 있습니다.
+
+operation::my_profile_card[snippets='http-request,http-response']
+
 === 추천 시스템 특징
 
 **개인화된 추천**
@@ -243,14 +249,4 @@ operation::backend_cluster_recommendation[snippets='http-request,http-response']
 
 operation::unauthorized_card_access[snippets='http-request,http-response']
 
-==== 잘못된 파라미터
 
-잘못된 size 파라미터 등에 대해서도 적절히 처리합니다.
-
-operation::invalid_size_parameter[snippets='http-request,http-response']
-
-=== 사용자 정보 검증
-
-반환되는 사용자 정보의 형식과 필수 필드를 검증합니다.
-
-operation::user_info_validation[snippets='http-request,http-response']

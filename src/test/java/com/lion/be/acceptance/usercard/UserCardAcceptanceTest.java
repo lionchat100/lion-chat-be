@@ -1,6 +1,7 @@
 package com.lion.be.acceptance.usercard;
 
 import static com.lion.be.acceptance.usercard.UserCardSteps.*;
+import static com.lion.be.acceptance.usercard.UserCardSteps.김프론트_로그인;
 
 import com.lion.be.acceptance.AcceptanceTest;
 import io.restassured.response.ExtractableResponse;
@@ -15,6 +16,17 @@ class UserCardAcceptanceTest extends AcceptanceTest {
 	@Nested
 	@DisplayName("카드 추천 시스템")
 	class CardRecommendationTest {
+		@DisplayName("유저 아이디로 카드를 조회 가능하다.(qr용)")
+		@Test
+		void when_userId_requests_cards_then_get_user_card(){
+			api_문서_타이틀("my_profile_card",spec);
+
+			String accessToken = 김프론트_로그인();
+
+			ExtractableResponse<Response> response = 카드를_조회한다(spec, accessToken);
+
+			단일_카드_조회_성공을_검증한다(response);
+		}
 
 		@DisplayName("클러스터 1 사용자(김프론트)가 카드를 조회하면, 같은 클러스터 사용자들을 우선 추천받는다")
 		@Test
@@ -25,10 +37,10 @@ class UserCardAcceptanceTest extends AcceptanceTest {
 			String accessToken = 김프론트_로그인();
 
 			// when - 카드 10개 조회
-			ExtractableResponse<Response> response = 카드를_조회한다(spec, accessToken, 10);
+			ExtractableResponse<Response> response = 카드리스트를_조회한다(spec, accessToken, 10);
 
 			// then
-			카드_조회_성공을_검증한다(response);
+			카드_리스트_조회_성공을_검증한다(response);
 			클러스터_기반_추천을_검증한다(response, 1); // 클러스터 1 사용자들 우선 추천
 		}
 
@@ -41,10 +53,10 @@ class UserCardAcceptanceTest extends AcceptanceTest {
 			String accessToken = 김백엔드_로그인();
 
 			// when
-			ExtractableResponse<Response> response = 카드를_조회한다(spec, accessToken, 10);
+			ExtractableResponse<Response> response = 카드리스트를_조회한다(spec, accessToken, 10);
 
 			// then
-			카드_조회_성공을_검증한다(response);
+			카드_리스트_조회_성공을_검증한다(response);
 			클러스터_기반_추천을_검증한다(response, 2); // 클러스터 2 사용자들 우선 추천
 		}
 
@@ -57,14 +69,14 @@ class UserCardAcceptanceTest extends AcceptanceTest {
 			String accessToken = 김프론트_로그인();
 
 			// when - 첫 번째 조회 (5개)
-			ExtractableResponse<Response> firstResponse = 카드를_조회한다(spec, accessToken, 5);
+			ExtractableResponse<Response> firstResponse = 카드리스트를_조회한다(spec, accessToken, 5);
 
 			// when - 두 번째 조회 (5개 더)
-			ExtractableResponse<Response> secondResponse = 카드를_조회한다(spec, accessToken, 5);
+			ExtractableResponse<Response> secondResponse = 카드리스트를_조회한다(spec, accessToken, 5);
 
 			// then
-			카드_조회_성공을_검증한다(firstResponse);
-			카드_조회_성공을_검증한다(secondResponse);
+			카드_리스트_조회_성공을_검증한다(firstResponse);
+			카드_리스트_조회_성공을_검증한다(secondResponse);
 			중복_카드가_없음을_검증한다(firstResponse, secondResponse);
 		}
 
@@ -81,7 +93,7 @@ class UserCardAcceptanceTest extends AcceptanceTest {
 				spec, accessToken, 10, "2,3");
 
 			// then
-			카드_조회_성공을_검증한다(response);
+			카드_리스트_조회_성공을_검증한다(response);
 			제외된_사용자가_결과에_없음을_검증한다(response, new Long[]{2L, 3L});
 		}
 
@@ -94,10 +106,10 @@ class UserCardAcceptanceTest extends AcceptanceTest {
 			String accessToken = 김프론트_로그인();
 
 			// when - 15개 조회 (클러스터 1: 4명 + 랜덤: 11명)
-			ExtractableResponse<Response> response = 카드를_조회한다(spec, accessToken, 15);
+			ExtractableResponse<Response> response = 카드리스트를_조회한다(spec, accessToken, 15);
 
 			// then
-			카드_조회_성공을_검증한다(response);
+			카드_리스트_조회_성공을_검증한다(response);
 			요청한_개수만큼_반환됨을_검증한다(response, 15);
 			혼합_추천을_검증한다(response); // 클러스터 + 랜덤 혼합
 		}
@@ -111,10 +123,10 @@ class UserCardAcceptanceTest extends AcceptanceTest {
 			String accessToken = 김프론트_로그인();
 
 			// when
-			ExtractableResponse<Response> response = 카드를_조회한다(spec, accessToken, 5);
+			ExtractableResponse<Response> response = 카드리스트를_조회한다(spec, accessToken, 5);
 
 			// then
-			카드_조회_성공을_검증한다(response);
+			카드_리스트_조회_성공을_검증한다(response);
 			사용자_정보_형식을_검증한다(response);
 		}
 	}
@@ -133,11 +145,10 @@ class UserCardAcceptanceTest extends AcceptanceTest {
 			String accessToken = 김프론트_로그인();
 
 			// when
-			ExtractableResponse<Response> response = 카드를_조회한다(spec, accessToken, 5);
+			ExtractableResponse<Response> response = 카드리스트를_조회한다(spec, accessToken, 5);
 
 			// then
-			카드_조회_성공을_검증한다(response);
-			// Redis TTL 설정 여부는 별도 단위 테스트에서 검증
+			카드_리스트_조회_성공을_검증한다(response);
 		}
 	}
 
@@ -173,11 +184,11 @@ class UserCardAcceptanceTest extends AcceptanceTest {
 			String accessToken = 김프론트_로그인();
 
 			// when - size를 0으로 요청
-			ExtractableResponse<Response> response = 카드를_조회한다(spec, accessToken, 0);
+			ExtractableResponse<Response> response = 카드리스트를_조회한다(spec, accessToken, 0);
 
 			// then
 			// 빈 배열 반환하거나 기본값 적용되는지 검증
-			카드_조회_성공을_검증한다(response);
+			카드_리스트_조회_성공을_검증한다(response);
 		}
 	}
 }

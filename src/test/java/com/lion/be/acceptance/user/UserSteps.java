@@ -58,8 +58,8 @@ public class UserSteps {
             () -> 상태코드를_검증한다(response, HttpStatus.OK),
             () -> assertThat(response.jsonPath().getString("message"))
                 .isEqualTo("온보딩이 완료되었습니다."),
-            () -> assertThat(response.jsonPath().getString("status"))
-                .isEqualTo("COMPLETED")
+			() -> assertThat(response.jsonPath().getBoolean("isCompleted"))  // 필드명과 타입 수정
+				.isTrue()
         );
     }
 

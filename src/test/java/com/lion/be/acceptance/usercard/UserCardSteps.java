@@ -43,6 +43,21 @@ public class UserCardSteps {
 	// === 카드 조회 관련 ===
 
 	public static ExtractableResponse<Response> 카드를_조회한다(
+		RequestSpecification spec, String accessToken) {
+		return RestAssured
+			.given()
+			.contentType(MediaType.APPLICATION_JSON_VALUE)
+			.spec(spec)
+			.auth().oauth2(accessToken)
+			.log().all()
+			.when()
+			.get("/api/users/card")
+			.then()
+			.log().all()
+			.extract();
+	}
+
+	public static ExtractableResponse<Response> 카드리스트를_조회한다(
 		RequestSpecification spec, String accessToken, int size) {
 		return RestAssured
 			.given()
@@ -52,7 +67,7 @@ public class UserCardSteps {
 			.param("size", size)
 			.log().all()
 			.when()
-			.get("/api/users/card")
+			.get("/api/users/card/list")
 			.then()
 			.log().all()
 			.extract();
@@ -69,7 +84,7 @@ public class UserCardSteps {
 			.param("excludeUserIds", excludeUserIds)
 			.log().all()
 			.when()
-			.get("/api/users/card")
+			.get("/api/users/card/list")
 			.then()
 			.log().all()
 			.extract();
@@ -84,7 +99,7 @@ public class UserCardSteps {
 			.param("size", size)
 			.log().all()
 			.when()
-			.get("/api/users/card")
+			.get("/api/users/card/list")
 			.then()
 			.log().all()
 			.extract();
@@ -92,7 +107,19 @@ public class UserCardSteps {
 
 	// === 검증 메서드들 ===
 
-	public static void 카드_조회_성공을_검증한다(ExtractableResponse<Response> response) {
+	public static void 단일_카드_조회_성공을_검증한다(ExtractableResponse<Response> response) {
+		Assertions.assertAll(
+			() -> assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value()),
+			() -> assertThat(response.jsonPath().getLong("userId")).isNotNull(),
+			() -> assertThat(response.jsonPath().getString("name")).isNotEmpty(),
+			() -> assertThat(response.jsonPath().getString("university")).isNotEmpty(),
+			() -> assertThat(response.jsonPath().getBoolean("isUniversityVisible")).isNotNull(),
+			() -> assertThat(response.jsonPath().getString("position")).isNotEmpty(),
+			() -> assertThat(response.jsonPath().getList("imageUrls")).isNotEmpty()
+		);
+	}
+
+	public static void 카드_리스트_조회_성공을_검증한다(ExtractableResponse<Response> response) {
 		assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
 		assertThat(response.jsonPath().getList("$")).isNotNull();
 	}
