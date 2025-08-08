@@ -3,22 +3,29 @@ package com.lion.be.feed.service;
 import com.lion.be.feed.domain.dto.FeedDto;
 import com.lion.be.feed.domain.dto.FeedResponse;
 import com.lion.be.feed.domain.dto.FeedWriterDto;
+import com.lion.be.feed.domain.entity.Feed;
+import com.lion.be.feed.domain.dto.FeedResponse;
 import com.lion.be.feed.repository.FeedRepository;
 import com.lion.be.user.repository.UserRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class FeedReadService {
+
     private final FeedRepository feedRepository;
     private final UserRepository userRepository;
 
-    public List<FeedResponse> getRecentFeedsFirst(){
+    public Feed fetchById(Long id) {
+        return feedRepository.findById(id)
+                .orElseThrow(IllegalAccessError::new); // TODO: feed exception 추가
+    }
+
+    public List<FeedResponse> getRecentFeedsFirst() {
         Pageable pageable = PageRequest.of(0, 30);
         return feedRepository.fetchRecentFeedsFirst(pageable)
                 .stream()
@@ -105,4 +112,5 @@ public class FeedReadService {
                 ))
                 .toList();
     }
+
 }
