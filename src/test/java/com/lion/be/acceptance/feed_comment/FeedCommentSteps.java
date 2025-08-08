@@ -8,6 +8,7 @@ import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.assertj.core.api.AbstractIntegerAssert;
 import org.assertj.core.api.AbstractStringAssert;
 import org.junit.jupiter.api.Assertions;
@@ -15,18 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
 public class FeedCommentSteps {
-
-    public static ExtractableResponse<Response> 회원_id를_가져온다(RequestSpecification spec, String accessToken) {
-        return RestAssured
-                .given()
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .spec(spec)
-                .auth().oauth2(accessToken)
-                .log().all()
-                .when().post("/api/feeds/")
-                .then().log().all()
-                .extract();
-    }
 
     public static Map<String, Object> feedCommentSaveRequest_생성(String content) {
         return Map.of("content", content);
@@ -65,6 +54,24 @@ public class FeedCommentSteps {
                 .log().all()
                 .when()
                 .get("/api/feeds/{feedId}/comments", feedId)
+                .then()
+                .log().all()
+                .extract();
+    }
+
+    public static ExtractableResponse<Response> 피드의_댓글을_삭제한다(
+            Long commentId,
+            String accessToken,
+            RequestSpecification spec
+    ) {
+        return RestAssured
+                .given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .spec(spec)
+                .auth().oauth2(accessToken)
+                .log().all()
+                .when()
+                .delete("/api/feeds/comments/{commentId}", commentId)
                 .then()
                 .log().all()
                 .extract();
@@ -109,6 +116,33 @@ public class FeedCommentSteps {
                     assertThat(response.jsonPath().getBoolean("last")).isNotNull();
                     assertThat(response.jsonPath().getInt("numberOfElements")).isEqualTo(expectedCommentCount);
                 }
+        );
+    }
+
+    public static void 피드_댓글_삭제_후_조회_응답을_검증한다(
+            ExtractableResponse<Response> response,
+            int expectedSize,
+            String expectedRemainingContent,
+            String deletedContent
+    ) {
+        List<Map<String, Object>> comments = response.jsonPath().getList("content");
+
+        Assertions.assertAll(
+                () -> 상태코드를_검증한다(response, HttpStatus.OK),
+
+                () -> assertThat(comments)
+                        .isNotNull()
+                        .hasSize(expectedSize),
+
+                // 남아있는 댓글의 내용이 예상과 일치하는지 검증
+                () -> assertThat(comments.get(0).get("content"))
+                        .isEqualTo(expectedRemainingContent),
+
+                // 응답 목록에 삭제된 댓글의 내용이 없는지 검증
+                () -> assertThat(comments.stream()
+                        .map(comment -> comment.get("content").toString())
+                        .collect(Collectors.toList()))
+                        .doesNotContain(deletedContent)
         );
     }
 
