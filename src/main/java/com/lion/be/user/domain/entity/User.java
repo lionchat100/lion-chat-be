@@ -5,11 +5,14 @@ import java.util.List;
 
 import com.lion.be.chat.domain.entity.ChatRoomUser;
 import com.lion.be.global.entity.BaseEntity;
+import com.lion.be.global.exception.CustomException;
+import com.lion.be.global.exception.ErrorCode;
 import com.lion.be.user.domain.AgreementType;
 import com.lion.be.user.domain.Gender;
 import com.lion.be.user.domain.Mbti;
 import com.lion.be.user.domain.OnboardingStatus;
 import com.lion.be.user.domain.Position;
+import com.lion.be.user.domain.PreferenceType;
 import com.lion.be.user.domain.Role;
 import com.lion.be.user.domain.University;
 import com.lion.be.user.domain.entity.dto.OnboardingData;
@@ -40,6 +43,9 @@ public class User extends BaseEntity {
     private Long id;
 
     private String name;
+
+	@Column(unique = true)
+	private String nickname;
 
     private String email;
 
@@ -85,6 +91,9 @@ public class User extends BaseEntity {
     @Column(name = "cluster_id")
     private Integer clusterId;
 
+	@Enumerated(EnumType.STRING)
+	private PreferenceType preferenceType;
+
     public User(String name, String email, String imageUrl, Role role) {
         this.name = name;
         this.email = email;
@@ -103,6 +112,7 @@ public class User extends BaseEntity {
     public void completeOnboarding(OnboardingData data) {
         validateOnboardingPreconditions();
         validateOnboardingData(data);
+		this.nickname = data.nickname();
         this.gender = data.gender();
         this.university = data.university();
         this.position = data.position();
@@ -111,6 +121,7 @@ public class User extends BaseEntity {
         this.agreements.add(new Agreements(this, AgreementType.REQUIRED, data.requiredAgreements()));
         this.agreements.add(new Agreements(this, AgreementType.MARKETING, data.marketingAgreements()));
         this.isUniversityView = data.isUniversityView();
+		this.preferenceType = data.preferenceType();
 
 
         for (int i = 0; i < data.userPhotos().size(); i++) {
@@ -119,29 +130,29 @@ public class User extends BaseEntity {
         this.onboardingStatus = OnboardingStatus.COMPLETED;
     }
 
-    public boolean isOnboardingCompleted() {
-        return onboardingStatus == OnboardingStatus.COMPLETED;
-    }
+	public boolean isOnboardingCompleted() {
+		return OnboardingStatusVO.from(this.onboardingStatus).isCompleted();
+	}
 
     private void validateOnboardingPreconditions() {
         if (isOnboardingCompleted()) {
-            throw new IllegalStateException("이미 온보딩이 완료된 사용자입니다.");
+            throw new CustomException(ErrorCode.USER_ONBOARDING_ALREADY_COMPLETED);
         }
         if (this.name == null || this.email == null) {
-            throw new IllegalStateException("기본 사용자 정보가 누락되었습니다.");
+            throw new CustomException(ErrorCode.USER_PROFILE_INCOMPLETE);
         }
     }
 
     private void validateOnboardingData(OnboardingData data) {
         if (data.gender() == null || data.university() == null || data.position() == null ||
                  data.mbti() == null || data.userPhotos() == null) {
-            throw new IllegalArgumentException("온보딩 필수 정보가 누락되었습니다.");
+            throw new CustomException(ErrorCode.USER_ONBOARDING_PROFILE_INCOMPLETE);
         }
         if (data.userPhotos().isEmpty()) {
-            throw new IllegalArgumentException("최소 1장의 사진이 필요합니다.");
+            throw new CustomException(ErrorCode.MINIMUM_PHOTOS_REQUIRED);
         }
         if (data.userPhotos().size() > 3) {
-            throw new IllegalArgumentException("사진은 최대 3장까지 업로드 가능합니다.");
+            throw new CustomException(ErrorCode.MAXIMUM_PHOTOS_REQUIRED);
         }
     }
 
@@ -151,10 +162,10 @@ public class User extends BaseEntity {
      */
     public void assignToCluster(Integer clusterId) {
         if (!isOnboardingCompleted()) {
-            throw new IllegalStateException("온보딩이 완료되지 않은 사용자는 클러스터 배정이 불가능합니다.");
+            throw new CustomException(ErrorCode.USER_ONBOARDING_NOT_COMPLETED);
         }
         if (clusterId == null || clusterId < 0) {
-            throw new IllegalArgumentException("유효하지 않은 클러스터 ID입니다.");
+            throw new CustomException(ErrorCode.INVALID_CLUSTER_ID);
         }
         this.clusterId = clusterId;
     }
