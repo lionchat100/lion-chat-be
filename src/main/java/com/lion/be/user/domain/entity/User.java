@@ -1,9 +1,11 @@
 package com.lion.be.user.domain.entity;
 
+import com.lion.be.feed_comment.domain.entity.FeedComment;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.lion.be.chat.domain.entity.ChatRoomUser;
+import com.lion.be.feed.domain.entity.Feed;
 import com.lion.be.global.entity.BaseEntity;
 import com.lion.be.global.exception.CustomException;
 import com.lion.be.global.exception.ErrorCode;
@@ -60,6 +62,12 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserPhoto> userPhotos = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FeedComment> feedComments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Feed> userFeeds = new ArrayList<>();
+
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
@@ -109,6 +117,9 @@ public class User extends BaseEntity {
         chatRoomUsers.add(chatRoomUser);
     }
 
+    public void addUserFeed(Feed feed){ userFeeds.add(feed); }
+
+    public void completeOnboarding(OnboardingData data, University university) {
     public void completeOnboarding(OnboardingData data) {
         validateOnboardingPreconditions();
         validateOnboardingData(data);

@@ -15,6 +15,7 @@ public enum ErrorCode {
     USER_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "유저의 권한이 없습니다."),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
 	NICKNAME_ALREADY_EXISTS(HttpStatus.BAD_REQUEST,"이미 존재하는 닉네임입니다." ),
+    FEED_NOT_FOUND(HttpStatus.NOT_FOUND, "피드를 찾을 수 없습니다."),
     USER_ONBOARDING_NOT_COMPLETED(HttpStatus.UNAUTHORIZED, "온보딩을 완료해야 해당 기능을 사용할 수 있습니다."),
 	USER_ONBOARDING_ALREADY_COMPLETED(HttpStatus.BAD_REQUEST,"이미 온보딩이 완료된 사용자입니다."),
 
