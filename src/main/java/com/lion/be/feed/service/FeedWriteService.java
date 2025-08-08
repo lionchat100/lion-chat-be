@@ -1,5 +1,6 @@
 package com.lion.be.feed.service;
 
+import com.lion.be.feed.controller.dto.FeedSaveResponse;
 import com.lion.be.feed.domain.dto.FeedListResponse;
 import com.lion.be.feed.domain.entity.Feed;
 import com.lion.be.feed.repository.FeedRepository;
@@ -38,13 +39,14 @@ public class FeedWriteService {
 
     //Todo: 커스텀 예외 던지기
     @Transactional
-    public void writeFeed(String title, String content, Long userID){
+    public FeedSaveResponse writeFeed(String title, String content, Long userID){
         User user = userRepository.fetchById(userID)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userID));
 
         Feed feed = new Feed(title, content, user);
         user.addUserFeed(feed);
 
-        feedRepository.save(feed);
+        Feed savedFeed = feedRepository.save(feed);
+        return new FeedSaveResponse(savedFeed.getId());
     }
 }
