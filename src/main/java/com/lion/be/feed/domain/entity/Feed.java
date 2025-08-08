@@ -29,7 +29,7 @@ public class Feed extends BaseEntity {
 
     //List<FeedLike> feedLikes;
 
-    public Feed(String content, String title, User user) {
+    public Feed(String title, String content, User user) {
         this.isDeleted = false; // 기본값 설정
         this.title = title;
         this.content = content;
@@ -40,5 +40,8 @@ public class Feed extends BaseEntity {
         this.isDeleted = true; // 삭제 상태로 변경
     }
 
-
+    public void update(String title, String content) {
+        this.title = title;
+        this.content = content;
+    }
 }

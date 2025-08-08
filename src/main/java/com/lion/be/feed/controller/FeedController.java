@@ -45,4 +45,12 @@ public class FeedController {
         Long userId = userPrincipal.getId();
         feedWriteService.writeFeed(feedWriteRequest.getTitle(), feedWriteRequest.getContent(), userId);
     }
+
+    @PutMapping("/api/feeds/{feedId}")
+    public void modifyFeed(@PathVariable("feedId") Long feedId,
+                             @RequestBody FeedWriteRequest feedWriteRequest,
+                             @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        Long userId = userPrincipal.getId();
+        feedWriteService.updateFeed(feedId, feedWriteRequest.getTitle(), feedWriteRequest.getContent(), userId);
+    }
 }
