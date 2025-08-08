@@ -12,6 +12,8 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,97 +23,36 @@ public class FeedReadService {
     private final FeedRepository feedRepository;
     private final UserRepository userRepository;
 
+    private static final int DEFAULT_PAGE_SIZE = 30;
+
     public Feed fetchById(Long id) {
         return feedRepository.findFeed(id)
                 .orElseThrow(FeedNotFoundException::new);
     }
 
-    public List<FeedResponse> getRecentFeedsFirst() {
-        Pageable pageable = PageRequest.of(0, 30);
-        return feedRepository.fetchRecentFeedsFirst(pageable)
-                .stream()
-                .map(feed -> new FeedResponse(
-                        new FeedDto(
-                                feed.getId(),
-                                feed.getTitle(),
-                                feed.getContent(),
-                                feed.getCreatedAt(),
-                                0L,
-                                false,
-                                0L),
-                        new FeedWriterDto(
-                                feed.getUser().getName(),
-                                feed.getUser().getId(),
-                                feed.getUser().getImageUrl()
-                        )
-                ))
-                .toList();
+    public Slice<FeedResponse> getRecentFeedsFirst(Integer size) {
+        return feedRepository.fetchRecentFeedsFirst(getRecentPageable(size));
     }
 
-    public List<FeedResponse> getRecentFeedsAfter(Long lastId){
-        Pageable pageable = PageRequest.of(0, 30);
-        return feedRepository.fetchRecentFeedsAfter(lastId, pageable)
-                .stream()
-                .map(feed -> new FeedResponse(
-                        new FeedDto(
-                                feed.getId(),
-                                feed.getTitle(),
-                                feed.getContent(),
-                                feed.getCreatedAt(),
-                                0L,
-                                false,
-                                0L),
-                        new FeedWriterDto(
-                                feed.getUser().getName(),
-                                feed.getUser().getId(),
-                                feed.getUser().getImageUrl()
-                        )
-                ))
-                .toList();
+    public Slice<FeedResponse> getRecentFeedsAfter(Long lastId, Integer size){
+        return feedRepository.fetchRecentFeedsAfter(lastId, getRecentPageable(size));
     }
 
-    public List<FeedResponse> getHotFeedsFirst(){
-        Pageable pageable = PageRequest.of(0, 30);
-        return feedRepository.fetchHotFeedsFirst(pageable)
-                .stream()
-                .map(feed -> new FeedResponse(
-                        new FeedDto(
-                                feed.getId(),
-                                feed.getTitle(),
-                                feed.getContent(),
-                                feed.getCreatedAt(),
-                                0L,
-                                false,
-                                0L),
-                        new FeedWriterDto(
-                                feed.getUser().getName(),
-                                feed.getUser().getId(),
-                                feed.getUser().getImageUrl()
-                        )
-                ))
-                .toList();
+    public Slice<FeedResponse> getHotFeedsFirst(Integer size){
+        return feedRepository.fetchHotFeedsFirst(getHotPageable(size));
     }
 
-    public List<FeedResponse> getHotFeedsAfter(Long lastLikeCount, Long lastId){
-        Pageable pageable = PageRequest.of(0, 30);
-        return feedRepository.fetchHotFeedsAfter(lastLikeCount, lastId, pageable)
-                .stream()
-                .map(feed -> new FeedResponse(
-                        new FeedDto(
-                                feed.getId(),
-                                feed.getTitle(),
-                                feed.getContent(),
-                                feed.getCreatedAt(),
-                                0L,
-                                false,
-                                0L),
-                        new FeedWriterDto(
-                                feed.getUser().getName(),
-                                feed.getUser().getId(),
-                                feed.getUser().getImageUrl()
-                        )
-                ))
-                .toList();
+    public Slice<FeedResponse> getHotFeedsAfter(Long lastLikeCount, Long lastId, Integer size){
+        return feedRepository.fetchHotFeedsAfter(lastLikeCount, lastId, getHotPageable(size));
     }
 
+
+    private Pageable getRecentPageable(Integer size) {
+        return PageRequest.of(0, size != null && size <= DEFAULT_PAGE_SIZE ? size : DEFAULT_PAGE_SIZE, Sort.by(Sort.Direction.DESC, "id"));
+    }
+
+    private Pageable getHotPageable(Integer size) {
+        //Todo: likeCount를 우선 정렬로 추가
+        return PageRequest.of(0, size!= null && size <= DEFAULT_PAGE_SIZE ? size : DEFAULT_PAGE_SIZE, Sort.by(Sort.Direction.DESC, "id"));
+    }
 }
