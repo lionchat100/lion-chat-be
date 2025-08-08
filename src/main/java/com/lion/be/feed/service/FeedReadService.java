@@ -22,7 +22,7 @@ public class FeedReadService {
     private final UserRepository userRepository;
 
     public Feed fetchById(Long id) {
-        return feedRepository.findById(id)
+        return feedRepository.findFeed(id)
                 .orElseThrow(FeedNotFoundException::new);
     }
 

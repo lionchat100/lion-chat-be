@@ -44,6 +44,20 @@ public class FeedSteps {
                 .extract();
     }
 
+    public static ExtractableResponse<Response> 피드_하나를_조회한다(String accessToken, RequestSpecification spec, Long feedId) {
+        return RestAssured
+                .given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .spec(spec)
+                .auth().oauth2(accessToken)
+                .log().all()
+                .when()
+                .get("/api/feeds/{feedId}",feedId)
+                .then()
+                .log().all()
+                .extract();
+    }
+
     public static ExtractableResponse<Response> 인기_피드를_조회한다(String accessToken, RequestSpecification spec) {
         return RestAssured
                 .given()

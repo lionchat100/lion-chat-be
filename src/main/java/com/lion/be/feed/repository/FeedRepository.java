@@ -47,5 +47,8 @@ public interface FeedRepository extends JpaRepository<Feed, Long> {
     //추가할 쿼리: join like_count, like_count < :lastLikeCount or (like_count = :lastLikeCount and id < lastId) ,order by like_count desc, f.id desc
     List<Feed> fetchHotFeedsAfter(Long lastLikeCount, Long lastId, Pageable pageable);
 
+    @Query("select f from Feed f where f.id = :id and f.isDeleted = false")
+    Optional<Feed> findFeed(Long id);
+
     //생각할 것: 검색이 되는가? 검색이 된다면 어디까지 될 것인가?
 }
