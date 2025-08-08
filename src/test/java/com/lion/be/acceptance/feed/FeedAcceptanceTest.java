@@ -33,8 +33,8 @@ public class FeedAcceptanceTest extends AcceptanceTest {
 
         ExtractableResponse<Response> newResponse = 최신_피드를_조회한다(accessToken, spec);
         assertThat(newResponse.jsonPath().getList("").size()).isGreaterThan(0);
-        assertThat(newResponse.jsonPath().getString("[0].title")).isEqualTo("Test Title");
-        assertThat(newResponse.jsonPath().getString("[0].content")).isEqualTo("Test Content");
+        assertThat(newResponse.jsonPath().getString("[0].feed.title")).isEqualTo("Test Title");
+        assertThat(newResponse.jsonPath().getString("[0].feed.content")).isEqualTo("Test Content");
 
     }
 
@@ -48,7 +48,7 @@ public class FeedAcceptanceTest extends AcceptanceTest {
 
         피드를_작성한다(accessToken, spec, "Test Title", "Test Content");
         ExtractableResponse<Response> feedsResponse = 최신_피드를_조회한다(accessToken, spec);
-        Long feedId = feedsResponse.jsonPath().getLong("[0].feedId");
+        Long feedId = feedsResponse.jsonPath().getLong("[0].feed.id");
 
         // when
         ExtractableResponse<Response> response = 피드를_삭제한다(accessToken, spec, feedId);
@@ -74,7 +74,7 @@ public class FeedAcceptanceTest extends AcceptanceTest {
 
         피드를_작성한다(accessToken1, spec, "Test Title", "Test Content");
         ExtractableResponse<Response> feedsResponse = 최신_피드를_조회한다(accessToken1, spec);
-        Long feedId = feedsResponse.jsonPath().getLong("[0].feedId");
+        Long feedId = feedsResponse.jsonPath().getLong("[0].feed.id");
 
         // when
         ExtractableResponse<Response> response = 피드를_삭제한다(accessToken2, spec, feedId);
@@ -96,7 +96,7 @@ public class FeedAcceptanceTest extends AcceptanceTest {
 
         피드를_작성한다(accessToken, spec, "Test Title", "Test Content");
         ExtractableResponse<Response> feedsResponse = 최신_피드를_조회한다(accessToken, spec);
-        Long feedId = feedsResponse.jsonPath().getLong("[0].feedId");
+        Long feedId = feedsResponse.jsonPath().getLong("[0].feed.id");
 
         // when
         ExtractableResponse<Response> response = 피드를_수정한다(accessToken, spec, feedId, "Updated Title", "Updated Content");
@@ -106,8 +106,8 @@ public class FeedAcceptanceTest extends AcceptanceTest {
 
         ExtractableResponse<Response> updatedFeedResponse = 최신_피드를_조회한다(accessToken, spec);
         assertThat(updatedFeedResponse.jsonPath().getList("").size()).isGreaterThan(0);
-        assertThat(updatedFeedResponse.jsonPath().getString("[0].title")).isEqualTo("Updated Title");
-        assertThat(updatedFeedResponse.jsonPath().getString("[0].content")).isEqualTo("Updated Content");
+        assertThat(updatedFeedResponse.jsonPath().getString("[0].feed.title")).isEqualTo("Updated Title");
+        assertThat(updatedFeedResponse.jsonPath().getString("[0].feed.content")).isEqualTo("Updated Content");
     }
 
     @Test
@@ -124,7 +124,7 @@ public class FeedAcceptanceTest extends AcceptanceTest {
 
         피드를_작성한다(accessToken1, spec, "Test Title", "Test Content");
         ExtractableResponse<Response> feedsResponse = 최신_피드를_조회한다(accessToken1, spec);
-        Long feedId = feedsResponse.jsonPath().getLong("[0].feedId");
+        Long feedId = feedsResponse.jsonPath().getLong("[0].feed.id");
 
 
         // when
@@ -135,8 +135,8 @@ public class FeedAcceptanceTest extends AcceptanceTest {
 
         ExtractableResponse<Response> unchangedResponse = 최신_피드를_조회한다(accessToken1, spec);
         assertThat(unchangedResponse.jsonPath().getList("").size()).isGreaterThan(0);
-        assertThat(unchangedResponse.jsonPath().getString("[0].title")).isEqualTo("Test Title");
-        assertThat(unchangedResponse.jsonPath().getString("[0].content")).isEqualTo("Test Content");
+        assertThat(unchangedResponse.jsonPath().getString("[0].feed.title")).isEqualTo("Test Title");
+        assertThat(unchangedResponse.jsonPath().getString("[0].feed.content")).isEqualTo("Test Content");
     }
 
 
