@@ -5,7 +5,10 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.lion.be.global.exception.CustomException;
+import com.lion.be.global.exception.ErrorCode;
 import com.lion.be.user.domain.entity.User;
+import com.lion.be.user.repository.UserRepositoryImpl;
 import com.lion.be.usercard.controller.dto.UserCardResponse;
 import com.lion.be.usercard.util.UserCardFilterUtil;
 
@@ -20,6 +23,7 @@ public class UserCardReadService {
 
 	private final UserViewHistoryService userViewHistoryService;
 	private final UserCardFilterUtil userCardFilterUtil;
+	private final UserRepositoryImpl userRepositoryImpl;
 
 	public List<UserCardResponse> getCards(Long userId, int size, List<Long> excludeUserIds) {
 		List<Long> allExcludeUserIds = userViewHistoryService.getExcludeUserIds(userId, excludeUserIds);
@@ -32,5 +36,11 @@ public class UserCardReadService {
 		return recommendedUsers.stream()
 			.map(UserCardResponse::from)
 			.toList();
+	}
+
+	public UserCardResponse getMyCards(Long id) {
+		return userRepositoryImpl.fetchById(id)
+			.map(UserCardResponse::from)
+			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 	}
 }

@@ -25,6 +25,16 @@ public class UserCardController {
 	private final UserCardReadService userCardReadService;
 
 	@GetMapping
+	public ResponseEntity<UserCardResponse> getUserCards(
+		@AuthenticationPrincipal UserPrincipal userPrincipal
+		){
+		UserCardResponse cards = userCardReadService.getMyCards(
+			userPrincipal.getId()
+		);
+		return ResponseEntity.ok(cards);
+	}
+
+	@GetMapping("/list")
 	public ResponseEntity<List<UserCardResponse>> getCards(
 		@AuthenticationPrincipal UserPrincipal userPrincipal,
 		@RequestParam(defaultValue = "10") int size,
@@ -41,6 +51,4 @@ public class UserCardController {
 		);
 		return ResponseEntity.ok(cards);
 	}
-
-	//todo - 특정 유저 하나만 확인할 수 있는 api 필요 (큐알용)
 }

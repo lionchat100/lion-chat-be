@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.lion.be.global.exception.CustomException;
 import com.lion.be.global.exception.ErrorCode;
+import com.lion.be.user.domain.PreferenceType;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.domain.entity.UserVectorizer;
 import com.lion.be.user.repository.UserRepository;
@@ -106,13 +107,22 @@ public class UserCardFilterUtil {
 
 	/**
 	 * 두 사용자 간 유사도 계산
-	 * 이로직에서 비율을 조절하시면 됩니다.
+	 * 이로직에서 비율을 조절하시면 됩니다. // 1번 선택시 7대 3 2번 선택시 3
 	 */
 	private double calculateSimilarity(User user1, User user2) {
 		double mbtiCompatibility = userVectorizer.calculateMbtiCompatibility(user1, user2);
 		double positionSimilarity = calculatePositionSimilarity(user1, user2);
 
-		return 0.7 * mbtiCompatibility + 0.3 * positionSimilarity;
+		PreferenceType preference = user1.getPreferenceType();
+
+		if (preference == PreferenceType.MBTI_FOCUSED) {
+			return 0.7 * mbtiCompatibility + 0.3 * positionSimilarity;
+		} else if (preference == PreferenceType.POSITION_FOCUSED) {
+			return 0.3 * mbtiCompatibility + 0.7 * positionSimilarity;
+		} else {
+			// 기본값 (null인 경우나 기타) 현재는 Null 값 없음
+			return 0.5 * mbtiCompatibility + 0.5 * positionSimilarity;
+		}
 	}
 
 	/**

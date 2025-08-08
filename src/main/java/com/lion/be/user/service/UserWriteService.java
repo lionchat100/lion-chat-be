@@ -30,6 +30,10 @@ public class UserWriteService {
         User user = userRepository.fetchById(userId)
             .orElseThrow(()-> new CustomException(ErrorCode.USER_NOT_FOUND));
 
+		if (userRepository.existsByNickname(request.nickname())) {
+			throw new CustomException(ErrorCode.NICKNAME_ALREADY_EXISTS);
+		}
+
         OnboardingData data = OnboardingData.from(request);
         user.completeOnboarding(data);
 
