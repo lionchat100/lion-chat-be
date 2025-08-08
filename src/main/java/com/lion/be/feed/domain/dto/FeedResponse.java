@@ -5,10 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Setter
-@Getter
-public class FeedDeleteRequest {
-    private Long feedId;
+public class FeedResponse {
+    private FeedDto feed;
+    private FeedWriterDto writer;
 }
