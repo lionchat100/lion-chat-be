@@ -1,5 +1,6 @@
 package com.lion.be.feed_comment.domain.entity;
 
+import com.lion.be.feed.domain.entity.Feed;
 import com.lion.be.global.entity.BaseEntity;
 import com.lion.be.user.domain.entity.User;
 import jakarta.persistence.Entity;
@@ -25,11 +26,9 @@ public class FeedComment extends BaseEntity {
     private Long id;
 
     @Getter
-    // TODO: Feed와 연관관계 설정
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "feed_id")
-//    private Feed feedId;
-    private Long feedId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "feed_id")
+    private Feed feed;
 
     @Getter
     @ManyToOne(fetch = FetchType.LAZY)
@@ -41,5 +40,17 @@ public class FeedComment extends BaseEntity {
 
     @Getter
     private boolean isDeleted;
+
+    private FeedComment(Feed feed, User user, String content) {
+        // TODO: null값 체크
+        this.feed = feed;
+        this.user = user;
+        this.content = content;
+        this.isDeleted = false;
+    }
+
+    public static FeedComment of(Feed feed, User user, String content) {
+        return new FeedComment(feed, user, content);
+    }
 
 }
