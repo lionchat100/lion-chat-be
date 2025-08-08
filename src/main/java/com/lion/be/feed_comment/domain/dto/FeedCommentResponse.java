@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 public record FeedCommentResponse(Long id,
                                   Long feedId,
                                   FeedCommentUserResponse feedCommentUserResponse,
-                                  String content, // content 필드 추가
+                                  String content,
                                   LocalDateTime createdAt,
                                   LocalDateTime updatedAt) {
 
