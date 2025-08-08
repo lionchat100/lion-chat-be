@@ -2,6 +2,7 @@ package com.lion.be.feed.controller;
 
 import com.lion.be.auth.domain.UserPrincipal;
 import com.lion.be.feed.domain.dto.FeedResponse;
+import com.lion.be.feed.domain.dto.FeedUpdateRequest;
 import com.lion.be.feed.domain.dto.FeedWriteRequest;
 import com.lion.be.feed.service.FeedReadService;
 import com.lion.be.feed.service.FeedWriteService;
@@ -48,9 +49,9 @@ public class FeedController {
 
     @PutMapping("/api/feeds/{feedId}")
     public void modifyFeed(@PathVariable("feedId") Long feedId,
-                             @RequestBody FeedWriteRequest feedWriteRequest,
+                             @RequestBody FeedUpdateRequest feedUpdateRequest,
                              @AuthenticationPrincipal UserPrincipal userPrincipal) {
         Long userId = userPrincipal.getId();
-        feedWriteService.updateFeed(feedId, feedWriteRequest.getTitle(), feedWriteRequest.getContent(), userId);
+        feedWriteService.updateFeed(feedId, feedUpdateRequest.getTitle(), feedUpdateRequest.getContent(), userId);
     }
 }
