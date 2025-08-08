@@ -71,4 +71,23 @@ public class FeedSteps {
                 .log().all()
                 .extract();
     }
+
+    public static ExtractableResponse<Response> 피드를_수정한다(String accessToken, RequestSpecification spec, Long feedId, String title, String content) {
+        Map<String, String> feedUpdateRequest = new HashMap<>();
+        feedUpdateRequest.put("title", title);
+        feedUpdateRequest.put("content", content);
+
+        return RestAssured
+                .given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .spec(spec)
+                .auth().oauth2(accessToken)
+                .body(feedUpdateRequest)
+                .log().all()
+                .when()
+                .put("/api/feeds/{feedId}", feedId)
+                .then()
+                .log().all()
+                .extract();
+    }
 }
