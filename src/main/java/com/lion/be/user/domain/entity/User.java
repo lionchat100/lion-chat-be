@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.lion.be.chat.domain.entity.ChatRoomUser;
+import com.lion.be.feed.domain.entity.Feed;
 import com.lion.be.global.entity.BaseEntity;
 import com.lion.be.user.domain.Gender;
 import com.lion.be.user.domain.Mbti;
@@ -53,6 +54,12 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserPhoto> userPhotos = new ArrayList<>();
 
+
+
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Feed> userFeeds = new ArrayList<>();
+
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
@@ -83,6 +90,8 @@ public class User extends BaseEntity {
     public void addChatRoomUser(ChatRoomUser chatRoomUser) {
         chatRoomUsers.add(chatRoomUser);
     }
+
+    public void addUserFeed(Feed feed){ userFeeds.add(feed); }
 
     public void completeOnboarding(OnboardingData data, University university) {
         validateOnboardingPreconditions();
