@@ -11,15 +11,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Setter
-public class FeedListResponse {
-    private Long feedId;
+public class FeedDto {
+    private Long id;
     private String title;
     private String content;
-    private String username;
-    private Long userId;
-    private String profileImageUrl;
+    private LocalDateTime createdAt;
     private Long likeCount;
     private Boolean isLiked;
     private Long commentCount;
-    private LocalDateTime createdAt;
 }

@@ -1,6 +1,5 @@
 package com.lion.be.feed.service;
 
-import com.lion.be.feed.domain.dto.FeedListResponse;
 import com.lion.be.feed.domain.entity.Feed;
 import com.lion.be.feed.repository.FeedRepository;
 import com.lion.be.global.exception.FeedNotFoundException;
@@ -9,12 +8,8 @@ import com.lion.be.global.exception.UserUnauthorizedException;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

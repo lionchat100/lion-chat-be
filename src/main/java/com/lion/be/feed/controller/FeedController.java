@@ -1,7 +1,7 @@
 package com.lion.be.feed.controller;
 
 import com.lion.be.auth.domain.UserPrincipal;
-import com.lion.be.feed.domain.dto.FeedListResponse;
+import com.lion.be.feed.domain.dto.FeedResponse;
 import com.lion.be.feed.domain.dto.FeedWriteRequest;
 import com.lion.be.feed.service.FeedReadService;
 import com.lion.be.feed.service.FeedWriteService;
@@ -18,7 +18,7 @@ public class FeedController {
     private final FeedWriteService feedWriteService;
 
     @GetMapping("/api/feeds")
-    public List<FeedListResponse> showRecentFeeds(@RequestParam(value = "lastId", required = false) Long lastId) {
+    public List<FeedResponse> showRecentFeeds(@RequestParam(value = "lastId", required = false) Long lastId) {
         if(lastId != null && lastId > 0)
             return feedReadService.getRecentFeedsAfter(lastId);
 
@@ -26,8 +26,8 @@ public class FeedController {
     }
 
     @GetMapping("/api/feeds/hot")
-    public List<FeedListResponse> showHotFeeds(@RequestParam(value = "lastLikeCount", required = false) Long lastLikeCount,
-                                                              @RequestParam(value = "lastId", required = false) Long lastId) {
+    public List<FeedResponse> showHotFeeds(@RequestParam(value = "lastLikeCount", required = false) Long lastLikeCount,
+                                           @RequestParam(value = "lastId", required = false) Long lastId) {
         if (lastLikeCount != null && lastId != null && lastLikeCount > 0 && lastId > 0) {
             return feedReadService.getHotFeedsAfter(lastLikeCount, lastId);
         }
