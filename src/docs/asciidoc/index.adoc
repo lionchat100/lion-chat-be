@@ -170,3 +170,16 @@ operation::save_feed_comment_success[snippets='http-request,http-response']
 ==== 성공
 
 operation::fetch_all_feed_comment_success[snippets='http-request,http-response']
+
+[[delete-feed-comment]]
+=== 피드 댓글 삭제
+
+특정 댓글 ID를 사용하여 댓글을 삭제합니다.
+이 작업은 '삭제됨' 상태로 표시하는 소프트 삭제(soft delete) 방식으로 처리되며, 이후 댓글 조회 시 목록에 나타나지 않습니다.
+
+* **요청 헤더**: `Authorization` 헤더에 Bearer 토큰이 필요합니다.
+* **경로 파라미터**: `commentId`에 삭제할 댓글의 ID를 명시해야 합니다.
+
+==== 성공
+
+operation::delete_feed_comment_success[snippets='http-request,http-response']

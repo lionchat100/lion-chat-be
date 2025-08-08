@@ -2,10 +2,8 @@ package com.lion.be.feed_comment.repository;
 
 import com.lion.be.feed_comment.domain.dto.FeedCommentResponse;
 import com.lion.be.feed_comment.domain.dto.FeedCommentSaveResponse;
-import com.lion.be.feed_comment.domain.dto.FeedCommentUserResponse;
 import com.lion.be.feed_comment.domain.entity.FeedComment;
 import com.lion.be.feed_comment.repository.persistence.jpa.FeedCommentJpaRepository;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -19,13 +17,18 @@ public class FeedCommentRepositoryImpl implements FeedCommentRepository {
 
     @Override
     public Slice<FeedCommentResponse> fetchAllByFeedId(Long feedId, Pageable pageable) {
-        return feedCommentJpaRepository.fetchCommentsByFeedId(feedId, pageable);
+        return feedCommentJpaRepository.fetchAllByFeedId(feedId, pageable);
     }
 
     @Override
     public FeedCommentSaveResponse save(FeedComment feedComment) {
         FeedComment savedFeedComment = feedCommentJpaRepository.save(feedComment);
         return new FeedCommentSaveResponse(savedFeedComment.getId());
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        feedCommentJpaRepository.softDeleteById(id);
     }
 
 }

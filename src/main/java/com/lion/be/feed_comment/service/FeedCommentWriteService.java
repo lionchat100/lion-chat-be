@@ -31,4 +31,8 @@ public class FeedCommentWriteService {
         return new FeedCommentSaveResponse(savedResponse.commentId());
     }
 
+    public void delete(Long id) {
+        feedCommentRepository.deleteById(id);
+    }
+
 }
