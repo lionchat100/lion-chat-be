@@ -3,6 +3,7 @@ package com.lion.be.chat.controller;
 import com.lion.be.chat.domain.dto.ChatMessageRequest;
 import com.lion.be.chat.domain.dto.ChatMessageResponse;
 import com.lion.be.chat.domain.entity.ChatMessage;
+import com.lion.be.chat.repository.ChatRoomRepository;
 import com.lion.be.chat.repository.MessageEntityAdapter;
 import com.lion.be.chat.service.MessagePersistence;
 import com.lion.be.chat.service.MessagePublisher;
@@ -23,6 +24,7 @@ public class ChatController {
     private final MessagePublisher messagePublisher;
     private final MessagePersistence messagePersistence;
     private final MessageEntityAdapter adapter;
+    private final ChatRoomRepository chatRoomRepository;
 
     /**
      * 클라이언트로부터 채팅 메시지를 수신해 저장하고, 메시지 발행 후 결과를 반환합니다.

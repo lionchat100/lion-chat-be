@@ -2,12 +2,14 @@ package com.lion.be.chat.service;
 
 import com.lion.be.chat.domain.MessageStatus;
 import com.lion.be.chat.domain.entity.ChatMessage;
+import com.lion.be.chat.domain.entity.ChatRoom;
 import com.lion.be.chat.repository.ChatMessageRepository;
-import com.lion.be.chat.repository.MessageEntityAdapter;
+import com.lion.be.chat.repository.ChatRoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -15,7 +17,7 @@ import java.util.List;
 public class DatabaseMessagePersistence implements MessagePersistence {
 
     private final ChatMessageRepository chatMessageRepository;
-    private final MessageEntityAdapter messageEntityAdapter;
+    private final ChatRoomRepository chatRoomRepository;
 
     /**
      * 채팅 메시지를 DB에 저장
@@ -30,9 +32,20 @@ public class DatabaseMessagePersistence implements MessagePersistence {
      */
     @Override
     public ChatMessage saveMessage(ChatMessage message) {
-        ChatMessage entity = messageEntityAdapter.toEntity(message);
-        ChatMessage saved = chatMessageRepository.save(entity);
-        return messageEntityAdapter.toRecord(saved);
+        ChatMessage saved = chatMessageRepository.save(message);
+        ChatRoom room = chatRoomRepository.findById(message.getChatRoomId()).get();
+        chatRoomRepository.save(
+                new ChatRoom(
+                        room.getId(),
+                        room.getVersion(),
+                        room.getIsDeleted(),
+                        room.getRegDt(),
+                        room.getChatRoomUsers(),
+                        message.getContent(),
+                        Instant.now()
+                )
+        );
+        return saved;
     }
 
     /**
@@ -108,7 +121,6 @@ public class DatabaseMessagePersistence implements MessagePersistence {
     public List<ChatMessage> getPendingMessages(Long userId) {
         return chatMessageRepository.findPendingMessageByReceiverId(userId)
                 .stream()
-                .map(messageEntityAdapter::toRecord)
                 .toList();
     }
 }
