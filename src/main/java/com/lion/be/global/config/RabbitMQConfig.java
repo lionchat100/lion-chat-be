@@ -22,6 +22,8 @@ public class RabbitMQConfig {
     public static final String CHAT_QUEUE_NAME = "chat.queue";
     // 라우팅 키 패턴. "chat.message.123" 같은 형식의 키를 가진 메시지를 바인딩
     public static final String ROUTING_KEY_PATTERN = "chat.message.*";
+    public static final String CHATROOM_QUEUE_NAME = "chatroom.event.queue";
+    public static final String CHATROOM_ROUTING_KEY = "chatroom.creation";
 
     /**
      * TopicExchange: 라우팅 키를 기반으로 메시지를 큐에 전달하는 유연한 방식의 Exchange
@@ -38,6 +40,12 @@ public class RabbitMQConfig {
     public Queue chatQueue() {
         return new Queue(CHAT_QUEUE_NAME, true);
     }
+
+    /**
+     * Queue: 채팅방 생성 이벤트의 동시성 제어를 위한 큐
+     */
+    @Bean
+    public Queue chatRoomCreationQueue() {return new Queue(CHATROOM_QUEUE_NAME, true);}
 
     /**
      * Binding: 위에서 정의한 Exchange와 Queue를 라우팅 키 패턴으로 연결
@@ -93,5 +101,14 @@ public class RabbitMQConfig {
         return factory;
     }
 
+    /**
+     * 채팅방 생성 큐를 반환합니다.
+     */
+    @Bean
+    public Binding chatRoomCreationBinding(Queue chatRoomCreationQueue, TopicExchange chatExchange) {
+        return BindingBuilder.bind(chatRoomCreationQueue)
+                .to(chatExchange)
+                .with(CHATROOM_ROUTING_KEY);
+    }
 }
 
