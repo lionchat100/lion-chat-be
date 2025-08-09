@@ -4,6 +4,9 @@ import com.lion.be.feed_comment.domain.dto.FeedCommentResponse;
 import com.lion.be.feed_comment.repository.FeedCommentRepository;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.lion.be.global.exception.CustomException;
+import com.lion.be.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -60,4 +63,39 @@ public class FeedCommentReadService {
         return new SliceImpl<>(enrichedContent, slice.getPageable(), slice.hasNext());
     }
 
+    public FeedCommentResponse fetchById(Long commentId, Long id) {
+        FeedCommentResponse comment = feedCommentRepository.findCommentById(commentId);
+
+        if (comment == null) {
+            throw new CustomException(ErrorCode.COMMENT_NOT_FOUNT);
+        }
+
+        String likeCountKey = LIKE_COUNT_KEY_PREFIX + comment.id();
+        String likedUsersKey = LIKED_USERS_KEY_PREFIX + comment.id();
+
+        Object likeCountObj = redisTemplate.opsForValue().get(likeCountKey);
+        long finalLikeCount;
+
+        if (likeCountObj != null) {
+            finalLikeCount = ((Number) likeCountObj).longValue();
+        } else {
+            finalLikeCount = comment.likeCount(); // DB에서 조회한 likeCount 사용
+            redisTemplate.opsForValue().set(likeCountKey, finalLikeCount);
+        }
+
+        boolean isLiked = Boolean.TRUE.equals(
+                redisTemplate.opsForSet().isMember(likedUsersKey, String.valueOf(id))
+        );
+
+        return new FeedCommentResponse(
+                comment.id(),
+                comment.feedId(),
+                comment.feedCommentUserResponse(),
+                comment.content(),
+                finalLikeCount, // 최종 계산된 좋아요 수
+                isLiked,
+                comment.createdAt(),
+                comment.updatedAt()
+        );
+    }
 }
