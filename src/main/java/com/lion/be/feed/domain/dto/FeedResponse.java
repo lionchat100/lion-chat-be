@@ -1,17 +1,17 @@
 package com.lion.be.feed.domain.dto;
 
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Setter
 public class FeedResponse {
+
     private FeedDto feed;
     private FeedWriterDto writer;
 
@@ -21,4 +21,5 @@ public class FeedResponse {
         this.feed = new FeedDto(feedId, title, content, createdAt, likeCount, isLiked, commentCount);
         this.writer = new FeedWriterDto(writerName, writerId, writerImageUrl);
     }
+
 }

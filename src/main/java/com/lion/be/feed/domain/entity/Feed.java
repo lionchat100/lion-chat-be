@@ -2,7 +2,12 @@ package com.lion.be.feed.domain.entity;
 
 import com.lion.be.global.entity.BaseEntity;
 import com.lion.be.user.domain.entity.User;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +15,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class Feed extends BaseEntity {
+
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     private Long id;
@@ -27,13 +33,14 @@ public class Feed extends BaseEntity {
 
     //List<FeedComment> feedComments;
 
-    //List<FeedLike> feedLikes;
+    private long likeCount;
 
     public Feed(String title, String content, User user) {
         this.isDeleted = false; // 기본값 설정
         this.title = title;
         this.content = content;
         this.user = user;
+        this.likeCount = 0L;
     }
 
     public void delete() {
@@ -44,4 +51,5 @@ public class Feed extends BaseEntity {
         this.title = title;
         this.content = content;
     }
+
 }
