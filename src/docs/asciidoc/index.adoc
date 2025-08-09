@@ -57,6 +57,18 @@ operation::fetch_my_info_success[snippets='http-request,http-response']
 
 operation::fetch_my_info_fail_no_token[snippets='http-request,http-response']
 
+[[user-management]]
+== 사용자 관리
+
+[[onboarding]]
+=== 온보딩 완료
+
+신규 회원이 온보딩 과정을 완료하여 프로필 정보를 등록합니다.
+
+==== 성공
+
+operation::onboarding_complete_success[snippets='http-request,http-response']
+
 [[test-endpoints]]
 == 테스트용 엔드포인트
 
@@ -257,3 +269,98 @@ operation::fetch_all_hot_feed_success[snippets='http-request,http-response']
 ==== 성공
 
 operation::delete_feed_success[snippets='http-request,http-response']
+
+[[user-card-recommendation]]
+== 유저 카드 추천 시스템
+
+유저 카드 추천 시스템은 MBTI와 포지션 정보를 기반으로 한 클러스터링 알고리즘을 통해
+사용자와 유사한 성향의 다른 사용자들을 추천하는 기능입니다.
+
+=== 추천 알고리즘 개요
+
+**클러스터링 기반 추천**
+* K-means 클러스터링을 통해 사용자를 유사한 그룹으로 분류
+* 9차원 벡터 공간에서 유사도 계산 (MBTI 4차원 + Position 5차원)
+* 동일 클러스터 내 사용자 우선 추천, 부족 시 랜덤 보완
+
+**유사도 계산 방식**
+* MBTI 호환성: 70% 가중치 (심리학적 궁합 이론 적용)
+* 포지션 유사도: 30% 가중치 (협업 가능성 반영)
+
+[[get-recommended-cards]]
+=== 추천 카드 조회
+
+현재 로그인한 사용자를 위한 맞춤형 사용자 카드 목록을 조회합니다.
+동일 클러스터 내 사용자를 우선 추천하며, 조회 이력은 10분간 유지되어 중복 추천을 방지합니다.
+
+==== 기본 조회
+
+기본적인 추천 카드 조회 요청입니다.
+
+operation::cluster_based_recommendation[snippets='http-request,http-response']
+
+==== 특정 사용자 제외 조회
+
+이미 매칭을 거절했거나 채팅을 나눈 사용자들을 제외하고 추천받을 수 있습니다.
+
+operation::manual_exclusion[snippets='http-request,http-response']
+
+==== 연속 조회 (중복 방지)
+
+연속으로 카드를 조회할 때 이전에 본 사용자는 자동으로 제외됩니다.
+
+operation::duplicate_prevention[snippets='http-request,http-response']
+
+==== 클러스터 부족 시 랜덤 보완
+
+같은 클러스터 사용자가 부족한 경우 다른 클러스터에서 랜덤으로 보완하여 요청한 개수만큼 반환합니다.
+
+operation::random_supplement[snippets='http-request,http-response']
+
+==== 백엔드 개발자 클러스터 추천
+
+백엔드 개발자의 추천 패턴을 확인할 수 있습니다.
+
+operation::backend_cluster_recommendation[snippets='http-request,http-response']
+
+=== 본인 카드 조회 (qr용)
+
+유저 id를 통해 유저 프로필카드를 볼 수 있습니다.
+
+operation::my_profile_card[snippets='http-request,http-response']
+
+=== 추천 시스템 특징
+
+**개인화된 추천**
+* 사용자의 MBTI와 포지션을 고려한 맞춤형 추천
+* 클러스터링을 통해 유사한 성향의 사용자 그룹 식별
+
+**중복 방지 시스템**
+* Redis 기반 조회 이력 관리 (TTL 10분)
+* 연속 조회 시 이전에 본 카드 자동 제외
+* 수동 제외 목록 지원 (`excludeUserIds` 파라미터)
+
+**유연한 추천 전략**
+* 클러스터 기반 우선 추천
+* 부족한 경우 랜덤 보완으로 항상 요청한 개수만큼 반환
+* 실시간 필터링 가능
+
+=== 응답 데이터 구조
+
+추천되는 각 사용자 카드는 다음 정보를 포함합니다:
+
+* `userId`: 사용자 ID
+* `name`: 사용자 이름
+* `university`: 대학교명
+* `isUniversityVisible`: 대학교 공개 여부
+* `position`: 직무 (BACKEND, FRONTEND, UX_UI, PM, FULLSTACK)
+* `imageUrls`: 프로필 이미지 URL 목록
+
+=== 에러 처리
+
+==== 인증 실패
+
+인증 토큰 없이 요청 시 401 Unauthorized를 반환합니다.
+
+operation::unauthorized_card_access[snippets='http-request,http-response']
+

@@ -95,6 +95,9 @@ dependencies {
     implementation 'org.springframework.security:spring-security-messaging'
 
     testImplementation 'org.awaitility:awaitility:4.2.0' // 테스트 의존성 추가
+
+    // weka 의존성 추가 (K-means Clustering)
+    implementation 'nz.ac.waikato.cms.weka:weka-stable:3.8.6'
 }
 
 ext {
