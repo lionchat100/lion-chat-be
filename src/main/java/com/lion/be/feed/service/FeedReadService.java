@@ -6,14 +6,14 @@ import com.lion.be.feed.domain.entity.Feed;
 import com.lion.be.feed.repository.FeedRepository;
 import com.lion.be.global.exception.CustomException;
 import com.lion.be.global.exception.ErrorCode;
+import com.lion.be.global.util.RedisKey;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -24,8 +24,6 @@ public class FeedReadService {
     private final RedisTemplate<String, Object> redisTemplate;
 
     private static final int DEFAULT_PAGE_SIZE = 30;
-    private static final String LIKE_COUNT_KEY_PREFIX = "feed:like_count:";
-    private static final String LIKED_USERS_KEY_PREFIX = "feed:liked_users:";
 
     public Feed fetchById(Long id) {
         return feedRepository.findFeed(id)
@@ -38,7 +36,7 @@ public class FeedReadService {
 
         long likeCount = getAndCacheLikeCount(feed.getId(), feed.getLikeCount());
         boolean isLiked = isLikedByCurrentUser(feedId, currentUserId);
-        long commentCount = 0L; // TODO: 댓글 수 조회 로직 필요
+        long commentCount = getAndCacheCommentCount(feed.getId(), feed.getCommentCount());
 
         return new FeedResponse(
                 feed.getId(), feed.getTitle(), feed.getContent(), feed.getCreatedAt(),
@@ -58,12 +56,12 @@ public class FeedReadService {
     }
 
     public Slice<FeedResponse> getHotFeedsFirst(Integer size, Long currentUserId) {
-        Slice<FeedResponse> feedResponses = feedRepository.fetchHotFeedsFirst(getHotPageable());
+        Slice<FeedResponse> feedResponses = feedRepository.fetchHotFeedsFirst(getHotPageable(size));
         return enrichFeedsWithRedisData(feedResponses, currentUserId);
     }
 
     public Slice<FeedResponse> getHotFeedsAfter(Long lastLikeCount, Long lastId, Integer size, Long currentUserId) {
-        Slice<FeedResponse> feedResponses = feedRepository.fetchHotFeedsAfter(lastLikeCount, lastId, getHotPageable());
+        Slice<FeedResponse> feedResponses = feedRepository.fetchHotFeedsAfter(lastLikeCount, lastId, getHotPageable(size));
         return enrichFeedsWithRedisData(feedResponses, currentUserId);
     }
 
@@ -76,15 +74,22 @@ public class FeedReadService {
             long finalLikeCount = getAndCacheLikeCount(feedId, feedDto.getLikeCount());
             feedDto.setLikeCount(finalLikeCount);
 
+            long finalCommentCount = getAndCacheCommentCount(feedId, feedDto.getCommentCount());
+            feedDto.setCommentCount(finalCommentCount);
+
             if (currentUserId != null) {
-                feedDto.setIsLiked(isLikedByCurrentUser(feedId, currentUserId));
+                if(isLikedByCurrentUser(feedId, currentUserId)){
+                    feedDto.like();
+                } else {
+                    feedDto.unlike();
+                }
             }
         });
         return feeds;
     }
 
     private long getAndCacheLikeCount(Long feedId, long dbLikeCount) {
-        String likeCountKey = LIKE_COUNT_KEY_PREFIX + feedId;
+        String likeCountKey = RedisKey.FEED_LIKE_COUNT_KEY_PREFIX + feedId;
         Object likeCountObj = redisTemplate.opsForValue().get(likeCountKey);
 
         if (likeCountObj != null) {
@@ -95,21 +100,35 @@ public class FeedReadService {
         }
     }
 
+    private long getAndCacheCommentCount(Long feedId, long dbCommentCount) {
+        String commentCountKey = RedisKey.COMMENT_COUNT_KEY + feedId;
+        Object commentCountObj = redisTemplate.opsForValue().get(commentCountKey);
+
+        if (commentCountObj != null) {
+            return ((Number) commentCountObj).longValue();
+        } else {
+            redisTemplate.opsForValue().set(commentCountKey, dbCommentCount);
+            return dbCommentCount;
+        }
+    }
+
     private boolean isLikedByCurrentUser(Long feedId, Long currentUserId) {
         if (currentUserId == null) {
             return false;
         }
         return Boolean.TRUE.equals(
-                redisTemplate.opsForSet().isMember(LIKED_USERS_KEY_PREFIX + feedId, String.valueOf(currentUserId)));
+                redisTemplate.opsForSet().isMember(RedisKey.FEED_LIKED_USERS_KEY_PREFIX + feedId, String.valueOf(currentUserId)));
     }
 
     private Pageable getRecentPageable(Integer size) {
-        return PageRequest.of(0, size != null && size <= DEFAULT_PAGE_SIZE ? size : DEFAULT_PAGE_SIZE,
+        return PageRequest.of(0,
+                size != null && size <= DEFAULT_PAGE_SIZE ? size : DEFAULT_PAGE_SIZE,
                 Sort.by(Sort.Direction.DESC, "id"));
     }
 
-    private Pageable getHotPageable() {
-        return PageRequest.of(0, DEFAULT_PAGE_SIZE);
+    private Pageable getHotPageable(Integer size) {
+        return PageRequest.of(0,
+                size != null && size <= DEFAULT_PAGE_SIZE ? size : DEFAULT_PAGE_SIZE);
     }
 
 }
