@@ -8,6 +8,7 @@ import com.lion.be.feed.repository.FeedRepository;
 import com.lion.be.feed_comment.domain.entity.FeedComment;
 import com.lion.be.feed_comment.repository.persistence.jpa.FeedCommentJpaRepository;
 import com.lion.be.feed_comment.service.FeedCommentLikeScheduler;
+import com.lion.be.global.util.RedisKey;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.repository.persistence.jpa.UserJpaRepository;
 import jakarta.persistence.EntityManager;
@@ -34,9 +35,6 @@ class FeedCommentLikeSchedulerAcceptanceTest extends AcceptanceTest {
     @Autowired
     private EntityManager em;
 
-    private static final String LIKE_COUNT_KEY_PREFIX = "comment:like_count:";
-    private static final String DIRTY_COMMENTS_KEY = "dirty:comments";
-
     @DisplayName("스케줄러가 실행되면 Redis의 좋아요 수가 DB에 정확히 반영된다")
     @Transactional
     @Test
@@ -54,9 +52,9 @@ class FeedCommentLikeSchedulerAcceptanceTest extends AcceptanceTest {
 
         assertThat(comment.getLikeCount()).isZero();
 
-        String likeCountKey = LIKE_COUNT_KEY_PREFIX + commentId;
+        String likeCountKey = RedisKey.COMMENT_LIKE_COUNT_KEY_PREFIX + commentId;
         redisTemplate.opsForValue().set(likeCountKey, "12");
-        redisTemplate.opsForSet().add(DIRTY_COMMENTS_KEY, String.valueOf(commentId));
+        redisTemplate.opsForSet().add(RedisKey.DIRTY_COMMENT_LIKE_KEY, String.valueOf(commentId));
 
         // when
         feedCommentLikeScheduler.syncLikesToDb();
@@ -68,7 +66,7 @@ class FeedCommentLikeSchedulerAcceptanceTest extends AcceptanceTest {
         FeedComment updatedComment = feedCommentJpaRepository.findById(commentId).orElseThrow();
         assertThat(updatedComment.getLikeCount()).isEqualTo(12);
 
-        Long dirtySetSize = redisTemplate.opsForSet().size(DIRTY_COMMENTS_KEY);
+        Long dirtySetSize = redisTemplate.opsForSet().size(RedisKey.DIRTY_COMMENT_LIKE_KEY);
         assertThat(dirtySetSize).isZero();
     }
 

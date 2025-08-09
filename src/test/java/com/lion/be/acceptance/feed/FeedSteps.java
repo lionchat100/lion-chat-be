@@ -175,6 +175,21 @@ public class FeedSteps {
         );
     }
 
+    public static void 피드_댓글_정보를_검증한다(
+            ExtractableResponse<Response> response,
+            Long targetFeedId,
+            int expectedCommentCount
+    ) {
+        // 단건 조회 응답 구조에 맞게 검증 로직 수정
+        Map<String, Object> feed = response.jsonPath().getMap("$"); // 응답 전체가 FeedDto 객체
+
+        Assertions.assertAll(
+                () -> 상태코드_200이다(response),
+                () -> assertThat(feed.get("id")).isEqualTo(targetFeedId.intValue()), // JSON Path는 숫자를 Integer로 반환할 수 있음
+                () -> assertThat(feed.get("commentCount")).isEqualTo(expectedCommentCount)
+        );
+    }
+
     public static void 상태코드_200이다(ExtractableResponse<Response> response) {
         assertThat(response.statusCode())
                 .isEqualTo(200);
@@ -199,7 +214,7 @@ public class FeedSteps {
                 .isEqualTo(content);
     }
 
-    public static void 피드_전체_조회_응답을_검증한다(ExtractableResponse<Response> response, int expectedCount, List<String> expectedTitles, List<String> expectedContents) {
+    public static void 피드_전체_조회_응답을_검증한다(ExtractableResponse<Response> response, int expectedCount, List<String> expectedTitles, List<String> expectedContents, List<Boolean> expectedIsLiked) {
 
         List<Map<String, Map<String,Object>>> content = response.jsonPath().getList("content");
 
@@ -211,13 +226,14 @@ public class FeedSteps {
                         .hasSize(expectedCount),
 
                 () -> {
-                    for(int i=expectedCount-1; i>=0; i--){
+                    for(int i=0; i<expectedCount; i++){
                         Map<String, Map<String,Object>> feedResponse = content.get(i);
                         Map<String, Object> feed = feedResponse.get("feed");
-                        assertThat(feed).containsKeys("id", "title", "content", "likeCount", "createdAt");
-                        int listIndex = expectedCount - 1 - i; // 역순으로 접근
-                        assertThat(feed.get("title")).isEqualTo(expectedTitles.get(listIndex));
-                        assertThat(feed.get("content")).isEqualTo(expectedContents.get(listIndex));
+                        assertThat(feed).containsKeys("id", "title", "content", "likeCount", "commentCount", "isLiked" ,"createdAt");
+
+                        assertThat(feed.get("title")).isEqualTo(expectedTitles.get(i));
+                        assertThat(feed.get("content")).isEqualTo(expectedContents.get(i));
+                        assertThat(feed.get("isLiked")).isEqualTo(expectedIsLiked.get(i));
 
                         Map<String, Object> user = feedResponse.get("writer");
                         assertThat(user).containsKeys("name", "id", "profileImageUrl");
@@ -251,12 +267,11 @@ public class FeedSteps {
 
                 // 남아있는 댓글의 내용이 예상과 일치하는지 검증
                 () -> {
-                    for(int i=expectedSize-1; i>=0; i--){
+                    for(int i=0; i<expectedSize; i++){
                         Map<String, Map<String,Object>> feedResponse = content.get(i);
                         Map<String, Object> feed = feedResponse.get("feed");
-                        int listIndex = expectedSize - 1 - i; // 역순으로 접근
-                        assertThat(feed.get("title")).isEqualTo(expectedRemainingTitles.get(listIndex));
-                        assertThat(feed.get("content")).isEqualTo(expectedRemainingContents.get(listIndex));
+                        assertThat(feed.get("title")).isEqualTo(expectedRemainingTitles.get(i));
+                        assertThat(feed.get("content")).isEqualTo(expectedRemainingContents.get(i));
                     }
                 },
 
