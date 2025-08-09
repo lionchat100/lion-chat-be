@@ -14,4 +14,6 @@ public interface FeedCommentRepository {
 
     void deleteById(Long id);
 
+    void updateLikeCount(Long commentId, long likeCount);
+
 }

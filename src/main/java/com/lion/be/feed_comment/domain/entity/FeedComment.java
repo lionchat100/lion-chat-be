@@ -41,12 +41,16 @@ public class FeedComment extends BaseEntity {
     @Getter
     private boolean isDeleted;
 
+    @Getter
+    private long likeCount;
+
     private FeedComment(Feed feed, User user, String content) {
         // TODO: null값 체크
         this.feed = feed;
         this.user = user;
         this.content = content;
         this.isDeleted = false;
+        this.likeCount = 0;
     }
 
     public static FeedComment of(Feed feed, User user, String content) {

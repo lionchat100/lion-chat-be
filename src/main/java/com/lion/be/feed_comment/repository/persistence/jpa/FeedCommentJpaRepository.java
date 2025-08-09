@@ -25,4 +25,10 @@ public interface FeedCommentJpaRepository extends JpaRepository<FeedComment, Lon
             + "WHERE c.id = :id")
     void softDeleteById(@Param("id") Long id);
 
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE FeedComment c "
+            + "SET c.likeCount = :likeCount "
+            + "WHERE c.id = :id")
+    void updateLikeCount(@Param("id") Long id, @Param("likeCount") long likeCount);
+
 }
