@@ -52,27 +52,22 @@ class FeedCommentLikeSchedulerAcceptanceTest extends AcceptanceTest {
 
         Long commentId = comment.getId();
 
-        // 2. 초기 DB 상태 검증
         assertThat(comment.getLikeCount()).isZero();
 
-        // 3. Redis에 '좋아요'가 12번 눌린 상황을 시뮬레이션
         String likeCountKey = LIKE_COUNT_KEY_PREFIX + commentId;
-        redisTemplate.opsForValue().set(likeCountKey, "12"); // Redis는 문자열로 값을 저장
+        redisTemplate.opsForValue().set(likeCountKey, "12");
         redisTemplate.opsForSet().add(DIRTY_COMMENTS_KEY, String.valueOf(commentId));
 
         // when
         feedCommentLikeScheduler.syncLikesToDb();
 
         // then
-        // 1. DB의 댓글을 다시 조회하여 'likeCount'가 업데이트되었는지 확인
-        // ✨ em.flush()와 em.clear()를 통해 영속성 컨텍스트를 초기화하여 DB에서 직접 데이터를 가져오도록 함
         em.flush();
         em.clear();
 
         FeedComment updatedComment = feedCommentJpaRepository.findById(commentId).orElseThrow();
         assertThat(updatedComment.getLikeCount()).isEqualTo(12);
 
-        // 2. 스케줄러가 작업을 마친 후 Redis의 dirty set이 비워졌는지 확인
         Long dirtySetSize = redisTemplate.opsForSet().size(DIRTY_COMMENTS_KEY);
         assertThat(dirtySetSize).isZero();
     }
