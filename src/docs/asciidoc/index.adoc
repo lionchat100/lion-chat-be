@@ -1,4 +1,4 @@
-= Lion Chat API Document
+= Tokit API Document
 :doctype: book
 :icons: font
 :source-highlighter: highlightjs
@@ -294,6 +294,32 @@ operation::fetch_all_hot_feed_success[snippets='http-request,http-response']
 ==== 성공
 
 operation::delete_feed_success[snippets='http-request,http-response']
+
+[[like-feed]]
+=== 피드 좋아요
+
+특정 피드에 '좋아요'를 누릅니다.
+한 사용자는 피드당 한 번만 좋아요를 누를 수 있으며, 반복 호출해도 카운트는 중복으로 증가하지 않습니다.
+
+* **요청 헤더**: `Authorization` 헤더에 Bearer 토큰이 필요합니다.
+* **경로 파라미터**: `feedId`에 좋아요를 누를 댓글의 ID를 명시해야 합니다.
+
+==== 성공
+
+operation::like_feed_success[snippets='http-request,http-response']
+
+[[unlike-feed]]
+=== 피드 좋아요 취소
+
+눌렀던 '좋아요'를 취소합니다.
+
+* **요청 헤더**: `Authorization` 헤더에 Bearer 토큰이 필요합니다.
+* **경로 파라미터**: `feedId`에 좋아요를 취소할 댓글의 ID를 명시해야 합니다.
+
+==== 성공
+
+operation::unlike_feed_success[snippets='http-request,http-response']
+
 
 [[user-card-recommendation]]
 == 유저 카드 추천 시스템
