@@ -1,36 +1,43 @@
 package com.lion.be.chat.domain.entity;
 
-import com.lion.be.chat.domain.entity.ChatRoom;
 import com.lion.be.user.domain.entity.User;
-import jakarta.persistence.*;
-
-import java.time.LocalDateTime;
-
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapsId;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @NoArgsConstructor
 public class ChatRoomUser {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @EmbeddedId
+    private ChatRoomUserId id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @Setter
+    @MapsId("chatRoomId")
     private ChatRoom chatRoom;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @Setter
+    @MapsId("userId")
     private User user;
 
-    @Setter
     private Boolean isRead;
 
     private LocalDateTime regDt;
+
+    public ChatRoomUser(ChatRoom chatRoom, User user, Boolean isRead) {
+        this.chatRoom = chatRoom;
+        this.user = user;
+        this.id = new ChatRoomUserId(chatRoom.getId(), user.getId());
+        this.isRead = isRead;
+        this.regDt = LocalDateTime.now();
+    }
 
     public ChatRoomUser(Boolean isRead) {
         this.isRead = isRead;
