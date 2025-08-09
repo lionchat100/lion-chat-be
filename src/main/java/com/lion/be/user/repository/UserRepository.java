@@ -8,6 +8,8 @@ import java.util.Optional;
 
 public interface UserRepository {
 
+    User findById(Long userId);
+
     Optional<User> fetchByEmail(String email);
 
     User save(User user);
@@ -15,9 +17,11 @@ public interface UserRepository {
     Optional<User> fetchById(Long userId);
 
     List<User> findMatchingUsersExcluding(
-        Long currentUserId,
-        UserCardFilterRequest filterRequest,
-        int size,
-        List<Long> excludeUserIds
+            Long currentUserId,
+            UserCardFilterRequest filterRequest,
+            int size,
+            List<Long> excludeUserIds
     );
+
+    void deleteAll();
 }

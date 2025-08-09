@@ -20,6 +20,12 @@ public class UserRepositoryImpl implements UserRepository {
     private final UserJpaRepository userJpaRepository;
 
     @Override
+    public User findById(Long userId) {
+        return userJpaRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("findById"));
+    }
+
+    @Override
     public Optional<User> fetchByEmail(String email) {
         return userJpaRepository.findByEmail(email);
     }
@@ -65,6 +71,11 @@ public class UserRepositoryImpl implements UserRepository {
                 pageable
             );
         }
+    }
+
+    @Override
+    public void deleteAll() {
+        userJpaRepository.deleteAll();
     }
 
 }
