@@ -44,6 +44,20 @@ public class FeedSteps {
                 .extract();
     }
 
+    public static ExtractableResponse<Response> 피드_하나를_조회한다(String accessToken, RequestSpecification spec, Long feedId) {
+        return RestAssured
+                .given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .spec(spec)
+                .auth().oauth2(accessToken)
+                .log().all()
+                .when()
+                .get("/api/feeds/{feedId}",feedId)
+                .then()
+                .log().all()
+                .extract();
+    }
+
     public static ExtractableResponse<Response> 인기_피드를_조회한다(String accessToken, RequestSpecification spec) {
         return RestAssured
                 .given()
@@ -67,6 +81,25 @@ public class FeedSteps {
                 .log().all()
                 .when()
                 .delete("/api/feeds/{feedId}", feedId)
+                .then()
+                .log().all()
+                .extract();
+    }
+
+    public static ExtractableResponse<Response> 피드를_수정한다(String accessToken, RequestSpecification spec, Long feedId, String title, String content) {
+        Map<String, String> feedUpdateRequest = new HashMap<>();
+        feedUpdateRequest.put("title", title);
+        feedUpdateRequest.put("content", content);
+
+        return RestAssured
+                .given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .spec(spec)
+                .auth().oauth2(accessToken)
+                .body(feedUpdateRequest)
+                .log().all()
+                .when()
+                .put("/api/feeds/{feedId}", feedId)
                 .then()
                 .log().all()
                 .extract();

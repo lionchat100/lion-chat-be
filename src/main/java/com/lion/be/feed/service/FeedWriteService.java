@@ -1,13 +1,14 @@
 package com.lion.be.feed.service;
 
-import com.lion.be.feed.domain.dto.FeedListResponse;
+import com.lion.be.feed.controller.dto.FeedSaveResponse;
 import com.lion.be.feed.domain.entity.Feed;
 import com.lion.be.feed.repository.FeedRepository;
+import com.lion.be.global.exception.FeedNotFoundException;
+import com.lion.be.global.exception.UserNotFoundException;
+import com.lion.be.global.exception.UserUnauthorizedException;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,32 +20,47 @@ public class FeedWriteService {
     private final FeedRepository feedRepository;
     private final UserRepository userRepository;
 
-    //Todo: 커스텀 예외 던지기
     @Transactional
     public void deleteFeed(Long currentUserId, Long feedId){
         User user = userRepository.fetchById(currentUserId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + currentUserId));
+                .orElseThrow(UserNotFoundException::new);
 
         Feed feed = feedRepository.fetchById(feedId)
-                .orElseThrow(() -> new IllegalArgumentException("Feed not found with ID: " + feedId));
+                .orElseThrow(FeedNotFoundException::new);
 
         Long feedWriterId = feed.getUser().getId();
         if(!feedWriterId.equals(user.getId())) {
-            throw new IllegalArgumentException("You do not have permission to delete this feed.");
+            throw new UserUnauthorizedException();
         }
 
         feed.delete();
     }
 
-    //Todo: 커스텀 예외 던지기
     @Transactional
-    public void writeFeed(String title, String content, Long userID){
+    public FeedSaveResponse writeFeed(String title, String content, Long userID){
         User user = userRepository.fetchById(userID)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userID));
+                .orElseThrow(UserNotFoundException::new);
 
         Feed feed = new Feed(title, content, user);
         user.addUserFeed(feed);
 
-        feedRepository.save(feed);
+        Feed savedFeed = feedRepository.save(feed);
+        return new FeedSaveResponse(savedFeed.getId());
+    }
+
+    @Transactional
+    public void updateFeed(Long feedId, String title, String content, Long userId) {
+        User user = userRepository.fetchById(userId)
+                .orElseThrow(UserNotFoundException::new);
+
+        Feed feed = feedRepository.fetchById(feedId)
+                .orElseThrow(FeedNotFoundException::new);
+
+        Long feedWriterId = feed.getUser().getId();
+        if (!feedWriterId.equals(user.getId())) {
+            throw new UserUnauthorizedException();
+        }
+
+        feed.update(title, content);
     }
 }

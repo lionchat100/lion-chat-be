@@ -10,7 +10,6 @@
 == 인증 및 인가
 
 [[token-exchange]]
-
 === Security 로그인 링크
 
 `https://api.lionchat.co.kr/oauth2/authorization/kakao`
