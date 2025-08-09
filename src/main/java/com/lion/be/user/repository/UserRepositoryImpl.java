@@ -20,6 +20,12 @@ public class UserRepositoryImpl implements UserRepository {
     private final UserQueryDslRepository userQueryDslRepository;
 
     @Override
+    public User findById(Long userId) {
+        return userJpaRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("findById"));
+    }
+
+    @Override
     public Optional<User> fetchByEmail(String email) {
         return userJpaRepository.findByEmail(email);
     }
@@ -89,11 +95,17 @@ public class UserRepositoryImpl implements UserRepository {
             excludeUserIds != null ? excludeUserIds : List.of()
         );
     }
+  
+    @Override
+    public boolean existsByNickname(
+      String nickname
+    ) {
+      return userJpaRepository.existsByNickname(nickname);
+    }
+  
+    @Override
+    public void deleteAll() {
+        userJpaRepository.deleteAll();
+    }
 
-	@Override
-	public boolean existsByNickname(
-		String nickname
-	) {
-		return userJpaRepository.existsByNickname(nickname);
-	}
 }

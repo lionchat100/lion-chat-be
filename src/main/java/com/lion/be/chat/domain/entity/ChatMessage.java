@@ -1,11 +1,13 @@
 package com.lion.be.chat.domain.entity;
 
+import com.lion.be.chat.domain.MessageStatus;
 import jakarta.persistence.Id;
-import java.time.Instant;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.time.Instant;
 
 @Document(collection = "chat_message")
 @Getter
@@ -16,21 +18,63 @@ public class ChatMessage {
     private ObjectId id;
 
     private Long senderId;
+
     private String senderName;
 
     private Long chatRoomId;
+
     private Instant date;
+
     private String content;
+
     private Boolean isRead;
 
-    public ChatMessage(Long senderId, String senderName, Long chatRoomId, Instant date, String content,
-                       Boolean isRead) {
+    private MessageStatus status;
+
+    public ChatMessage(
+            ObjectId id,
+            Long senderId,
+            String senderName,
+            Long chatRoomId,
+            Instant date,
+            String content,
+            Boolean isRead,
+            MessageStatus status
+    ) {
+        this.id = id;
         this.senderId = senderId;
         this.senderName = senderName;
         this.chatRoomId = chatRoomId;
         this.date = date;
         this.content = content;
         this.isRead = isRead;
+        this.status = status;
     }
 
+    public ChatMessage(
+            Long senderId,
+            String senderName,
+            Long chatRoomId,
+            Instant date,
+            String content,
+            Boolean isRead,
+            MessageStatus status
+    ) {
+        this.senderId = senderId;
+        this.senderName = senderName;
+        this.chatRoomId = chatRoomId;
+        this.date = date;
+        this.content = content;
+        this.isRead = isRead;
+        this.status = status;
+    }
+
+    public void markAsRead() {
+        this.isRead = true;
+        updateStatus(MessageStatus.READ);
+    }
+
+    public void updateStatus(MessageStatus status) {
+        this.status = status;
+    }
 }

@@ -1,13 +1,19 @@
 package com.lion.be.chat.domain.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
-
-import java.util.ArrayList;
-import java.util.List;
-import lombok.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Version;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -26,13 +32,10 @@ public class ChatRoom {
     private LocalDateTime regDt;
 
     @OneToMany(mappedBy = "chatRoom", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnore
     private List<ChatRoomUser> chatRoomUsers = new ArrayList<>();
 
-    @Setter
     private String recentMessageContent;
 
-    @Setter
     private LocalDateTime recentMessageDt;
 
     public ChatRoom(Boolean isDeleted) {
