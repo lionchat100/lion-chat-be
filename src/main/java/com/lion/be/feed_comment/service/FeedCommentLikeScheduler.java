@@ -2,6 +2,8 @@ package com.lion.be.feed_comment.service;
 
 import com.lion.be.feed_comment.repository.FeedCommentRepository;
 import java.util.List;
+
+import com.lion.be.global.util.RedisKey;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -17,16 +19,13 @@ public class FeedCommentLikeScheduler {
     private final RedisTemplate<String, Object> redisTemplate;
     private final FeedCommentRepository feedCommentRepository;
 
-    private static final String LIKE_COUNT_KEY_PREFIX = "comment:like_count:";
-    private static final String DIRTY_COMMENTS_KEY = "dirty:comments";
-
     // 10초마다 실행
     @Scheduled(fixedRate = 10000)
     @Transactional
     public void syncLikesToDb() {
         log.info("피드 댓글 좋아요 카운트 Batch update 시작");
 
-        List<Object> objCommentIds = redisTemplate.opsForSet().pop(DIRTY_COMMENTS_KEY, 100);
+        List<Object> objCommentIds = redisTemplate.opsForSet().pop(RedisKey.DIRTY_COMMENT_LIKE_KEY, 100);
 
         if (objCommentIds == null || objCommentIds.isEmpty()) {
             log.info("업데이트 할 피드 댓글 좋아요가 존재하지 않음");
@@ -37,7 +36,7 @@ public class FeedCommentLikeScheduler {
             String commentIdStr = (String) commentIdObj;
             Long commentId = Long.parseLong(commentIdStr);
 
-            String likeCountKey = LIKE_COUNT_KEY_PREFIX + commentId;
+            String likeCountKey = RedisKey.COMMENT_LIKE_COUNT_KEY_PREFIX + commentId;
             Object likeCountObj = redisTemplate.opsForValue().get(likeCountKey);
 
             if (likeCountObj != null) {

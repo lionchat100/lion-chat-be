@@ -2,6 +2,8 @@ package com.lion.be.feed.service;
 
 import com.lion.be.feed.repository.FeedRepository;
 import java.util.List;
+
+import com.lion.be.global.util.RedisKey;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -17,15 +19,12 @@ public class FeedLikeScheduler {
     private final RedisTemplate<String, Object> redisTemplate;
     private final FeedRepository feedRepository;
 
-    private static final String LIKE_COUNT_KEY_PREFIX = "feed:like_count:";
-    private static final String DIRTY_FEEDS_KEY = "dirty:feeds";
-
     @Scheduled(fixedRate = 10000)
     @Transactional
     public void syncLikesToDb() {
         log.info("피드 좋아요 카운트 Batch update 시작");
 
-        List<Object> objFeedIds = redisTemplate.opsForSet().pop(DIRTY_FEEDS_KEY, 100);
+        List<Object> objFeedIds = redisTemplate.opsForSet().pop(RedisKey.DIRTY_FEED_LIKE_KEY, 100);
 
         if (objFeedIds == null || objFeedIds.isEmpty()) {
             log.info("업데이트 할 피드 좋아요가 존재하지 않음");
@@ -35,7 +34,7 @@ public class FeedLikeScheduler {
         for (Object feedIdObj : objFeedIds) {
             String feedIdStr = (String) feedIdObj;
             Long feedId = Long.parseLong(feedIdStr);
-            String likeCountKey = LIKE_COUNT_KEY_PREFIX + feedId;
+            String likeCountKey = RedisKey.FEED_LIKE_COUNT_KEY_PREFIX + feedId;
             Object likeCountObj = redisTemplate.opsForValue().get(likeCountKey);
 
             if (likeCountObj != null) {
