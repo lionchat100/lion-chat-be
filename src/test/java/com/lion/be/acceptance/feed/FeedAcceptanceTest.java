@@ -2,6 +2,7 @@ package com.lion.be.acceptance.feed;
 
 import static com.lion.be.acceptance.auth.AuthSteps.비회원이_로그인한다;
 import static com.lion.be.acceptance.auth.AuthSteps.원준이_로그인한다;
+import static com.lion.be.acceptance.feed.FeedSteps.문서_없이_피드_하나를_조회한다;
 import static com.lion.be.acceptance.feed.FeedSteps.상태코드_200이다;
 import static com.lion.be.acceptance.feed.FeedSteps.상태코드_401이다;
 import static com.lion.be.acceptance.feed.FeedSteps.상태코드_404이다;
@@ -279,7 +280,7 @@ public class FeedAcceptanceTest extends AcceptanceTest {
         피드에_좋아요를_누른다(accessToken, spec, feedId);
 
         // then
-        var fetchResponse = 피드_하나를_조회한다(accessToken, spec, feedId);
+        var fetchResponse = 문서_없이_피드_하나를_조회한다(accessToken, feedId);
         피드_좋아요_정보를_검증한다(fetchResponse, feedId, 1, true);
     }
 
@@ -301,7 +302,7 @@ public class FeedAcceptanceTest extends AcceptanceTest {
         피드의_좋아요를_취소한다(accessToken, spec, feedId);
 
         // then
-        var fetchResponse = 피드_하나를_조회한다(accessToken, spec, feedId);
+        var fetchResponse = 문서_없이_피드_하나를_조회한다(accessToken, feedId);
         피드_좋아요_정보를_검증한다(fetchResponse, feedId, 0, false);
     }
 
