@@ -50,14 +50,7 @@ public interface UserRepository {
         List<Long> excludeUserIds
     );
 
-	  boolean existsByNickname(String nickname);
-  
-    List<User> findMatchingUsersExcluding(
-            Long currentUserId,
-            UserCardFilterRequest filterRequest,
-            int size,
-            List<Long> excludeUserIds
-    );
+  	boolean existsByNickname(String nickname);
 
     void deleteAll();
 }
