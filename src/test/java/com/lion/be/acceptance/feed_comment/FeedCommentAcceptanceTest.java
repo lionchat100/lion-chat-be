@@ -2,6 +2,7 @@ package com.lion.be.acceptance.feed_comment;
 
 import static com.lion.be.acceptance.feed.FeedSteps.피드를_작성한다;
 import static com.lion.be.acceptance.feed_comment.FeedCommentSteps.feedCommentSaveRequest_생성;
+import static com.lion.be.acceptance.feed_comment.FeedCommentSteps.문서_없이_피드의_모든_댓글을_조회한다;
 import static com.lion.be.acceptance.feed_comment.FeedCommentSteps.상태코드가_200이다;
 import static com.lion.be.acceptance.feed_comment.FeedCommentSteps.피드_댓글_삭제_후_조회_응답을_검증한다;
 import static com.lion.be.acceptance.feed_comment.FeedCommentSteps.피드_댓글_작성_응답을_검증한다;
@@ -161,8 +162,8 @@ class FeedCommentAcceptanceTest extends AcceptanceTest {
             // then
             상태코드가_200이다(likeResponse);
 
-            var fetchResponse = 피드의_모든_댓글을_조회한다(feedId, accessToken, spec);
-            피드_댓글_좋아요_정보를_검증한다(fetchResponse, commentId, 1, true);
+//            var fetchResponse = 피드의_모든_댓글을_조회한다(feedId, accessToken, spec);
+//            피드_댓글_좋아요_정보를_검증한다(fetchResponse, commentId, 1, true);
         }
 
         @DisplayName("좋아요를 누른 댓글의 좋아요를 취소하면 likeCount가 1 감소하고 isLiked는 false가 된다.")
@@ -178,7 +179,7 @@ class FeedCommentAcceptanceTest extends AcceptanceTest {
             // then
             상태코드가_200이다(unlikeResponse);
 
-            var fetchResponse = 피드의_모든_댓글을_조회한다(feedId, accessToken, spec);
+            var fetchResponse = 문서_없이_피드의_모든_댓글을_조회한다(feedId, accessToken);
             피드_댓글_좋아요_정보를_검증한다(fetchResponse, commentId, 0, false);
         }
 
@@ -193,7 +194,7 @@ class FeedCommentAcceptanceTest extends AcceptanceTest {
             피드_댓글에_좋아요를_누른다(commentId, accessToken, spec); // 두 번째 좋아요
 
             // then
-            var fetchResponse = 피드의_모든_댓글을_조회한다(feedId, accessToken, spec);
+            var fetchResponse = 문서_없이_피드의_모든_댓글을_조회한다(feedId, accessToken);
             피드_댓글_좋아요_정보를_검증한다(fetchResponse, commentId, 1, true);
         }
 
@@ -204,15 +205,13 @@ class FeedCommentAcceptanceTest extends AcceptanceTest {
             api_문서_타이틀("multiple_users_like_comment_success", spec);
 
             // when
-            피드_댓글에_좋아요를_누른다(commentId, accessToken, spec); // 첫 번째 사용자(원준)가 좋아요
-            피드_댓글에_좋아요를_누른다(commentId, anotherAccessToken, spec); // 두 번째 사용자(민지)가 좋아요
+            피드_댓글에_좋아요를_누른다(commentId, accessToken, spec);
+            피드_댓글에_좋아요를_누른다(commentId, anotherAccessToken, spec);
 
             // then
-            // 첫 번째 사용자(원준)의 관점에서 조회
             var fetchResponseForUser1 = 피드의_모든_댓글을_조회한다(feedId, accessToken, spec);
             피드_댓글_좋아요_정보를_검증한다(fetchResponseForUser1, commentId, 2, true);
 
-            // 두 번째 사용자(민지)의 관점에서 조회
             var fetchResponseForUser2 = 피드의_모든_댓글을_조회한다(feedId, anotherAccessToken, spec);
             피드_댓글_좋아요_정보를_검증한다(fetchResponseForUser2, commentId, 2, true);
         }

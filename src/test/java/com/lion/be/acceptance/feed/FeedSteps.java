@@ -64,6 +64,19 @@ public class FeedSteps {
                 .extract();
     }
 
+    public static ExtractableResponse<Response> 문서_없이_피드_하나를_조회한다(String accessToken, Long feedId) {
+        return RestAssured
+                .given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .auth().oauth2(accessToken)
+                .log().all()
+                .when()
+                .get("/api/feeds/{feedId}",feedId)
+                .then()
+                .log().all()
+                .extract();
+    }
+
     public static ExtractableResponse<Response> 인기_피드를_조회한다(String accessToken, RequestSpecification spec) {
         return RestAssured
                 .given()
@@ -109,6 +122,57 @@ public class FeedSteps {
                 .then()
                 .log().all()
                 .extract();
+    }
+
+    public static ExtractableResponse<Response> 피드에_좋아요를_누른다(
+            String accessToken,
+            RequestSpecification spec,
+            Long feedId
+    ) {
+        return RestAssured
+                .given()
+                .spec(spec)
+                .auth().oauth2(accessToken)
+                .log().all()
+                .when()
+                .post("/api/feeds/{feedId}/like", feedId)
+                .then()
+                .log().all()
+                .extract();
+    }
+
+    public static ExtractableResponse<Response> 피드의_좋아요를_취소한다(
+            String accessToken,
+            RequestSpecification spec,
+            Long feedId
+    ) {
+        return RestAssured
+                .given()
+                .spec(spec)
+                .auth().oauth2(accessToken)
+                .log().all()
+                .when()
+                .delete("/api/feeds/{feedId}/like", feedId)
+                .then()
+                .log().all()
+                .extract();
+    }
+
+    public static void 피드_좋아요_정보를_검증한다(
+            ExtractableResponse<Response> response,
+            Long targetFeedId,
+            int expectedLikeCount,
+            boolean expectedIsLiked
+    ) {
+        // 단건 조회 응답 구조에 맞게 검증 로직 수정
+        Map<String, Object> feed = response.jsonPath().getMap("$"); // 응답 전체가 FeedDto 객체
+
+        Assertions.assertAll(
+                () -> 상태코드_200이다(response),
+                () -> assertThat(feed.get("id")).isEqualTo(targetFeedId.intValue()), // JSON Path는 숫자를 Integer로 반환할 수 있음
+                () -> assertThat(feed.get("likeCount")).isEqualTo(expectedLikeCount),
+                () -> assertThat(feed.get("isLiked")).isEqualTo(expectedIsLiked)
+        );
     }
 
     public static void 상태코드_200이다(ExtractableResponse<Response> response) {

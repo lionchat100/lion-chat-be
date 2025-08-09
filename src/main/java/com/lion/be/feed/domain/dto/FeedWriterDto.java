@@ -10,7 +10,9 @@ import lombok.Setter;
 @AllArgsConstructor
 @Setter
 public class FeedWriterDto {
+
     private String name;
     private Long id;
     private String profileImageUrl;
+
 }

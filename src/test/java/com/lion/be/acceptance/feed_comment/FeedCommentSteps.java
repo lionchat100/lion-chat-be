@@ -59,6 +59,21 @@ public class FeedCommentSteps {
                 .extract();
     }
 
+    public static ExtractableResponse<Response> 문서_없이_피드의_모든_댓글을_조회한다(
+            Long feedId,
+            String accessToken) {
+        return RestAssured
+                .given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .auth().oauth2(accessToken)
+                .log().all()
+                .when()
+                .get("/api/feeds/{feedId}/comments", feedId)
+                .then()
+                .log().all()
+                .extract();
+    }
+
     public static ExtractableResponse<Response> 피드의_댓글을_삭제한다(
             Long commentId,
             String accessToken,

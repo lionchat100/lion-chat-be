@@ -10,6 +10,8 @@ import lombok.Setter;
 @Setter
 @Getter
 public class FeedWriteRequest {
+
     private String title;
     private String content;
+
 }

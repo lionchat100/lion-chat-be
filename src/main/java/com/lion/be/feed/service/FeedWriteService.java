@@ -11,16 +11,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class FeedWriteService {
+
     private final FeedRepository feedRepository;
     private final UserRepository userRepository;
 
     @Transactional
-    public void deleteFeed(Long currentUserId, Long feedId){
+    public void deleteFeed(Long currentUserId, Long feedId) {
         User user = userRepository.fetchById(currentUserId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
@@ -28,7 +27,7 @@ public class FeedWriteService {
                 .orElseThrow(() -> new CustomException(ErrorCode.FEED_NOT_FOUND));
 
         Long feedWriterId = feed.getUser().getId();
-        if(!feedWriterId.equals(user.getId())) {
+        if (!feedWriterId.equals(user.getId())) {
             throw new CustomException(ErrorCode.USER_UNAUTHORIZED);
         }
 
@@ -36,7 +35,7 @@ public class FeedWriteService {
     }
 
     @Transactional
-    public FeedSaveResponse writeFeed(String title, String content, Long userID){
+    public FeedSaveResponse writeFeed(String title, String content, Long userID) {
         User user = userRepository.fetchById(userID)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
@@ -62,4 +61,5 @@ public class FeedWriteService {
 
         feed.update(title, content);
     }
+
 }
