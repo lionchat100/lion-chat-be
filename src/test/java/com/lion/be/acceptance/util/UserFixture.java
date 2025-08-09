@@ -39,6 +39,10 @@ public enum UserFixture {
         return Map.of("email", 회원_원준.email, "name", 회원_원준.name, "imageUrl", 회원_원준.imageUrl);
     }
 
+    public static Map<String, Object> 비회원_회원가입_요청() {
+        return Map.of("email", 비회원.email, "name", 비회원.name, "imageUrl", 비회원.imageUrl);
+    }
+
 	public static Map<String, Object> 회원_멋사_온보딩_요청(){
 		return Map.ofEntries(
 			Map.entry("nickname", "멋진 호랑이"),

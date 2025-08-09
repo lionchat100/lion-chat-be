@@ -1,6 +1,8 @@
 package com.lion.be.acceptance;
 
+import static com.lion.be.acceptance.auth.AuthSteps.비회원이_로그인한다;
 import static com.lion.be.acceptance.auth.AuthSteps.원준이_로그인한다;
+import static com.lion.be.acceptance.user.UserSteps.비회원_회원가입;
 import static com.lion.be.acceptance.user.UserSteps.원준_회원가입;
 import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.document;
 
@@ -94,15 +96,18 @@ public abstract class AcceptanceTest {
         registry.add("spring.messaging.stomp.broker-relay.host", () -> System.getProperty("RABBITMQ_HOST"));
         registry.add("spring.messaging.stomp.broker-relay.port", () -> System.getProperty("RABBITMQ_STOMP_PORT"));
         registry.add("spring.messaging.stomp.broker-relay.system-login", () -> System.getProperty("RABBITMQ_USERNAME"));
-        registry.add("spring.messaging.stomp.broker-relay.system-passcode", () -> System.getProperty("RABBITMQ_PASSWORD"));
+        registry.add("spring.messaging.stomp.broker-relay.system-passcode",
+                () -> System.getProperty("RABBITMQ_PASSWORD"));
         registry.add("spring.messaging.stomp.broker-relay.client-login", () -> System.getProperty("RABBITMQ_USERNAME"));
-        registry.add("spring.messaging.stomp.broker-relay.client-passcode", () -> System.getProperty("RABBITMQ_PASSWORD"));
+        registry.add("spring.messaging.stomp.broker-relay.client-passcode",
+                () -> System.getProperty("RABBITMQ_PASSWORD"));
     }
 
     @LocalServerPort
     public int port;
 
     public String 회원_원준_액세스토큰;
+    public String 비회원_엑세스토큰;
 
     @Autowired
     protected DatabaseCleanup databaseCleanup;
@@ -159,11 +164,17 @@ public abstract class AcceptanceTest {
 
     private void initAccessToken() {
         회원_원준_액세스토큰 = 원준_액세스토큰_요청();
+        비회원_엑세스토큰 = 비회원_액세스토큰_요청();
     }
 
     private static String 원준_액세스토큰_요청() {
         원준_회원가입();
         return 원준이_로그인한다(new RequestSpecBuilder().build()).jsonPath().getString("accessToken");
+    }
+
+    private static String 비회원_액세스토큰_요청() {
+        비회원_회원가입();
+        return 비회원이_로그인한다(new RequestSpecBuilder().build()).jsonPath().getString("accessToken");
     }
 
 }
