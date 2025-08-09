@@ -36,4 +36,13 @@ public class FeedCommentRepositoryImpl implements FeedCommentRepository {
         feedCommentJpaRepository.updateLikeCount(commentId, likeCount);
     }
 
+    @Override
+    public FeedCommentResponse findCommentById(Long commentId) {
+        return feedCommentJpaRepository.findCommentById(commentId);
+    }
+
+    @Override
+    public void softDeleteByFeedId(Long feedId) {
+        feedCommentJpaRepository.softDeleteByFeedId(feedId);
+    }
 }
