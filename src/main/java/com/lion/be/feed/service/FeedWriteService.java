@@ -5,7 +5,6 @@ import com.lion.be.feed.domain.entity.Feed;
 import com.lion.be.feed.repository.FeedRepository;
 import com.lion.be.global.exception.CustomException;
 import com.lion.be.global.exception.ErrorCode;
-import com.lion.be.global.exception.FeedNotFoundException;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
