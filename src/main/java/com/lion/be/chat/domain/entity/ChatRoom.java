@@ -25,8 +25,8 @@ public class ChatRoom {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Version
-    private Long version;
+//    @Version
+//    private Long version;
 
     private Boolean isDeleted = false;
 
@@ -41,7 +41,7 @@ public class ChatRoom {
 
     public ChatRoom(
             Long id,
-            Long version,
+//            Long version,
             Boolean isDeleted,
             LocalDateTime regDt,
             List<ChatRoomUser> chatRoomUsers,
@@ -49,7 +49,7 @@ public class ChatRoom {
             Instant now
     ) {
         this.id = id;
-        this.version = version;
+//        this.version = version;
         this.isDeleted = isDeleted;
         this.regDt = regDt;
         this.chatRoomUsers = chatRoomUsers;
