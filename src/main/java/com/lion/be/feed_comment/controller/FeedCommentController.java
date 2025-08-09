@@ -9,7 +9,6 @@ import com.lion.be.feed_comment.service.FeedCommentWriteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -35,8 +34,9 @@ public class FeedCommentController {
     }
 
     @GetMapping("/api/feeds/{feedId}/comments")
-    public ResponseEntity<Slice<FeedCommentResponse>> fetchAll(@PathVariable Long feedId, Pageable pageable) {
-        Slice<FeedCommentResponse> response = feedCommentReadService.fetchAll(feedId, pageable);
+    public ResponseEntity<Slice<FeedCommentResponse>> fetchAll(@PathVariable Long feedId, Pageable pageable,
+                                                               @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        Slice<FeedCommentResponse> response = feedCommentReadService.fetchAll(feedId, pageable, userPrincipal.getId());
         return ResponseEntity.ok(response);
     }
 

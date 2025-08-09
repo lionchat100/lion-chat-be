@@ -101,8 +101,8 @@ public class FeedCommentSteps {
                     Map<String, Object> firstComment = content.get(0);
 
                     assertThat(firstComment).containsKeys("id", "feedId", "feedCommentUserResponse", "content",
-                            "createdAt", "updatedAt");
-                    assertThat(firstComment.get("content")).isEqualTo("댓글1"); // 생성 순서에 따라 검증
+                            "createdAt", "updatedAt", "likeCount", "isLiked");
+                    assertThat(firstComment.get("content")).isEqualTo("댓글1");
 
                     assertThat(firstComment.get("feedCommentUserResponse")).isInstanceOf(Map.class);
 
@@ -143,6 +143,61 @@ public class FeedCommentSteps {
                         .map(comment -> comment.get("content").toString())
                         .collect(Collectors.toList()))
                         .doesNotContain(deletedContent)
+        );
+    }
+
+    public static ExtractableResponse<Response> 피드_댓글에_좋아요를_누른다(
+            Long commentId,
+            String accessToken,
+            RequestSpecification spec
+    ) {
+        return RestAssured
+                .given()
+                .spec(spec)
+                .auth().oauth2(accessToken)
+                .log().all()
+                .when()
+                .post("/api/feeds/comments/{commentId}/like", commentId)
+                .then()
+                .log().all()
+                .extract();
+    }
+
+    public static ExtractableResponse<Response> 피드_댓글의_좋아요를_취소한다(
+            Long commentId,
+            String accessToken,
+            RequestSpecification spec
+    ) {
+        return RestAssured
+                .given()
+                .spec(spec)
+                .auth().oauth2(accessToken)
+                .log().all()
+                .when()
+                .delete("/api/feeds/comments/{commentId}/like", commentId)
+                .then()
+                .log().all()
+                .extract();
+    }
+
+    public static void 피드_댓글_좋아요_정보를_검증한다(
+            ExtractableResponse<Response> response,
+            Long targetCommentId,
+            int expectedLikeCount,
+            boolean expectedIsLiked
+    ) {
+        List<Map<String, Object>> comments = response.jsonPath().getList("content");
+
+        // 검증하려는 특정 댓글을 찾습니다.
+        Map<String, Object> targetComment = comments.stream()
+                .filter(comment -> Long.valueOf(comment.get("id").toString()).equals(targetCommentId))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Target comment not found. ID: " + targetCommentId));
+
+        Assertions.assertAll(
+                () -> 상태코드를_검증한다(response, HttpStatus.OK),
+                () -> assertThat((Integer) targetComment.get("likeCount")).isEqualTo(expectedLikeCount),
+                () -> assertThat((Boolean) targetComment.get("isLiked")).isEqualTo(expectedIsLiked)
         );
     }
 

@@ -218,6 +218,31 @@ operation::fetch_all_feed_comment_success[snippets='http-request,http-response']
 
 operation::delete_feed_comment_success[snippets='http-request,http-response']
 
+[[like-feed-comment]]
+=== 피드 댓글 좋아요
+
+특정 댓글에 '좋아요'를 누릅니다.
+한 사용자는 댓글당 한 번만 좋아요를 누를 수 있으며, 반복 호출해도 카운트는 중복으로 증가하지 않습니다.
+
+* **요청 헤더**: `Authorization` 헤더에 Bearer 토큰이 필요합니다.
+* **경로 파라미터**: `commentId`에 좋아요를 누를 댓글의 ID를 명시해야 합니다.
+
+==== 성공
+
+operation::like_feed_comment_success[snippets='http-request,http-response']
+
+[[unlike-feed-comment]]
+=== 피드 댓글 좋아요 취소
+
+눌렀던 '좋아요'를 취소합니다.
+
+* **요청 헤더**: `Authorization` 헤더에 Bearer 토큰이 필요합니다.
+* **경로 파라미터**: `commentId`에 좋아요를 취소할 댓글의 ID를 명시해야 합니다.
+
+==== 성공
+
+operation::unlike_feed_comment_success[snippets='http-request,http-response']
+
 [[feed]]
 == 피드
 
@@ -363,4 +388,3 @@ operation::my_profile_card[snippets='http-request,http-response']
 인증 토큰 없이 요청 시 401 Unauthorized를 반환합니다.
 
 operation::unauthorized_card_access[snippets='http-request,http-response']
-
