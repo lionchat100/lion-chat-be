@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.operation.preprocess.Preprocessors;
@@ -115,6 +116,9 @@ public abstract class AcceptanceTest {
     @Autowired
     protected SqlFileExecutor sqlFileExecutor;
 
+    @Autowired
+    protected RedisTemplate<String, Object> redisTemplate;
+
     protected RequestSpecification spec;
 
     public static void api_문서_타이틀(String documentName, RequestSpecification specification) {
@@ -145,6 +149,8 @@ public abstract class AcceptanceTest {
         databaseCleanup.execute();
         mongoCleanup.execute();
         sqlFileExecutor.execute("data.sql");
+
+        redisTemplate.getConnectionFactory().getConnection().flushAll();
 
         initAccessToken();
         this.spec = new RequestSpecBuilder().addFilter(
