@@ -1,15 +1,14 @@
 package com.lion.be.feed.domain.entity;
 
+import com.lion.be.feed_comment.domain.entity.FeedComment;
 import com.lion.be.global.entity.BaseEntity;
 import com.lion.be.user.domain.entity.User;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -31,9 +30,12 @@ public class Feed extends BaseEntity {
 
     private Boolean isDeleted;
 
-    //List<FeedComment> feedComments;
+    @OneToMany(mappedBy = "feed", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<FeedComment> feedComments = new ArrayList<>();
 
     private long likeCount;
+
+    private long commentCount;
 
     public Feed(String title, String content, User user) {
         this.isDeleted = false; // 기본값 설정
@@ -41,6 +43,7 @@ public class Feed extends BaseEntity {
         this.content = content;
         this.user = user;
         this.likeCount = 0L;
+        this.commentCount = 0L;
     }
 
     public void delete() {
@@ -52,4 +55,7 @@ public class Feed extends BaseEntity {
         this.content = content;
     }
 
+    public void addComment(FeedComment comment) {
+        feedComments.add(comment);
+    }
 }
