@@ -92,7 +92,7 @@ operation::test_login_success[snippets='http-request,http-response']
 아래는 메시지 송수신 전반의 흐름입니다.
 
 . **메시지 전송 (클라이언트 → 서버)**
-클라이언트는 상황에 따라 `POST /api/chat/message` REST API 또는 WebSocket(STOMP) 메시지를 통해 채팅 메시지를 서버로 전송할 수 있습니다.
+클라이언트는 상황에 따라 `POST /api/chats/message` REST API 또는 WebSocket(STOMP) 메시지를 통해 채팅 메시지를 서버로 전송할 수 있습니다.
 서버는 메시지를 데이터베이스에 저장합니다.
 . **메시지 발행 및 실시간 푸시 (서버 → 클라이언트)**
 저장된 메시지는 메시지 브로커(RabbitMQ 등)에 발행되고, WebSocket을 통해 연결된 모든 클라이언트에 실시간 푸시됩니다.
