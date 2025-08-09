@@ -12,7 +12,7 @@ import org.springframework.data.repository.query.Param;
 public interface FeedCommentJpaRepository extends JpaRepository<FeedComment, Long> {
 
     @Query("SELECT NEW com.lion.be.feed_comment.domain.dto.FeedCommentResponse(" +
-            "c.id, c.feed.id, c.content, c.createdAt, c.updatedAt, u.id, u.name, u.imageUrl"
+            "c.id, c.feed.id, c.content, c.createdAt, c.updatedAt, u.id, u.name, u.imageUrl, c.likeCount" // c.likeCount 추가
             + ") " +
             "FROM FeedComment c " +
             "JOIN c.user u " +

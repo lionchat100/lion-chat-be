@@ -32,9 +32,14 @@ public class FeedCommentReadService {
                     String likedUsersKey = LIKED_USERS_KEY_PREFIX + comment.id();
 
                     Object likeCountObj = redisTemplate.opsForValue().get(likeCountKey);
-                    long likeCount = (likeCountObj != null) ?
-                            ((Number) likeCountObj).longValue()
-                            : comment.likeCount();
+                    long finalLikeCount;
+
+                    if (likeCountObj != null) {
+                        finalLikeCount = ((Number) likeCountObj).longValue();
+                    } else {
+                        finalLikeCount = comment.likeCount(); // DB에서 조회한 likeCount 사용
+                        redisTemplate.opsForValue().set(likeCountKey, finalLikeCount);
+                    }
 
                     boolean isLiked = Boolean.TRUE.equals(
                             redisTemplate.opsForSet().isMember(likedUsersKey, String.valueOf(userId))
@@ -45,7 +50,7 @@ public class FeedCommentReadService {
                             comment.feedId(),
                             comment.feedCommentUserResponse(),
                             comment.content(),
-                            likeCount,
+                            finalLikeCount, // 최종 계산된 좋아요 수
                             isLiked,
                             comment.createdAt(),
                             comment.updatedAt()

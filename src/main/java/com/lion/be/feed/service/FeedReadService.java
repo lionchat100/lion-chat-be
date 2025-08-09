@@ -21,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class FeedReadService {
 
     private final FeedRepository feedRepository;
-    private final RedisTemplate<String, Object> redisTemplate; // ✨ RedisTemplate 주입
+    private final RedisTemplate<String, Object> redisTemplate;
 
     private static final int DEFAULT_PAGE_SIZE = 30;
     private static final String LIKE_COUNT_KEY_PREFIX = "feed:like_count:";
@@ -36,7 +36,7 @@ public class FeedReadService {
         Feed feed = feedRepository.fetchById(feedId)
                 .orElseThrow(() -> new CustomException(ErrorCode.FEED_NOT_FOUND));
 
-        long likeCount = getLikeCountFromRedis(feed);
+        long likeCount = getAndCacheLikeCount(feed.getId(), feed.getLikeCount());
         boolean isLiked = isLikedByCurrentUser(feedId, currentUserId);
         long commentCount = 0L; // TODO: 댓글 수 조회 로직 필요
 
@@ -47,7 +47,6 @@ public class FeedReadService {
         );
     }
 
-    // ✨ currentUserId를 받아 Redis 데이터와 조합하도록 로직 변경
     public Slice<FeedResponse> getRecentFeedsFirst(Integer size, Long currentUserId) {
         Slice<FeedResponse> feedResponses = feedRepository.fetchRecentFeedsFirst(getRecentPageable(size));
         return enrichFeedsWithRedisData(feedResponses, currentUserId);
@@ -73,23 +72,27 @@ public class FeedReadService {
             FeedDto feedDto = feedResponse.getFeed();
             long feedId = feedDto.getId();
 
-            Object likeCountObj = redisTemplate.opsForValue().get(LIKE_COUNT_KEY_PREFIX + feedId);
-            if (likeCountObj != null) {
-                feedDto.setLikeCount(((Number) likeCountObj).longValue());
-            }
+            // ✨ 수정: 캐시 워밍업 로직을 포함한 메서드 호출
+            long finalLikeCount = getAndCacheLikeCount(feedId, feedDto.getLikeCount());
+            feedDto.setLikeCount(finalLikeCount);
 
             if (currentUserId != null) {
-                boolean isLiked = Boolean.TRUE.equals(redisTemplate.opsForSet()
-                        .isMember(LIKED_USERS_KEY_PREFIX + feedId, String.valueOf(currentUserId)));
-                feedDto.setIsLiked(isLiked);
+                feedDto.setIsLiked(isLikedByCurrentUser(feedId, currentUserId));
             }
         });
         return feeds;
     }
 
-    private long getLikeCountFromRedis(Feed feed) {
-        Object likeCountObj = redisTemplate.opsForValue().get(LIKE_COUNT_KEY_PREFIX + feed.getId());
-        return (likeCountObj != null) ? ((Number) likeCountObj).longValue() : feed.getLikeCount();
+    private long getAndCacheLikeCount(Long feedId, long dbLikeCount) {
+        String likeCountKey = LIKE_COUNT_KEY_PREFIX + feedId;
+        Object likeCountObj = redisTemplate.opsForValue().get(likeCountKey);
+
+        if (likeCountObj != null) {
+            return ((Number) likeCountObj).longValue();
+        } else {
+            redisTemplate.opsForValue().set(likeCountKey, dbLikeCount);
+            return dbLikeCount;
+        }
     }
 
     private boolean isLikedByCurrentUser(Long feedId, Long currentUserId) {

@@ -10,10 +10,10 @@ public record FeedCommentResponse(Long id,
                                   boolean isLiked,
                                   LocalDateTime createdAt,
                                   LocalDateTime updatedAt) {
-
+    // JPQL에서 사용할 새로운 생성자 추가
     public FeedCommentResponse(Long id, Long feedId, String content, LocalDateTime createdAt, LocalDateTime updatedAt,
-                               Long userId, String userName, String userImageUrl) {
-        this(id, feedId, new FeedCommentUserResponse(userId, userName, userImageUrl), content, 0, false, createdAt,
+                               Long userId, String userName, String userImageUrl, long likeCount) {
+        this(id, feedId, new FeedCommentUserResponse(userId, userName, userImageUrl), content, likeCount, false, createdAt,
                 updatedAt);
     }
 
