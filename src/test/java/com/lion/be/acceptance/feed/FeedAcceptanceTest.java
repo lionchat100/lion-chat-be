@@ -274,17 +274,20 @@ public class FeedAcceptanceTest extends AcceptanceTest {
                 "Test Title 2");
         List<String> expectedContents = List.of("Test Content 3", "Test Content 1", "Test Content 5", "Test Content 4",
                 "Test Content 2");
-        List<Boolean> expectedLiked = List.of(true, true, false, false, false);
+        List<Boolean> expectedLiked1 = List.of(true, true, false, false, false);
+        List<Boolean> expectedLiked2 = List.of(true, true, true, false, false);
 
         // when
         // 좋아요 수가 극적으로 변화하지 않는다면, Redis와 RDB의 좋아요 수 차이가 정렬에 유의미하게 영향을 주지 않을 것이다.
         // 하지만 테스트할 때는 RDB에 좋아요 수가 정확히 반영되게 하기 위해 억지로 Redis를 Flush한다.
         feedLikeScheduler.syncLikesToDb();
 
-        ExtractableResponse<Response> response = 인기_피드를_조회한다(accessToken1, spec);
+        ExtractableResponse<Response> response1 = 인기_피드를_조회한다(accessToken1, spec);
+        ExtractableResponse<Response> response2 = 인기_피드를_조회한다(accessToken2, spec);
 
         // then
-        피드_전체_조회_응답을_검증한다(response, 5, expectedTitles, expectedContents, expectedLiked);
+        피드_전체_조회_응답을_검증한다(response1, 5, expectedTitles, expectedContents, expectedLiked1);
+        피드_전체_조회_응답을_검증한다(response2, 5, expectedTitles, expectedContents, expectedLiked2);
     }
 
     @Test
