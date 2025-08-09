@@ -23,15 +23,16 @@ public class FeedLikeScheduler {
     @Scheduled(fixedRate = 10000)
     @Transactional
     public void syncLikesToDb() {
-        log.info("Batch update for feed likes started.");
-        List<Object> dirtyFeedIds = redisTemplate.opsForSet().pop(DIRTY_FEEDS_KEY, 100);
+        log.info("피드 좋아요 카운트 Batch update 시작");
 
-        if (dirtyFeedIds == null || dirtyFeedIds.isEmpty()) {
-            log.info("No dirty feeds to update.");
+        List<Object> objFeedIds = redisTemplate.opsForSet().pop(DIRTY_FEEDS_KEY, 100);
+
+        if (objFeedIds == null || objFeedIds.isEmpty()) {
+            log.info("업데이트 할 피드 좋아요가 존재하지 않음");
             return;
         }
 
-        for (Object feedIdObj : dirtyFeedIds) {
+        for (Object feedIdObj : objFeedIds) {
             String feedIdStr = (String) feedIdObj;
             Long feedId = Long.parseLong(feedIdStr);
             String likeCountKey = LIKE_COUNT_KEY_PREFIX + feedId;
@@ -45,10 +46,11 @@ public class FeedLikeScheduler {
                     likeCount = Long.parseLong(likeCountObj.toString());
                 }
                 feedRepository.updateLikeCount(feedId, likeCount);
-                log.debug("Updating feedId: {} with likeCount: {}", feedId, likeCount);
+                log.debug("업데이트 feedId: {}, likeCount: {}", feedId, likeCount);
             }
         }
-        log.info("Batch update for {} feed likes finished.", dirtyFeedIds.size());
+
+        log.info("피드 댓글 좋아요 카운트 Batch update 끝: {}번", objFeedIds.size());
     }
 
 }
