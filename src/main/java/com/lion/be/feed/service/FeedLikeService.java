@@ -11,7 +11,6 @@ public class FeedLikeService {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
-    // ✨ 피드용 Redis 키 접두사 정의
     private static final String LIKE_COUNT_KEY_PREFIX = "feed:like_count:";
     private static final String LIKED_USERS_KEY_PREFIX = "feed:liked_users:";
     private static final String DIRTY_FEEDS_KEY = "dirty:feeds";

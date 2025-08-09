@@ -24,16 +24,16 @@ public class FeedCommentLikeScheduler {
     @Scheduled(fixedRate = 10000)
     @Transactional
     public void syncLikesToDb() {
-        log.info("좋아요 카운트 Batch update 시작");
+        log.info("피드 댓글 좋아요 카운트 Batch update 시작");
 
-        List<Object> ObjCommentIds = redisTemplate.opsForSet().pop(DIRTY_COMMENTS_KEY, 100);
+        List<Object> objCommentIds = redisTemplate.opsForSet().pop(DIRTY_COMMENTS_KEY, 100);
 
-        if (ObjCommentIds == null || ObjCommentIds.isEmpty()) {
-            log.info("업데이트 할 좋아요가 존재하지 않음");
+        if (objCommentIds == null || objCommentIds.isEmpty()) {
+            log.info("업데이트 할 피드 댓글 좋아요가 존재하지 않음");
             return;
         }
 
-        for (Object commentIdObj : ObjCommentIds) {
+        for (Object commentIdObj : objCommentIds) {
             String commentIdStr = (String) commentIdObj;
             Long commentId = Long.parseLong(commentIdStr);
 
@@ -51,11 +51,11 @@ public class FeedCommentLikeScheduler {
                 }
 
                 feedCommentRepository.updateLikeCount(commentId, likeCount);
-                log.debug("Updating commentId: {} with likeCount: {}", commentId, likeCount);
+                log.debug("업데이트 commentId: {}, likeCount: {}", commentId, likeCount);
             }
         }
 
-        log.info("좋아요 카운트 Batch update 끝: {}번", ObjCommentIds.size());
+        log.info("피드 댓글 좋아요 카운트 Batch update 끝: {}번", objCommentIds.size());
     }
 
 }
