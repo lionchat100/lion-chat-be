@@ -7,8 +7,9 @@ import com.lion.be.feed.domain.dto.FeedResponse;
 import com.lion.be.feed.domain.entity.Feed;
 import com.lion.be.feed.service.FeedReadService;
 import com.lion.be.feed.service.FeedWriteService;
-import java.util.List;
+
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -21,22 +22,25 @@ public class FeedController {
     private final FeedWriteService feedWriteService;
 
     @GetMapping("/api/feeds")
-    public List<FeedResponse> showRecentFeeds(@RequestParam(value = "lastId", required = false) Long lastId) {
+    public ResponseEntity<Slice<FeedResponse>> showRecentFeeds(
+            @RequestParam(value = "lastId", required = false) Long lastId,
+            @RequestParam(value = "size", required = false)Integer size) {
         if (lastId != null && lastId > 0) {
-            return feedReadService.getRecentFeedsAfter(lastId);
+            return ResponseEntity.ok(feedReadService.getRecentFeedsAfter(lastId, size));
         }
 
-        return feedReadService.getRecentFeedsFirst();
+        return ResponseEntity.ok(feedReadService.getRecentFeedsFirst(size));
     }
 
     @GetMapping("/api/feeds/hot")
-    public List<FeedResponse> showHotFeeds(
+    public ResponseEntity<Slice<FeedResponse>> showHotFeeds(
             @RequestParam(value = "lastLikeCount", required = false) Long lastLikeCount,
-            @RequestParam(value = "lastId", required = false) Long lastId) {
+            @RequestParam(value = "lastId", required = false) Long lastId,
+            @RequestParam(value = "size", required = false)Integer size) {
         if (lastLikeCount != null && lastId != null && lastLikeCount > 0 && lastId > 0) {
-            return feedReadService.getHotFeedsAfter(lastLikeCount, lastId);
+            return ResponseEntity.ok(feedReadService.getHotFeedsAfter(lastLikeCount, lastId, size));
         }
-        return feedReadService.getHotFeedsFirst();
+        return ResponseEntity.ok(feedReadService.getHotFeedsFirst(size));
     }
 
     @DeleteMapping("/api/feeds/{feedId}")

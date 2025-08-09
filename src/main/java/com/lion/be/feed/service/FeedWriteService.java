@@ -5,7 +5,6 @@ import com.lion.be.feed.domain.entity.Feed;
 import com.lion.be.feed.repository.FeedRepository;
 import com.lion.be.global.exception.CustomException;
 import com.lion.be.global.exception.ErrorCode;
-import com.lion.be.global.exception.FeedNotFoundException;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,10 +22,10 @@ public class FeedWriteService {
     @Transactional
     public void deleteFeed(Long currentUserId, Long feedId){
         User user = userRepository.fetchById(currentUserId)
-                .orElseThrow(()-> new CustomException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         Feed feed = feedRepository.fetchById(feedId)
-                .orElseThrow(FeedNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ErrorCode.FEED_NOT_FOUND));
 
         Long feedWriterId = feed.getUser().getId();
         if(!feedWriterId.equals(user.getId())) {
@@ -39,7 +38,7 @@ public class FeedWriteService {
     @Transactional
     public FeedSaveResponse writeFeed(String title, String content, Long userID){
         User user = userRepository.fetchById(userID)
-                .orElseThrow(()-> new CustomException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         Feed feed = new Feed(title, content, user);
         user.addUserFeed(feed);
@@ -51,10 +50,10 @@ public class FeedWriteService {
     @Transactional
     public void updateFeed(Long feedId, String title, String content, Long userId) {
         User user = userRepository.fetchById(userId)
-                .orElseThrow(()-> new CustomException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         Feed feed = feedRepository.fetchById(feedId)
-                .orElseThrow(FeedNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ErrorCode.FEED_NOT_FOUND));
 
         Long feedWriterId = feed.getUser().getId();
         if (!feedWriterId.equals(user.getId())) {
