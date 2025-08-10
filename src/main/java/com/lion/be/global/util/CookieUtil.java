@@ -6,46 +6,48 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 import java.util.Optional;
 import org.springframework.http.ResponseCookie;
+import org.springframework.stereotype.Component;
 
+@Component
 public class CookieUtil {
 
     private CookieUtil() {
     }
 
-    public static void addCookie(HttpServletResponse response, String name, String value, int maxAge) {
+    public void addCookie(HttpServletResponse response, String name, String value, int maxAge, String domain) {
         ResponseCookie cookie = ResponseCookie.from(name, value)
+                .httpOnly(true)
+                .secure(true)
                 .path("/")
                 .maxAge(maxAge)
-                .httpOnly(true)
-                .secure(true)
-                .sameSite("Strict")
+                .domain(domain)
+                .sameSite("Lax")
                 .build();
 
         response.addHeader("Set-Cookie", cookie.toString());
     }
 
-    public static void deleteCookie(HttpServletResponse response, String name) {
+    public void deleteCookie(HttpServletResponse response, String name, String domain) {
         ResponseCookie cookie = ResponseCookie.from(name, "")
-                .path("/")
-                .maxAge(0) // 쿠키 즉시 만료
                 .httpOnly(true)
                 .secure(true)
-                .sameSite("Strict")
+                .path("/")
+                .maxAge(0)
+                .domain(domain)
+                .sameSite("Lax")
                 .build();
 
         response.addHeader("Set-Cookie", cookie.toString());
     }
 
-    public static Optional<Cookie> getCookie(HttpServletRequest request, String name) {
+    public Optional<Cookie> getCookie(HttpServletRequest request, String name) {
         Cookie[] cookies = request.getCookies();
-
-        if (cookies == null) {
-            return Optional.empty();
+        if (cookies != null) {
+            return Arrays.stream(cookies)
+                    .filter(cookie -> cookie.getName().equals(name))
+                    .findFirst();
         }
-
-        return Arrays.stream(cookies)
-                .filter(cookie -> name.equals(cookie.getName()))
-                .findFirst();
+        return Optional.empty();
     }
 
 }

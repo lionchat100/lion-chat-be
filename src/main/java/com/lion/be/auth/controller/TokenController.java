@@ -27,9 +27,13 @@ public class TokenController {
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenService refreshTokenService;
     private final AuthCodeService authCodeService;
+    private final CookieUtil cookieUtil;
 
     @Value("${jwt.refresh-token-expire-time}")
     private long refreshTokenExpireTime;
+
+    @Value("${cookie.domain}")
+    private String cookieDomain;
 
     @PostMapping("/api/auth/token")
     public ResponseEntity<?> exchangeCodeForToken(@RequestBody Map<String, String> payload,
@@ -46,14 +50,14 @@ public class TokenController {
         AuthToken tokens = tokenOptional.get();
 
         int cookieMaxAge = (int) (refreshTokenExpireTime / 1000);
-        CookieUtil.addCookie(response, "refresh_token", tokens.getRefreshToken(), cookieMaxAge);
+        cookieUtil.addCookie(response, "refresh_token", tokens.getRefreshToken(), cookieMaxAge, cookieDomain);
 
         return ResponseEntity.ok(new AuthTokenResponse(tokens.getAccessToken()));
     }
 
     @PostMapping("/api/auth/refresh")
     public ResponseEntity<?> refreshAccessToken(HttpServletRequest request) {
-        String refreshToken = CookieUtil.getCookie(request, "refresh_token")
+        String refreshToken = cookieUtil.getCookie(request, "refresh_token")
                 .map(Cookie::getValue)
                 .orElse(null);
 
@@ -76,7 +80,7 @@ public class TokenController {
 
     @PostMapping("/api/auth/logout")
     public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
-        Optional<Cookie> refreshTokenCookie = CookieUtil.getCookie(request, "refresh_token");
+        Optional<Cookie> refreshTokenCookie = cookieUtil.getCookie(request, "refresh_token");
 
         if (refreshTokenCookie.isPresent()) {
             String refreshToken = refreshTokenCookie.get().getValue();
@@ -86,7 +90,7 @@ public class TokenController {
             }
         }
 
-        CookieUtil.deleteCookie(response, "refresh_token");
+        cookieUtil.deleteCookie(response, "refresh_token", cookieDomain);
 
         return ResponseEntity.noContent().build();
     }

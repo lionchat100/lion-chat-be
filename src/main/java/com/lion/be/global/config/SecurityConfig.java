@@ -36,18 +36,10 @@ public class SecurityConfig {
     @Value("${cors.allowed-origins}")
     private String[] allowedOrigins;
 
-    /**
-     * 이 메서드는 SecurityFilterChain보다 먼저 실행되며,
-     * 여기서 설정된 경로는 Spring Security의 인증/인가 필터 체인을 완전히 우회합니다.
-     * 정적 리소스나 WebSocket 경로처럼 인증이 필요 없는 리소스에 사용하기에 적합합니다.
-     */
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        // AuthEndpoints.PERMIT_ALL_PATTERNS에 있는 경로들을 포함하여
-        // Spring Security 필터를 거치지 않도록 설정합니다.
         return (web) -> web.ignoring()
                 .requestMatchers(AuthEndpoints.STATIC_RESOURCES_PATTERNS)
-                // Spring Boot의 기본 정적 리소스 경로들도 무시하도록 추가할 수 있습니다.
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
     }
 
