@@ -68,4 +68,10 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
         return chatRoomUsers;
     }
+
+
+    @Override
+    public List<ChatRoom> getChatRooms(Long userId) {
+        return chatRoomRepository.findByChatRoomUsers_User_IdOrderByRecentMessageDtDesc(userId);
+    }
 }
