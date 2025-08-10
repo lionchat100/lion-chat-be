@@ -21,6 +21,10 @@ public class FeedCommentSteps {
         return Map.of("content", content);
     }
 
+    public static Map<String, Object> feedCommentUpdateRequest_수정(String newContent) {
+        return Map.of("content", newContent);
+    }
+
     public static ExtractableResponse<Response> 피드의_댓글을_작성한다(
             Map<String, Object> feedCommentSaveRequest,
             Long feedId,
@@ -36,6 +40,26 @@ public class FeedCommentSteps {
                 .body(feedCommentSaveRequest)
                 .when()
                 .post("/api/feeds/{feedId}/comments", feedId)
+                .then()
+                .log().all()
+                .extract();
+    }
+
+    public static ExtractableResponse<Response> 피드의_댓글을_수정한다(
+            Map<String, Object> feedCommentSaveRequest,
+            Long commentId,
+            String accessToken,
+            RequestSpecification spec
+    ) {
+        return RestAssured
+                .given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .spec(spec)
+                .auth().oauth2(accessToken)
+                .log().all()
+                .body(feedCommentSaveRequest)
+                .when()
+                .patch("/api/feeds/comments/{commentId}", commentId)
                 .then()
                 .log().all()
                 .extract();
@@ -111,6 +135,14 @@ public class FeedCommentSteps {
     }
 
     public static void 피드_댓글_작성_응답을_검증한다(ExtractableResponse<Response> response) {
+        Assertions.assertAll(
+                () -> 상태코드를_검증한다(response, HttpStatus.OK),
+                () -> assertThat(response.jsonPath().getString("commentId"))
+                        .isNotEmpty()
+        );
+    }
+
+    public static void 피드_댓글_수정_응답을_검증한다(ExtractableResponse<Response> response) {
         Assertions.assertAll(
                 () -> 상태코드를_검증한다(response, HttpStatus.OK),
                 () -> assertThat(response.jsonPath().getString("commentId"))
