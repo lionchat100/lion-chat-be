@@ -22,4 +22,19 @@ public class FeedResponse {
         this.writer = new FeedWriterDto(writerName, writerId, writerImageUrl);
     }
 
+    public FeedResponse(Long feedId, String title, String content, LocalDateTime createdAt,
+                        long likeCount, long commentCount,
+                        String writerName, Long writerId, String writerImageUrl) {
+        this.feed = new FeedDto(feedId, title, content, createdAt, likeCount, false, commentCount);
+        this.writer = new FeedWriterDto(writerName, writerId, writerImageUrl);
+    }
+
+    public void unlike(){
+        feed.unlike();
+    }
+
+    public void like(){
+        feed.unlike();
+    }
+
 }

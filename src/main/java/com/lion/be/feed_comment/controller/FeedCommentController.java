@@ -6,6 +6,7 @@ import com.lion.be.feed_comment.domain.dto.FeedCommentSaveRequest;
 import com.lion.be.feed_comment.domain.dto.FeedCommentSaveResponse;
 import com.lion.be.feed_comment.service.FeedCommentReadService;
 import com.lion.be.feed_comment.service.FeedCommentWriteService;
+import com.lion.be.user.domain.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -41,9 +42,18 @@ public class FeedCommentController {
     }
 
     @DeleteMapping("/api/feeds/comments/{commentId}")
-    public ResponseEntity<Void> delete(@PathVariable Long commentId) {
-        feedCommentWriteService.delete(commentId);
+    public ResponseEntity<Void> delete(@PathVariable Long commentId,
+                                       @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        feedCommentWriteService.delete(commentId, userPrincipal.getId());
         return ResponseEntity.ok().build();
+    }
+
+    //테스트용 단일 댓글 조회
+    @GetMapping("/api/feeds/comments/{commentId}")
+    public ResponseEntity<FeedCommentResponse> fetchById(@PathVariable Long commentId,
+                                                         @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        FeedCommentResponse response = feedCommentReadService.fetchById(commentId, userPrincipal.getId());
+        return ResponseEntity.ok(response);
     }
 
 }
