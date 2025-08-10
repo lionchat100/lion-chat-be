@@ -102,11 +102,12 @@ public class AuthSteps {
         );
     }
 
-    public static void 내_정보가_정상적으로_조회되는지_검증한다(ExtractableResponse<Response> response, String email, String name) {
+    public static void 내_정보가_정상적으로_조회되는지_검증한다(ExtractableResponse<Response> response, String email, String name, boolean isOnboardingCompleted) {
         Assertions.assertAll(
                 () -> 상태코드를_검증한다(response, HttpStatus.OK),
                 () -> assertThat(response.jsonPath().getString("email")).isEqualTo(email),
-                () -> assertThat(response.jsonPath().getString("name")).isEqualTo(name)
+                () -> assertThat(response.jsonPath().getString("name")).isEqualTo(name),
+				() -> assertThat(response.jsonPath().getBoolean("isOnboardingCompleted")).isEqualTo(isOnboardingCompleted)
         );
     }
 

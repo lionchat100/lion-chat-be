@@ -143,7 +143,7 @@ class AuthAcceptanceTest extends AcceptanceTest {
             var response = 내_정보를_조회한다(accessToken, spec);
 
             // then
-            내_정보가_정상적으로_조회되는지_검증한다(response, 원준.getEmail(), 원준.getName());
+            내_정보가_정상적으로_조회되는지_검증한다(response, 원준.getEmail(), 원준.getName(), 원준.isOnboardingCompleted());
         }
 
         @DisplayName("토큰 없이 내 정보를 요청하면, 401 코드를 반환한다.")
