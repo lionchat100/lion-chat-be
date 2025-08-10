@@ -27,7 +27,7 @@ public class UserVectorizer {
 		double[] vector = new double[9];
 
 		// MBTI 4차원
-		int[] mbtiBinary = getMbtiBinary(user.getMbti());
+		double[] mbtiBinary = getMbtiBinary(user.getMbti());
 		System.arraycopy(mbtiBinary, 0, vector, 0, 4);
 
 		// Position 5차원
@@ -40,9 +40,9 @@ public class UserVectorizer {
 	/**
 	 * MBTI를 4차원 이진 벡터로 변환
 	 */
-	public int[] getMbtiBinary(Mbti mbti) {
+	public double[] getMbtiBinary(Mbti mbti) {
 		String mbtiStr = mbti.name();
-		return new int[]{
+		return new double[]{
 			mbtiStr.charAt(0) == 'E' ? 1 : 0,  // E/I
 			mbtiStr.charAt(1) == 'S' ? 1 : 0,  // S/N
 			mbtiStr.charAt(2) == 'T' ? 1 : 0,  // T/F
