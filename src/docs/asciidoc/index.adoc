@@ -132,6 +132,30 @@ operation::test_login_success[snippets='http-request,http-response']
 
 ---
 
+* **응답 본문 예시**
++
+[source,json]
+----
+{
+    "messageId": "60c72b2f6b8c9b2f6b8c9b2f",
+    "chatRoomId": 1,
+    "senderName": "사용자이름",
+    "senderId": 2,
+    "timestamp": "2025-08-04T20:42:52.104Z",
+    "content": "안녕하세요!"
+}
+----
+
+* **설명**
+** `messageId` — 저장된 메시지의 고유 ID
+** `chatRoomId` — 메시지가 속한 채팅방의 ID
+** `senderName` — 메시지를 보낸 사용자의 이름
+** `senderId` — 메시지를 보낸 사용자의 ID
+** `timestamp` — 서버에 메시지가 저장된 시간 (UTC)
+** `content` — 전송된 메시지 내용
+
+---
+
 [[send-chat-message-ws]]
 === 메시지 전송 (WebSocket)
 
