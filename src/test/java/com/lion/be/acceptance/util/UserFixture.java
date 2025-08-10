@@ -11,16 +11,18 @@ import java.util.Map;
 
 public enum UserFixture {
 
-    회원_원준("wj1234@gmail.com", "정원준", "https://www"), 비회원("asd1234@naver.com", "성이름", "https://www");
+    회원_원준("wj1234@gmail.com", "정원준", "https://www", false), 비회원("asd1234@naver.com", "성이름", "https://www", false);
 
     private String email;
     private String name;
     private String imageUrl;
+	private boolean isOnboardingCompleted;
 
-    UserFixture(String email, String name, String imageUrl) {
+    UserFixture(String email, String name, String imageUrl, boolean isOnboardingCompleted) {
         this.email = email;
         this.name = name;
         this.imageUrl = imageUrl;
+		this.isOnboardingCompleted = isOnboardingCompleted;
     }
 
     public String getEmail() {

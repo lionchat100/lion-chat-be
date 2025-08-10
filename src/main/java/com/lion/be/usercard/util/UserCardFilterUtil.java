@@ -204,6 +204,7 @@ public class UserCardFilterUtil {
 			kmeans.setNumClusters(numClusters);
 			kmeans.setMaxIterations(500);
 			kmeans.setSeed(10);
+			kmeans.setPreserveInstancesOrder(true);
 			kmeans.buildClusterer(dataset);
 
 			int[] assignments = kmeans.getAssignments();
