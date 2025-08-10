@@ -27,8 +27,11 @@ public enum ErrorCode {
 	MINIMUM_PHOTOS_REQUIRED(HttpStatus.BAD_REQUEST, "최소 1장의 사진이 필요합니다."),
 	MAXIMUM_PHOTOS_REQUIRED(HttpStatus.BAD_REQUEST, "최대 3장의 사진입니다."),
 	INVALID_CLUSTER_ID(HttpStatus.BAD_REQUEST, "유효하지 않은 클러스터 ID입니다."),
-	INVALID_PREFERENCE_TYPE(HttpStatus.BAD_REQUEST,"지원하지 않은 타입입니다." );
-	private final HttpStatus status;
+	INVALID_PREFERENCE_TYPE(HttpStatus.BAD_REQUEST,"지원하지 않은 타입입니다." ),
+
+    CHAT_ROOM_CREATION_FAILED(HttpStatus.BAD_REQUEST, "채팅방 생성에 실패했습니다.");
+
+    private final HttpStatus status;
     private final String message;
 
 }

@@ -22,7 +22,7 @@ public class RabbitMQConfig {
     public static final String CHAT_QUEUE_NAME = "chat.queue";
     // 라우팅 키 패턴. "chat.message.123" 같은 형식의 키를 가진 메시지를 바인딩
     public static final String ROUTING_KEY_PATTERN = "chat.message.*";
-    public static final String CHATROOM_QUEUE_NAME = "chatroom.event.queue";
+    public static final String CHATROOM_QUEUE_NAME = "chatroom.creation.queue";
     public static final String CHATROOM_ROUTING_KEY = "chatroom.creation";
 
     /**

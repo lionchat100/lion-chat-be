@@ -13,30 +13,6 @@ import java.time.ZoneId;
 @Component
 public class MessageEntityAdapter {
 
-    public ChatMessage toRecord(ChatMessage message) {
-        return new ChatMessage(
-                message.getSenderId(),
-                message.getSenderName(),
-                message.getChatRoomId(),
-                message.getDate(),
-                message.getContent(),
-                message.getIsRead(),
-                message.getStatus()
-        );
-    }
-
-    public ChatMessage toEntity(ChatMessage message) {
-        return new ChatMessage(
-                message.getSenderId(),
-                message.getSenderName(),
-                message.getChatRoomId(),
-                message.getDate(),
-                message.getContent(),
-                message.getIsRead(),
-                message.getStatus()
-        );
-    }
-
     public ChatMessage fromRequest(ChatMessageRequest request) {
         return new ChatMessage(
                 request.senderId(),
