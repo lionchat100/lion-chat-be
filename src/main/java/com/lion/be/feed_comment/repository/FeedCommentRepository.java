@@ -21,4 +21,6 @@ public interface FeedCommentRepository {
 
     void softDeleteByFeedId(Long feedId);
 
+    FeedComment fetchById(Long commentId);
+
 }

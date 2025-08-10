@@ -7,6 +7,8 @@ import static com.lion.be.acceptance.feed_comment.FeedCommentSteps.*;
 import com.lion.be.acceptance.AcceptanceTest;
 import com.lion.be.acceptance.util.UserFixture;
 import io.restassured.RestAssured;
+import io.restassured.response.ExtractableResponse;
+import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -60,6 +62,22 @@ class FeedCommentAcceptanceTest extends AcceptanceTest {
 
             // then
             피드_댓글_작성_응답을_검증한다(response);
+        }
+
+        @DisplayName("피드의 댓글을 수정한다.")
+        @Test
+        void  when_update_feed_comment_then_response_200() {
+            // given
+            api_문서_타이틀("update_feed_comment_success", spec);
+            var savedResponse = 피드의_댓글을_작성한다(feedCommentSaveRequest_생성("이것은 댓글 내용입니다."), feedId,
+                    accessToken, spec);
+            long commentId = savedResponse.jsonPath().getLong("commentId");
+
+            // when
+            var response = 피드의_댓글을_수정한다(feedCommentUpdateRequest_수정("이것은 새로운 댓글 내용입니다."), commentId, accessToken, spec);
+
+            // then
+            피드_댓글_수정_응답을_검증한다(response);
         }
 
         @DisplayName("피드의 댓글을 모두 조회한다.")

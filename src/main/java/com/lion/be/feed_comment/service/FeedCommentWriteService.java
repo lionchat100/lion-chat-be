@@ -5,6 +5,8 @@ import com.lion.be.feed.service.FeedReadService;
 import com.lion.be.feed_comment.domain.dto.FeedCommentResponse;
 import com.lion.be.feed_comment.domain.dto.FeedCommentSaveRequest;
 import com.lion.be.feed_comment.domain.dto.FeedCommentSaveResponse;
+import com.lion.be.feed_comment.domain.dto.FeedCommentUpdateRequest;
+import com.lion.be.feed_comment.domain.dto.FeedCommentUpdateResponse;
 import com.lion.be.feed_comment.domain.entity.FeedComment;
 import com.lion.be.feed_comment.repository.FeedCommentRepository;
 import com.lion.be.global.exception.CustomException;
@@ -43,6 +45,17 @@ public class FeedCommentWriteService {
         redisTemplate.opsForSet().add(RedisKey.DIRTY_COMMENT_COUNT_KEY, String.valueOf(feedId));
 
         return new FeedCommentSaveResponse(savedResponse.commentId());
+    }
+
+    public FeedCommentUpdateResponse update(Long commentId, Long userId, FeedCommentUpdateRequest request) {
+        FeedComment feedComment = feedCommentRepository.fetchById(commentId);
+
+        if (!feedComment.getUser().getId().equals(userId)) {
+            throw new RuntimeException("TODO: 입력한 유저가 아닙니다.");
+        }
+
+        feedComment.updateContent(request.getContent());
+        return new FeedCommentUpdateResponse(feedComment.getId());
     }
 
     public void delete(Long commentId, Long requestedUserId) {
