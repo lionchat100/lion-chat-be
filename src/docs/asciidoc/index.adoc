@@ -115,14 +115,19 @@ operation::test_login_success[snippets='http-request,http-response']
 ----
 {
     "chatRoomId": 1,
+    "senderName": "홍길동",
     "senderId": 2,
+    "receiverId": 3,
     "content": "안녕하세요!"
 }
+
 ----
 
 * **설명**
-** `chatRoomId` — 메시지를 보낼 채팅방의 ID
+** `chatRoomId` — 메시지를 보낼 채팅방의 ID (채팅방이 없을 경우, 서버에서 새로 생성)
+** `senderName` — 메시지를 보낸 사용자의 이름
 ** `senderId` — 메시지를 보낸 사용자의 ID
+** `receiverId` — 메시지를 받을 사용자의 ID
 ** `content` — 전송할 메시지 내용
 
 ---
