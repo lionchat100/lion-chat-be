@@ -9,6 +9,7 @@ import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
@@ -24,6 +25,11 @@ public class RabbitMQConfig {
     public static final String ROUTING_KEY_PATTERN = "chat.message.*";
     public static final String CHATROOM_QUEUE_NAME = "chatroom.creation.queue";
     public static final String CHATROOM_ROUTING_KEY = "chatroom.creation";
+
+    @Bean
+    public RabbitAdmin rabbitAdmin(ConnectionFactory connectionFactory) {
+        return new RabbitAdmin(connectionFactory);
+    }
 
     /**
      * TopicExchange: 라우팅 키를 기반으로 메시지를 큐에 전달하는 유연한 방식의 Exchange
@@ -104,6 +110,7 @@ public class RabbitMQConfig {
     /**
      * 채팅방 생성 큐를 반환합니다.
      */
+    @Deprecated
     @Bean
     public Binding chatRoomCreationBinding(Queue chatRoomCreationQueue, TopicExchange chatExchange) {
         return BindingBuilder.bind(chatRoomCreationQueue)

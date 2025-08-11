@@ -7,12 +7,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.Version;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,7 +36,9 @@ public class ChatRoom {
 
     private String recentMessageContent;
 
-    private LocalDateTime recentMessageDt;
+    private ZonedDateTime recentMessageDt;
+
+    private Boolean isRead;
 
     public ChatRoom(
             Long id,
@@ -45,16 +46,18 @@ public class ChatRoom {
             Boolean isDeleted,
             LocalDateTime regDt,
             List<ChatRoomUser> chatRoomUsers,
-            String content,
-            Instant now
+            String recentMessageContent,
+            ZonedDateTime recentMessageDt,
+            Boolean isRead
     ) {
         this.id = id;
 //        this.version = version;
         this.isDeleted = isDeleted;
         this.regDt = regDt;
         this.chatRoomUsers = chatRoomUsers;
-        this.recentMessageContent = content;
-        this.recentMessageDt = LocalDateTime.ofInstant(now, java.time.ZoneId.systemDefault());
+        this.recentMessageContent = recentMessageContent;
+        this.recentMessageDt = recentMessageDt;
+        this.isRead = isRead;
     }
 
     public ChatRoom(Boolean isDeleted) {
