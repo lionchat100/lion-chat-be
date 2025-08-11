@@ -8,4 +8,6 @@ public interface ImageRepository {
 
     Image fetchById(Long imageId);
 
+    void deleteById(Long id);
+
 }

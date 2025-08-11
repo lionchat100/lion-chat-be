@@ -24,4 +24,9 @@ public class ImageRepositoryImpl implements ImageRepository {
                 .orElseThrow(() -> new CustomException(ErrorCode.IMAGE_NOT_FOUND));
     }
 
+    @Override
+    public void deleteById(Long id) {
+        imageJpaRepository.softDelete(id);
+    }
+
 }

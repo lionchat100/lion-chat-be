@@ -33,10 +33,13 @@ public class Image extends BaseEntity {
     @Column(nullable = false)
     private String imageUrl; // S3에 저장된 이미지의 전체 URL
 
+    private boolean isDeleted;
+
     public Image(String originalFileName, String storedFileName, String imageUrl) {
         this.originalFileName = originalFileName;
         this.storedFileName = storedFileName;
         this.imageUrl = imageUrl;
+        this.isDeleted = false;
     }
 
 }

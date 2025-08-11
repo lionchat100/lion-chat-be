@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 @Service
@@ -68,14 +69,13 @@ public class ImageUploadService {
 
     @Transactional
     public void deleteImage(Long imageId) {
-        Image image = imageRepository.fetchById(imageId)
-                .orElseThrow(() -> new CustomException(ErrorCode.IMAGE_NOT_FOUND));
+        Image image = imageRepository.fetchById(imageId);
 
         // 2. S3에서 파일 삭제
         deleteFromS3(image.getStoredFileName());
 
         // 3. DB에서 이미지 정보 삭제
-        imageRepository.delete(image);
+        imageRepository.deleteById(image.getId());
     }
 
     private void deleteFromS3(String key) {
