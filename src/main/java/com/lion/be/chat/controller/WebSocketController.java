@@ -3,6 +3,8 @@ package com.lion.be.chat.controller;
 import com.lion.be.chat.domain.dto.MessageAckRequest;
 import com.lion.be.chat.service.MessageDelivery;
 import com.lion.be.chat.service.MessagePersistence;
+import com.lion.be.user.domain.entity.User;
+import com.lion.be.user.service.UserReadService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -21,6 +23,7 @@ public class WebSocketController {
 
     private final MessagePersistence messagePersistence;
     private final MessageDelivery messageDelivery;
+    private final UserReadService userReadService;
 
     /**
      * 클라이언트로부터 메시지 읽음 확인을 요청합니다.
@@ -63,6 +66,8 @@ public class WebSocketController {
      */
     private Long extractUserIdFromSession(Message<?> message) {
             StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
-            return Long.parseLong(accessor.getUser().getName());
+        String email = accessor.getUser().getName();
+        User user = userReadService.fetchByEmail(email);
+        return user.getId();
     }
 }
