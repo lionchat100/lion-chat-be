@@ -29,7 +29,8 @@ public enum ErrorCode {
 	INVALID_CLUSTER_ID(HttpStatus.BAD_REQUEST, "유효하지 않은 클러스터 ID입니다."),
 	INVALID_PREFERENCE_TYPE(HttpStatus.BAD_REQUEST,"지원하지 않은 타입입니다." ),
 
-    CHAT_ROOM_CREATION_FAILED(HttpStatus.BAD_REQUEST, "채팅방 생성에 실패했습니다.");
+    CHAT_ROOM_CREATION_FAILED(HttpStatus.BAD_REQUEST, "채팅방 생성에 실패했습니다."),
+	USER_CAN_NOT_LIKE_HIMSELF(HttpStatus.BAD_REQUEST, "자기 자신에게 좋아요를 누를수 없습니다.");
 
     private final HttpStatus status;
     private final String message;
