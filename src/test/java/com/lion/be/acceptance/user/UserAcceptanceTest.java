@@ -1,16 +1,17 @@
 package com.lion.be.acceptance.user;
 
-import static com.lion.be.acceptance.auth.AuthSteps.비회원이_로그인한다;
-import static com.lion.be.acceptance.auth.AuthSteps.원준이_로그인한다;
+import static com.lion.be.acceptance.auth.AuthSteps.*;
 import static com.lion.be.acceptance.user.UserSteps.*;
 
-import com.lion.be.acceptance.AcceptanceTest;
-import com.lion.be.acceptance.util.UserFixture;
-import io.restassured.RestAssured;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
+
+import com.lion.be.acceptance.AcceptanceTest;
+import com.lion.be.acceptance.util.UserFixture;
+
+import io.restassured.RestAssured;
 
 @DisplayName("회원 관련 기능 인수테스트")
 class UserAcceptanceTest extends AcceptanceTest {
@@ -48,6 +49,7 @@ class UserAcceptanceTest extends AcceptanceTest {
         @DisplayName("가 가입된 사용자가 온보딩 라벨을 조회하면, 상태코드 200과 라벨 목록을 반환한다.")
         @Test
         void when_authenticated_user_get_onboarding_labels_then_response_200(){
+			 api_문서_타이틀("fetch_labels_success",spec);
             var loginResponse = 비회원이_로그인한다(spec);
             String accessToken = loginResponse.jsonPath().getString("accessToken");
 

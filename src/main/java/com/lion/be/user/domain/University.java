@@ -1,5 +1,7 @@
 package com.lion.be.user.domain;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -60,4 +62,9 @@ public enum University {
 	HONGIK("홍익대학교");
 
 	private final String koreanName;
+
+	@JsonValue
+	public String getKoreanName() {
+		return koreanName;
+	}
 }
