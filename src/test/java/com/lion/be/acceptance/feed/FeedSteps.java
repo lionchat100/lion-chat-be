@@ -158,6 +158,28 @@ public class FeedSteps {
                 .extract();
     }
 
+    public static ExtractableResponse<Response> 내_피드를_조회한다(
+            String accessToken,
+            RequestSpecification spec,
+            Long lastId,
+            Integer size
+    ) {
+        return RestAssured
+                .given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .spec(spec)
+                .auth().oauth2(accessToken)
+                .queryParam("lastId", lastId)
+                .queryParam("size", size)
+                .log().all()
+                .when()
+                .get("/api/feeds/me")
+                .then()
+                .log().all()
+                .extract();
+    }
+
+
     public static void 피드_좋아요_정보를_검증한다(
             ExtractableResponse<Response> response,
             Long targetFeedId,

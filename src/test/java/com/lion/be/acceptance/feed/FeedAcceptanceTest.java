@@ -388,4 +388,30 @@ public class FeedAcceptanceTest extends AcceptanceTest {
         피드_댓글_정보를_검증한다(fetchResponse1, feedId, 2);
     }
 
+    @Test
+    @DisplayName("내가 쓴 글의 목록을 최신 순으로 불러온다.")
+    void when_call_my_feeds_then_return_my_feeds() {
+        // given
+        api_문서_타이틀("fetch_my_feeds_success", spec);
+        var loginResponse = 비회원이_로그인한다(spec);
+        String accessToken = loginResponse.jsonPath().getString("accessToken");
+        온보딩을_완료한다(회원_멋사2_온보딩_요청(), accessToken, spec);
+
+        List<String> feedTitles = List.of("내 피드 1", "내 피드 2", "내 피드 3");
+        List<String> feedContents = List.of("내용 1", "내용 2", "내용 3");
+
+        for (int i = 0; i < feedTitles.size(); i++) {
+            피드를_작성한다(accessToken, spec, feedTitles.get(i), feedContents.get(i));
+        }
+
+        List<String> expectedTitles = List.of("내 피드 3", "내 피드 2", "내 피드 1");
+        List<String> expectedContents = List.of("내용 3", "내용 2", "내용 1");
+
+        // when
+        ExtractableResponse<Response> response = 내_피드를_조회한다(accessToken, spec,null,null);
+
+        // then
+        피드_전체_조회_응답을_검증한다(response, 3, expectedTitles, expectedContents, List.of(false, false, false));
+    }
+
 }

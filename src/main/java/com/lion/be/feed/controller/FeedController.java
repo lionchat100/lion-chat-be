@@ -88,4 +88,17 @@ public class FeedController {
         return ResponseEntity.ok(feedResponse.getFeed());
     }
 
+    @GetMapping("/api/feeds/me")
+    public ResponseEntity<Slice<FeedResponse>> getMyFeeds(
+            @RequestParam(value = "lastId", required = false) Long lastId,
+            @RequestParam(value = "size", required = false) Integer size,
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        Long currentUserId = userPrincipal.getId();
+        System.out.println("currentUserId = " + currentUserId);
+        if (lastId != null && lastId > 0) {
+            return ResponseEntity.ok(feedReadService.getMyFeedsAfter(currentUserId, lastId, size));
+        }
+        return ResponseEntity.ok(feedReadService.getMyFeedsFirst(currentUserId, size));
+    }
+
 }

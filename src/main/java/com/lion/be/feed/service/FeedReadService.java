@@ -65,6 +65,16 @@ public class FeedReadService {
         return enrichFeedsWithRedisData(feedResponses, currentUserId);
     }
 
+    public Slice<FeedResponse> getMyFeedsAfter(Long currentUserId, Long lastId, Integer size) {
+        Slice<FeedResponse> feedResponses = feedRepository.fetchFeedsByUserIdAfter(currentUserId, lastId, getRecentPageable(size));
+        return enrichFeedsWithRedisData(feedResponses, currentUserId);
+    }
+
+    public Slice<FeedResponse> getMyFeedsFirst(Long currentUserId, Integer size) {
+        Slice<FeedResponse> feedResponses = feedRepository.fetchFeedsByUserIdFirst(currentUserId, getRecentPageable(size));
+        return enrichFeedsWithRedisData(feedResponses, currentUserId);
+    }
+
     private Slice<FeedResponse> enrichFeedsWithRedisData(Slice<FeedResponse> feeds, Long currentUserId) {
         feeds.getContent().forEach(feedResponse -> {
             FeedDto feedDto = feedResponse.getFeed();
