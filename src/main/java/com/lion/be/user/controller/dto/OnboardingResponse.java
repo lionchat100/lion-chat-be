@@ -3,7 +3,7 @@ package com.lion.be.user.controller.dto;
 public record OnboardingResponse(
 	Long userId,
 	String message,
-	Boolean isCompleted
+	Boolean isOnboardingCompleted
 
 ) {
 

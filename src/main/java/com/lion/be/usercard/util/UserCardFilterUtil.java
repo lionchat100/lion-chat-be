@@ -153,11 +153,11 @@ public class UserCardFilterUtil {
 
 		PreferenceType preference = user1.getPreferenceType();
 
-		if (preference == PreferenceType.MBTI_FOCUSED) {
+		if (preference == PreferenceType.PREFERENCE_FOCUSED) {
 			return 0.7 * mbtiCompatibility + 0.3 * positionSimilarity;
 		} else if (preference == PreferenceType.POSITION_FOCUSED) {
 			return 0.3 * mbtiCompatibility + 0.7 * positionSimilarity;
-		} else if (preference == PreferenceType.BOTH_FOCUSED){
+		} else if (preference == PreferenceType.CAREER_FOCUSED){
 			return 0.5 * mbtiCompatibility + 0.5 * positionSimilarity;
 		} else {
 			throw new CustomException(ErrorCode.INVALID_PREFERENCE_TYPE);
