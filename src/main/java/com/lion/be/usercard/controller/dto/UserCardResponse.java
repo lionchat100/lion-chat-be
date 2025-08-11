@@ -2,7 +2,9 @@ package com.lion.be.usercard.controller.dto;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.lion.be.user.domain.Position;
+import com.lion.be.user.domain.PreferenceType;
 import com.lion.be.user.domain.University;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.domain.entity.UserPhoto;
@@ -13,12 +15,16 @@ public record UserCardResponse (
 	University university,
 	Boolean isUniversityVisible,
 	Position position,
-	List<String> imageUrls
+	List<String> imageUrls,
+	String bio,
+	@JsonProperty("focusType")
+	PreferenceType preferenceType,
+	boolean isLikedByMe
 ) {
 	/**
 	 * User 엔티티에서 변환하는 정적 메서드
 	 */
-	public static UserCardResponse from(User user) {
+	public static UserCardResponse from(User user, boolean isLikedByMe) {
 		return new UserCardResponse(
 			user.getId(),
 			user.getName(),
@@ -27,7 +33,10 @@ public record UserCardResponse (
 			user.getPosition(),
 			user.getUserPhotos().stream()
 				.map(UserPhoto::getImageUrl)
-				.toList()
+				.toList(),
+			user.getBio(),
+			user.getPreferenceType(),
+			isLikedByMe
 		);
 	}
 }
