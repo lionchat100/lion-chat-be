@@ -33,7 +33,7 @@ public class ImageUploadController {
         }
     }
 
-    @DeleteMapping("/api/images/upload/{imageId}")
+    @DeleteMapping("/api/images/{imageId}")
     public ResponseEntity<Void> deleteImage(@PathVariable Long imageId) {
         try {
             imageUploadService.deleteImage(imageId);
