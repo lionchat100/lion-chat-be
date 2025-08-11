@@ -26,7 +26,7 @@ public class ImageUploadService {
     @Value("${spring.cloud.aws.s3.bucket}")
     private String bucket;
 
-    @Transactional // S3 업로드와 DB 저장을 한 트랜잭션으로 묶음
+    @Transactional
     public Image upload(MultipartFile file, String dirName) throws IOException {
         if (file.isEmpty()) {
             throw new CustomException(ErrorCode.IMAGE_NOT_FOUND);
@@ -36,20 +36,15 @@ public class ImageUploadService {
         String uniqueFilename = createUniqueFilename(originalFilename);
         String storedFilePath = dirName + "/" + uniqueFilename;
 
-        // S3에 업로드
         uploadToS3(file, storedFilePath);
-
-        // 업로드된 파일의 URL 가져오기
         String imageUrl = getImageUrl(storedFilePath);
-
-        // 데이터베이스에 이미지 정보 저장
         Image image = new Image(originalFilename, storedFilePath, imageUrl);
 
         return imageRepository.save(image);
     }
 
     private String createUniqueFilename(String originalFilename) {
-        return UUID.randomUUID().toString() + "_" + originalFilename;
+        return UUID.randomUUID() + "_" + originalFilename;
     }
 
     private void uploadToS3(MultipartFile file, String key) throws IOException {
@@ -70,11 +65,7 @@ public class ImageUploadService {
     @Transactional
     public void deleteImage(Long imageId) {
         Image image = imageRepository.fetchById(imageId);
-
-        // 2. S3에서 파일 삭제
         deleteFromS3(image.getStoredFileName());
-
-        // 3. DB에서 이미지 정보 삭제
         imageRepository.deleteById(image.getId());
     }
 
