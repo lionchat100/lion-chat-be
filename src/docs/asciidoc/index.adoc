@@ -321,6 +321,7 @@ operation::unlike_feed_comment_success[snippets='http-request,http-response']
 === 피드 작성
 
 새로운 피드를 작성합니다.
+피드는 한 유저가 3초에 한 번만 작성할 수 있으며, 10분에 5개만 작성할 수 있습니다.
 
 * **요청 헤더**: `Authorization` 헤더에 Bearer 토큰이 필요합니다.
 
