@@ -68,6 +68,7 @@ dependencies {
     testImplementation 'org.testcontainers:mysql:1.18.3'
     testImplementation "org.testcontainers:mongodb:1.21.3"
     testImplementation "org.testcontainers:rabbitmq"
+    testImplementation "org.testcontainers:localstack:1.21.3"
 
     // Rest Assured
     testImplementation 'io.rest-assured:rest-assured:5.5.5'
@@ -98,6 +99,9 @@ dependencies {
 
     // weka 의존성 추가 (K-means Clustering)
     implementation 'nz.ac.waikato.cms.weka:weka-stable:3.8.6'
+
+    implementation platform('software.amazon.awssdk:bom:2.25.46') // AWS SDK BOM(Bill of Materials)
+    implementation 'software.amazon.awssdk:s3'
 }
 
 ext {
