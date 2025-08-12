@@ -1,17 +1,16 @@
 package com.lion.be.acceptance.chat;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.restassured.RestAssured;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-
-import java.util.List;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class ChatSteps {
 
@@ -94,7 +93,8 @@ public class ChatSteps {
     }
 
     // ✅ 수정된 부분: DTO 필드명 일치
-    public static void 채팅방_목록_조회_응답을_검증한다(ExtractableResponse<Response> response, int expectedSize, String expectedFirstName) {
+    public static void 채팅방_목록_조회_응답을_검증한다(ExtractableResponse<Response> response, int expectedSize,
+                                          String expectedFirstName) {
         List<Map<String, Object>> chatRooms = response.jsonPath().getList("$");
         Assertions.assertAll(
                 () -> assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value()),
@@ -109,7 +109,8 @@ public class ChatSteps {
         assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
     }
 
-    public static void 메시지_목록_조회_응답을_검증한다(ExtractableResponse<Response> response, int expectedSize, String firstMessageContent) {
+    public static void 메시지_목록_조회_응답을_검증한다(ExtractableResponse<Response> response, int expectedSize,
+                                          String firstMessageContent) {
         List<Map<String, Object>> messages = response.jsonPath().getList("content");
 
         Assertions.assertAll(
@@ -118,7 +119,8 @@ public class ChatSteps {
                 () -> assertThat(messages.get(0).get("content")).isEqualTo(firstMessageContent),
                 () -> assertThat(messages.get(0).get("messageId")).isNotNull(),
                 () -> assertThat(messages.get(0).get("senderName")).isNotNull(),
-                () -> assertThat(response.jsonPath().getBoolean("isEnd")).isTrue()
+                () -> assertThat(response.jsonPath().getBoolean("last")).isTrue()
         );
     }
+
 }
