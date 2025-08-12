@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -65,7 +66,7 @@ public class ChatController {
             @RequestParam Long roomId
     ) {
         Page<ChatMessageResponse> messages = messagePersistence.findMessagesByIdAndLastId(
-                roomId, 0L, PageRequest.of(0, 30));
+                roomId, 0L, PageRequest.of(0, 30, Sort.by("_id").descending()));
         return ResponseEntity.ok(messages);
     }
 
@@ -84,7 +85,7 @@ public class ChatController {
             @RequestParam Long lastId
     ) {
         Page<ChatMessageResponse> messages = messagePersistence.findMessagesByIdAndLastId(
-                roomId, lastId, PageRequest.of(0, 30));
+                roomId, lastId, PageRequest.of(0, 30, Sort.by("_id").descending()));
         return ResponseEntity.ok(messages);
     }
 }
