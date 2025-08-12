@@ -5,6 +5,8 @@ import com.lion.be.global.exception.ErrorCode;
 import com.lion.be.image.domain.entity.Image;
 import com.lion.be.image.repository.ImageRepository;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,7 +29,7 @@ public class ImageUploadService {
     private String bucket;
 
     @Transactional
-    public Image upload(MultipartFile file, String dirName) throws IOException {
+    public Image upload(MultipartFile file, String dirName, Long uploaderId) throws IOException {
         if (file.isEmpty()) {
             throw new CustomException(ErrorCode.IMAGE_NOT_FOUND);
         }
@@ -38,10 +40,41 @@ public class ImageUploadService {
 
         uploadToS3(file, storedFilePath);
         String imageUrl = getImageUrl(storedFilePath);
-        Image image = new Image(originalFilename, storedFilePath, imageUrl);
+        Image image = new Image(originalFilename, storedFilePath, imageUrl, uploaderId);
 
         return imageRepository.save(image);
     }
+	// 이미지 한번에 업로드
+	@Transactional
+	public List<Image> uploadImages(List<MultipartFile> files, String dirName, Long uploaderId) throws IOException {
+		// 이미지 개수 검증
+		if (files == null || files.isEmpty()) {
+			throw new CustomException(ErrorCode.MINIMUM_PHOTOS_REQUIRED);
+		}
+		if (files.size() > 3) {
+			throw new CustomException(ErrorCode.MAXIMUM_PHOTOS_REQUIRED);
+		}
+
+		List<Image> uploadedImages = new ArrayList<>();
+
+		for (MultipartFile file : files) {
+			if (file.isEmpty()) {
+				throw new CustomException(ErrorCode.IMAGE_NOT_FOUND);
+			}
+
+			String originalFilename = file.getOriginalFilename();
+			String uniqueFilename = createUniqueFilename(originalFilename);
+			String storedFilePath = dirName + "/" + uniqueFilename;
+
+			uploadToS3(file, storedFilePath);
+			String imageUrl = getImageUrl(storedFilePath);
+			Image image = new Image(originalFilename, storedFilePath, imageUrl, uploaderId);
+
+			uploadedImages.add(imageRepository.save(image));
+		}
+
+		return uploadedImages;
+	}
 
     private String createUniqueFilename(String originalFilename) {
         return UUID.randomUUID() + "_" + originalFilename;
@@ -63,8 +96,11 @@ public class ImageUploadService {
     }
 
     @Transactional
-    public void deleteImage(Long imageId) {
+    public void deleteImage(Long imageId,  Long userId) {
         Image image = imageRepository.fetchById(imageId);
+		if (!image.getUploaderId().equals(userId)) {
+			throw new CustomException(ErrorCode.IMAGE_DELETE_ACCESS_DENIED);
+		}
         deleteFromS3(image.getStoredFileName());
         imageRepository.deleteById(image.getId());
     }
