@@ -1,19 +1,15 @@
 package com.lion.be.image.domain.entity;
 
 import com.lion.be.global.entity.BaseEntity;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import java.time.LocalDateTime;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Getter
@@ -35,11 +31,14 @@ public class Image extends BaseEntity {
 
     private boolean isDeleted;
 
-    public Image(String originalFileName, String storedFileName, String imageUrl) {
+	private Long uploaderId; // 사진업로드를 누가 했는지 체크하기 위함
+
+    public Image(String originalFileName, String storedFileName, String imageUrl, Long uploaderId) {
         this.originalFileName = originalFileName;
         this.storedFileName = storedFileName;
         this.imageUrl = imageUrl;
         this.isDeleted = false;
+		this.uploaderId = uploaderId;
     }
 
 }

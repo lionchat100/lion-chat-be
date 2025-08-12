@@ -18,9 +18,9 @@ public record OnboardingRequest(
 	@Size(min = 1, max = 8 ,message = "닉네임은 최대 8자 이하입니다.")
 	String nickname,
 
-	@NotEmpty(message = "대표 사진을 최소 1장 추가해주세요.")
-	@Size(max = 3, message = "사진은 최대 3장까지 업로드 가능합니다.")
-	List<String> userPhotos,
+	@NotNull
+	@Size(min = 1, max = 3, message = "프로필 사진은 1-3장이어야 합니다")
+	List<Long> imageIds,
 
 	@NotNull(message = "성별을 선택해주세요.")
 	Gender gender,
@@ -41,7 +41,7 @@ public record OnboardingRequest(
 	@AssertTrue(message = "필수 약관에 동의해주세요.")
 	Boolean requiredAgreements, // 필수 약관들을 묶어서 처리
 
-	Boolean marketingAgreement,  // 마케팅 동의 더 추가될수있음
+	Boolean marketingAgreements,  // 마케팅 동의 더 추가될수있음
 
 	Boolean isUniversityView, // 학교정보 공개 여부
 
