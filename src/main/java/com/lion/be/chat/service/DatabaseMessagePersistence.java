@@ -6,9 +6,13 @@ import com.lion.be.chat.domain.entity.ChatMessage;
 import com.lion.be.chat.domain.entity.ChatRoom;
 import com.lion.be.chat.repository.ChatMessageRepository;
 import com.lion.be.chat.repository.ChatRoomRepository;
+import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.repository.UserRepository;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -145,7 +149,8 @@ public class DatabaseMessagePersistence implements MessagePersistence {
                         message.getChatRoomId(),
                         message.getSenderId(),
                         message.getSenderName(),
-                        userRepository.findById(message.getSenderId()).getImageUrl(), // FIXME: N+1 문제
+                        // FIXME: N+1 문제 (senderId 목록은 Set, Map 사용해서 2번 호출하면 됨)
+                        userRepository.findById(message.getSenderId()).getImageUrl(),
                         message.getCreatedAt(),
                         message.getContent(),
                         isEnd

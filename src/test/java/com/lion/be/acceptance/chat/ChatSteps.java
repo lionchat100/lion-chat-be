@@ -41,7 +41,6 @@ public class ChatSteps {
                 .extract();
     }
 
-    // ✅ 수정된 부분: TestChatController 호출
     public static ExtractableResponse<Response> 채팅방에_메시지를_전송한다(
             String accessToken, Long chatRoomId, String content, RequestSpecification spec) {
         Map<String, Object> requestBody = Map.of("chatRoomId", chatRoomId, "content", content);
@@ -58,25 +57,18 @@ public class ChatSteps {
                 .extract();
     }
 
-    // ✅ 수정된 부분: ChatController의 실제 경로와 파라미터 방식에 맞게 수정
     public static ExtractableResponse<Response> 채팅방의_메시지_목록을_조회한다(
             String accessToken, Long chatRoomId, RequestSpecification spec) {
         return RestAssured
                 .given().log().all()
                 .spec(spec)
                 .auth().oauth2(accessToken)
-                // PathVariable이 아닌 RequestParam으로 roomId 전달
                 .queryParam("roomId", chatRoomId)
-                // lastId는 기본값이 0이므로 명시적으로 보내지 않아도 테스트 가능
                 .when()
-                // 실제 Controller 경로인 "/api/chatrooms/chats/messages"로 수정
                 .get("/api/chatrooms/chats/messages")
                 .then().log().all()
                 .extract();
     }
-
-
-    /* --- 응답 검증 메서드 --- */
 
     public static void 채팅방_생성_응답을_검증한다(ExtractableResponse<Response> response) {
         Assertions.assertAll(
@@ -92,7 +84,6 @@ public class ChatSteps {
         );
     }
 
-    // ✅ 수정된 부분: DTO 필드명 일치
     public static void 채팅방_목록_조회_응답을_검증한다(ExtractableResponse<Response> response, int expectedSize,
                                           String expectedFirstName) {
         List<Map<String, Object>> chatRooms = response.jsonPath().getList("$");

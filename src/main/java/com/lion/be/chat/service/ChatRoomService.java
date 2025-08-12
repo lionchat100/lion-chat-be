@@ -103,6 +103,7 @@ public class ChatRoomService {
      * @return 채팅방 리스트
      */
     public List<ChatRoomResponse> getChatRooms(Long userId) {
+        // FIXME: JPQL로 최적화
         List<ChatRoom> chatRooms = chatRoomRepository.findByChatRoomUsers_User_IdOrderByRecentMessageDtDesc(userId);
         return chatRooms.stream()
                 .map(chatRoom -> {
