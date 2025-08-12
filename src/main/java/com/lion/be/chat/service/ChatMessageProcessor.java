@@ -1,9 +1,12 @@
 package com.lion.be.chat.service;
 
 import com.lion.be.chat.domain.MessageStatus;
+import com.lion.be.chat.domain.dto.ChatMessageRequest;
 import com.lion.be.chat.domain.dto.ChatMessageResponse;
+import com.lion.be.chat.domain.entity.ChatMessage;
 import com.lion.be.chat.domain.entity.ChatRoomUser;
 import com.lion.be.chat.repository.ChatRoomUserRepository;
+import com.lion.be.chat.repository.MessageEntityAdapter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -17,31 +20,20 @@ import java.util.Set;
 public class ChatMessageProcessor implements MessageProcessor {
 
     private final ChatRoomUserRepository chatRoomUserRepository;
-    private final MessageDelivery messageDelivery;
     private final MessagePersistence messagePersistence;
+    private final MessagePublisher messagePublisher;
+    private final MessageEntityAdapter adapter;
 
-    /**
-     * 수신한 채팅 메시지를 처리합니다.
-     * <br>
-     * 1. 메시지 대상자(수신자) 결정
-     * <br>
-     * 2. 대상자에게 메시지 전달 시도
-     * <br>
-     * 3. 성공 시 상태를 DELIVERED로, 실패 시 PENDING으로 갱신
-     *
-     * @param message 수신된 채팅 메시지 응답 DTO
-     */
     @Override
-    public void processIncomingMessage(ChatMessageResponse message) {
-        Long targetUserId = determineTargetUser(message);
+    public void processIncomingMessage(ChatMessageRequest request, Long senderId) {
+        ChatMessage messageToSave = adapter.fromRequest(request, senderId);
+        ChatMessage savedMessage = messagePersistence.saveMessage(messageToSave);
+        log.info("채팅 메시지 저장 완료: {}", savedMessage);
 
-        boolean delivered = messageDelivery.deliverToClient(targetUserId, message);
+        messagePublisher.publishMessage(savedMessage);
+        log.info("채팅 메시지 발행 완료: {}", savedMessage);
 
-        if (delivered) {
-            messagePersistence.updateMessageStatus(new ObjectId(message.messageId()), MessageStatus.DELIVERED);
-        } else {
-            messagePersistence.updateMessageStatus(new ObjectId(message.messageId()), MessageStatus.PENDING);
-        }
+        messagePersistence.updateMessageStatus(savedMessage.getId(), MessageStatus.SENT);
     }
 
     /**
@@ -55,13 +47,12 @@ public class ChatMessageProcessor implements MessageProcessor {
         messagePersistence.updateMessageStatus(new ObjectId(message.messageId()), MessageStatus.PENDING);
     }
 
-    private Long determineTargetUser(ChatMessageResponse message) {
-        Set<ChatRoomUser> userSet = chatRoomUserRepository.findById_ChatRoomId(message.chatRoomId());
-        Long senderId = message.senderId();
+    private Long determineTargetUser(Long chatRoomId, Long senderId) {
+        Set<ChatRoomUser> userSet = chatRoomUserRepository.findById_ChatRoomId(chatRoomId);
         return userSet.stream()
-                .filter(user -> !user.getId().getUserId().equals(senderId))
+                .filter(chatRoomUser -> !chatRoomUser.getId().getUserId().equals(senderId))
+                .map(chatRoomUser -> chatRoomUser.getId().getUserId())
                 .findFirst()
-                .map(user -> user.getId().getUserId())
                 .orElse(null);
     }
 }

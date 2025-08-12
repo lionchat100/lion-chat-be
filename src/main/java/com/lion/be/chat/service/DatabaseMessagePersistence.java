@@ -6,7 +6,7 @@ import com.lion.be.chat.domain.entity.ChatMessage;
 import com.lion.be.chat.domain.entity.ChatRoom;
 import com.lion.be.chat.repository.ChatMessageRepository;
 import com.lion.be.chat.repository.ChatRoomRepository;
-import com.lion.be.chat.repository.MessageEntityAdapter;
+import com.lion.be.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -14,7 +14,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -23,9 +22,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DatabaseMessagePersistence implements MessagePersistence {
 
+    private final UserRepository userRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
-    private final MessageEntityAdapter adapter;
 
     /**
      * 채팅 메시지를 DB에 저장
@@ -45,19 +44,9 @@ public class DatabaseMessagePersistence implements MessagePersistence {
         chatRoomRepository.findById(message.getChatRoomId())
                 .ifPresentOrElse(
                         room -> {
-                            ChatRoom updatedRoom = new ChatRoom(
-                                    room.getId(),
-                                    room.getIsDeleted(),
-                                    room.getRegDt(),
-                                    room.getChatRoomUsers(),
-                                    message.getContent(),
-                                    ZonedDateTime.now(),
-                                    true
-                            );
-                            room.getChatRoomUsers().forEach(updatedRoom::addChatRoomUser);
-                            chatRoomRepository.save(updatedRoom);
-                        },
-                        () -> log.warn("채팅방을 찾을 수 없습니다. ChatRoomId: {}", message.getChatRoomId())
+                            room.updateRecentMessage(message.getContent(), ZonedDateTime.now());
+                            room.markAsRead();
+                        }, () -> log.warn("채팅방을 찾을 수 없습니다. ChatRoomId: {}", message.getChatRoomId())
                 );
 
         return saved;
@@ -78,17 +67,7 @@ public class DatabaseMessagePersistence implements MessagePersistence {
     public void updateMessageStatus(ObjectId messageId, MessageStatus status) {
         chatMessageRepository.findById(messageId).ifPresentOrElse(
                 entity -> {
-                    ChatMessage updatedMessage = new ChatMessage(
-                            entity.getId(),
-                            entity.getSenderId(),
-                            entity.getSenderName(),
-                            entity.getChatRoomId(),
-                            entity.getCreatedAt(),
-                            entity.getContent(),
-                            entity.getIsRead(),
-                            status
-                    );
-                    chatMessageRepository.save(updatedMessage);
+                    entity.updateStatus(status);
                     log.debug("메시지 상태 업데이트: messageId={}, status={}", messageId, status);
                 },
                 () -> log.warn("메시지를 찾을 수 없습니다. MessageId: {}", messageId)
@@ -113,17 +92,11 @@ public class DatabaseMessagePersistence implements MessagePersistence {
         chatMessageRepository.findById(new ObjectId(messageId)).ifPresentOrElse(
                 entity -> {
                     if (!entity.getSenderId().equals(userId)) {
-                        ChatMessage readMessage = new ChatMessage(
-                                entity.getId(),
-                                entity.getSenderId(),
-                                entity.getSenderName(),
-                                entity.getChatRoomId(),
-                                entity.getCreatedAt(),
-                                entity.getContent(),
-                                true,
-                                MessageStatus.READ
+                        ChatMessage updatedMessage = new ChatMessage();
+                        updatedMessage.markAsRead(
+                                entity.getId()
                         );
-                        chatMessageRepository.save(readMessage);
+                        chatMessageRepository.save(updatedMessage);
                         log.info("메시지 읽음 처리 완료: messageId={}, userId={}", messageId, userId);
                     } else {
                         log.debug("발신자는 자신의 메시지를 읽음 처리할 수 없습니다: messageId={}, userId={}", messageId, userId);
@@ -151,6 +124,18 @@ public class DatabaseMessagePersistence implements MessagePersistence {
 
     @Override
     public Page<ChatMessageResponse> findMessagesByIdAndLastId(Long roomId, Long lastId, Pageable pageable) {
+        chatRoomRepository.findById(roomId).ifPresent(
+                chatRoom -> chatRoomRepository.save(new ChatRoom(
+                        chatRoom.getId(),
+                        chatRoom.getIsDeleted(),
+                        chatRoom.getRegDt(),
+                        chatRoom.getChatRoomUsers(),
+                        chatRoom.getRecentMessageContent(),
+                        chatRoom.getRecentMessageDt(),
+                        true
+                ))
+        );
+
         Page<ChatMessage> messages = chatMessageRepository.findMessagesByIdAndLastId(roomId, lastId, pageable);
         boolean isEnd = !messages.hasNext();
 
@@ -159,6 +144,8 @@ public class DatabaseMessagePersistence implements MessagePersistence {
                         message.getId().toString(),
                         message.getChatRoomId(),
                         message.getSenderId(),
+                        message.getSenderName(),
+                        userRepository.findById(message.getSenderId()).getImageUrl(),
                         message.getCreatedAt(),
                         message.getContent(),
                         isEnd

@@ -68,7 +68,8 @@ public class ChatMessage {
         this.status = status;
     }
 
-    public void markAsRead() {
+    public void markAsRead(ObjectId messageId) {
+        this.id= messageId;
         this.isRead = true;
         updateStatus(MessageStatus.READ);
     }

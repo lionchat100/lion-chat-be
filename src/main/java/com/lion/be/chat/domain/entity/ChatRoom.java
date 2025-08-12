@@ -69,4 +69,12 @@ public class ChatRoom {
         chatRoomUsers.add(chatRoomUser);
     }
 
+    public void updateRecentMessage(String content, ZonedDateTime dt) {
+        this.recentMessageContent = content;
+        this.recentMessageDt = dt;
+    }
+
+    public void markAsRead() {
+        this.isRead = true;
+    }
 }
