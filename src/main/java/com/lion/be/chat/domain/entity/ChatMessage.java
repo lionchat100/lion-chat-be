@@ -54,6 +54,7 @@ public class ChatMessage {
 
     public ChatMessage(
             Long senderId,
+            String senderName,
             Long chatRoomId,
             ZonedDateTime createdAt,
             String content,
@@ -61,6 +62,7 @@ public class ChatMessage {
             MessageStatus status
     ) {
         this.senderId = senderId;
+        this.senderName = senderName;
         this.chatRoomId = chatRoomId;
         this.createdAt = createdAt;
         this.content = content;
