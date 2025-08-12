@@ -266,6 +266,28 @@ operation::delete_feed_comment_success[snippets='http-request,http-response']
 
 operation::fetch_all_feed_comment_success[snippets='http-request,http-response']
 
+[[rate-limit-feed-comment]]
+=== 피드 댓글 작성 속도 제한
+
+과도한 요청을 방지하기 위해 댓글 작성 기능에는 속도 제한이 적용됩니다.
+
+* **단기 제한**: 3초에 1개의 댓글만 작성할 수 있습니다.
+* **장기 제한**: 10분에 5개의 댓글만 작성할 수 있습니다.
+
+제한을 초과하여 API를 호출할 경우, `429 Too Many Requests` 상태 코드가 반환됩니다.
+
+==== 실패 (3초 제한 위반)
+
+3초 이내에 연속으로 댓글 작성을 요청하여 실패하는 경우입니다.
+
+operation::rate_limit_3_seconds_fail[snippets='http-request,http-response']
+
+==== 실패 (10분 제한 위반)
+
+10분 이내에 6번째 댓글 작성을 요청하여 실패하는 경우입니다.
+
+operation::rate_limit_10_minutes_fail[snippets='http-request,http-response']
+
 [[like-feed-comment]]
 === 피드 댓글 좋아요
 
