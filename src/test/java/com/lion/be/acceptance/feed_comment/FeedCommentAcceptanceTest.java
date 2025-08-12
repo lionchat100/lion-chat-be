@@ -25,10 +25,7 @@ import static com.lion.be.acceptance.feed_comment.FeedCommentSteps.피드의_모
 import com.lion.be.acceptance.AcceptanceTest;
 import com.lion.be.acceptance.util.UserFixture;
 import io.restassured.RestAssured;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.http.MediaType;
 
 @DisplayName("피드 댓글 관련 인수 테스트")
@@ -316,7 +313,7 @@ class FeedCommentAcceptanceTest extends AcceptanceTest {
             상태코드가_200이다(thirdResponse);
         }
 
-        @DisplayName("10분에 5개를 초과하여 댓글을 작성하면 429 에러가 발생한다")
+        @DisplayName("1분에 5개를 초과하여 댓글을 작성하면 429 에러가 발생한다")
         @Test
         void when_comment_more_than_5_in_10_minutes_then_throw_429() throws InterruptedException {
             // given
@@ -334,6 +331,27 @@ class FeedCommentAcceptanceTest extends AcceptanceTest {
             // 2. 6번째 요청은 10분 제한에 걸려 실패한다.
             var sixthResponse = 피드의_댓글을_작성한다(request, feedId, accessToken, spec);
             상태코드가_429이다(sixthResponse);
+        }
+
+        @DisplayName("5개를 작성 한 후 1분 후에 댓글을 작성하면 작성할 수 있다.")
+        @Test
+        @Disabled //시간이 좀 오래 걸리므로, 눈으로 확인하고 싶다면 주석을 해제하세요
+        void when_comment_after_1_minutes_then_200() throws InterruptedException {
+            // given
+            var request = feedCommentSaveRequest_생성("이것은 10분 제한 테스트 댓글입니다.");
+
+            // when & then
+            // 1. 5개의 요청을 3초 이상의 간격을 두고 보내 모두 성공시킨다.
+            for (int i = 0; i < 5; i++) {
+                var response = 피드의_댓글을_작성한다(request, feedId, accessToken, spec);
+                상태코드가_200이다(response);
+                Thread.sleep(3100); // 단기 제한에 걸리지 않도록 3.1초 대기
+            }
+
+            // 2. 6번째 요청은 10분 제한에 걸려 실패한다.
+            Thread.sleep(1010 * 60);
+            var sixthResponse = 피드의_댓글을_작성한다(request, feedId, accessToken, spec);
+            상태코드가_200이다(sixthResponse);
         }
 
     }

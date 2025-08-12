@@ -158,6 +158,40 @@ public class FeedSteps {
                 .extract();
     }
 
+    public static ExtractableResponse<Response> 내_피드를_조회한다(
+            String accessToken,
+            RequestSpecification spec,
+            Long lastId,
+            Integer size
+    ) {
+        return RestAssured
+                .given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .spec(spec)
+                .auth().oauth2(accessToken)
+                .queryParam("lastId", lastId)
+                .queryParam("size", size)
+                .log().all()
+                .when()
+                .get("/api/feeds/me")
+                .then()
+                .log().all()
+                .extract();
+    }
+
+    public static ExtractableResponse<Response> 피드의_제한을_조심하며_작성한다(String accessToken, RequestSpecification spec, String title, String content){
+        ExtractableResponse<Response> response = 피드를_작성한다(accessToken, spec, title, content);
+
+        try {
+            Thread.sleep(3100);
+        } catch (InterruptedException e) {
+            System.out.println("Thread.Sleep Fail");
+        }
+
+        return response;
+    }
+
+
     public static void 피드_좋아요_정보를_검증한다(
             ExtractableResponse<Response> response,
             Long targetFeedId,
@@ -285,5 +319,10 @@ public class FeedSteps {
                             }).findFirst().isEmpty()).isTrue();
                 }
         );
+    }
+
+    public static void 다회_요청제한을_검증한다(ExtractableResponse<Response> response){
+        assertThat(response.statusCode())
+                .isEqualTo(HttpStatus.TOO_MANY_REQUESTS.value());
     }
 }

@@ -32,6 +32,7 @@ public class AuthEndpoints {
             "/api/test/login",
             "/api/docs",
             "/api/health",
+            "/api/test/generate-tokens",
             // WebSocket
             "/ws/**",
     };

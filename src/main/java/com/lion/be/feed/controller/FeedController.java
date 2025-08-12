@@ -8,6 +8,7 @@ import com.lion.be.feed.domain.dto.FeedUpdateRequest;
 import com.lion.be.feed.domain.dto.FeedWriteRequest;
 import com.lion.be.feed.service.FeedReadService;
 import com.lion.be.feed.service.FeedWriteService;
+import com.lion.be.global.aop.CheckRateLimitFeed;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
@@ -60,6 +61,7 @@ public class FeedController {
     }
 
     @PostMapping("/api/feeds")
+    @CheckRateLimitFeed
     public ResponseEntity<FeedSaveResponse> writeFeed(@RequestBody FeedWriteRequest feedWriteRequest,
                                                       @AuthenticationPrincipal UserPrincipal userPrincipal) {
         Long userId = userPrincipal.getId();
@@ -86,6 +88,19 @@ public class FeedController {
         Long currentUserId = (userPrincipal != null) ? userPrincipal.getId() : null;
         FeedResponse feedResponse = feedReadService.getFeedResponseById(feedId, currentUserId); // ✨ 새로운 서비스 메서드 호출
         return ResponseEntity.ok(feedResponse.getFeed());
+    }
+
+    @GetMapping("/api/feeds/me")
+    public ResponseEntity<Slice<FeedResponse>> getMyFeeds(
+            @RequestParam(value = "lastId", required = false) Long lastId,
+            @RequestParam(value = "size", required = false) Integer size,
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        Long currentUserId = userPrincipal.getId();
+        System.out.println("currentUserId = " + currentUserId);
+        if (lastId != null && lastId > 0) {
+            return ResponseEntity.ok(feedReadService.getMyFeedsAfter(currentUserId, lastId, size));
+        }
+        return ResponseEntity.ok(feedReadService.getMyFeedsFirst(currentUserId, size));
     }
 
 }

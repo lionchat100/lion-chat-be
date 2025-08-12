@@ -7,11 +7,16 @@ import com.lion.be.feed_comment.repository.FeedCommentRepository;
 import com.lion.be.feed_comment.service.FeedCommentWriteService;
 import com.lion.be.global.exception.CustomException;
 import com.lion.be.global.exception.ErrorCode;
+import com.lion.be.global.util.RedisKey;
+import com.lion.be.user.domain.Role;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +25,7 @@ public class FeedWriteService {
     private final FeedRepository feedRepository;
     private final FeedCommentWriteService feedCommentWriteService;
     private final UserRepository userRepository;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Transactional
     public void deleteFeed(Long currentUserId, Long feedId) {
@@ -30,7 +36,7 @@ public class FeedWriteService {
                 .orElseThrow(() -> new CustomException(ErrorCode.FEED_NOT_FOUND));
 
         Long feedWriterId = feed.getUser().getId();
-        if (!feedWriterId.equals(user.getId())) {
+        if (!feedWriterId.equals(currentUserId) && !user.getRole().equals(Role.ADMIN)) {
             throw new CustomException(ErrorCode.USER_UNAUTHORIZED);
         }
 

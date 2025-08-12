@@ -86,5 +86,27 @@ public interface FeedRepository extends JpaRepository<Feed, Long> {
     """)
     void softDeleteById(@Param("feedId") Long feedId);
 
+    @Query("""
+            SELECT new com.lion.be.feed.domain.dto.FeedResponse(
+                f.id, f.title, f.content, f.createdAt,
+                f.likeCount, f.commentCount,
+                u.name, u.id, u.imageUrl
+            )
+            FROM Feed f JOIN f.user u
+            WHERE f.isDeleted = false AND u.id = :currentUserId
+            """)
+    Slice<FeedResponse> fetchFeedsByUserIdFirst(Long currentUserId, Pageable recentPageable);
+
+    @Query("""
+            SELECT new com.lion.be.feed.domain.dto.FeedResponse(
+                f.id, f.title, f.content, f.createdAt,
+                f.likeCount, f.commentCount,
+                u.name, u.id, u.imageUrl
+            )
+            FROM Feed f JOIN f.user u
+            WHERE f.isDeleted = false AND u.id = :currentUserId AND f.id < :lastId
+            """)
+    Slice<FeedResponse> fetchFeedsByUserIdAfter(Long currentUserId, Long lastId, Pageable recentPageable);
+
     //생각할 것: 검색이 되는가? 검색이 된다면 어디까지 될 것인가?
 }
