@@ -7,6 +7,7 @@ import com.lion.be.feed_comment.repository.FeedCommentRepository;
 import com.lion.be.feed_comment.service.FeedCommentWriteService;
 import com.lion.be.global.exception.CustomException;
 import com.lion.be.global.exception.ErrorCode;
+import com.lion.be.user.domain.Role;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +31,7 @@ public class FeedWriteService {
                 .orElseThrow(() -> new CustomException(ErrorCode.FEED_NOT_FOUND));
 
         Long feedWriterId = feed.getUser().getId();
-        if (!feedWriterId.equals(user.getId())) {
+        if (user.getRole() != Role.ADMIN || !feedWriterId.equals(user.getId())) {
             throw new CustomException(ErrorCode.USER_UNAUTHORIZED);
         }
 
