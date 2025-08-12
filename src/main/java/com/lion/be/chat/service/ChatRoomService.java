@@ -3,6 +3,7 @@ package com.lion.be.chat.service;
 import com.lion.be.chat.domain.dto.ChatRoomResponse;
 import com.lion.be.chat.domain.entity.ChatRoom;
 import com.lion.be.chat.domain.entity.ChatRoomUser;
+import com.lion.be.chat.repository.ChatMessageRepository;
 import com.lion.be.chat.repository.ChatRoomRepository;
 import com.lion.be.chat.repository.ChatRoomUserRepository;
 import com.lion.be.user.domain.entity.User;
@@ -17,8 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static java.util.stream.Collectors.toList;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -28,6 +27,7 @@ public class ChatRoomService {
     private final UserRepository userRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomUserRepository chatRoomUserRepository;
+    private final ChatMessageRepository chatMessageRepository;
 
     @Transactional
     public Long findOrCreateChatRoom(Long senderId, Long receiverId) {
@@ -105,13 +105,20 @@ public class ChatRoomService {
     public List<ChatRoomResponse> getChatRooms(Long userId) {
         List<ChatRoom> chatRooms = chatRoomRepository.findByChatRoomUsers_User_IdOrderByRecentMessageDtDesc(userId);
         return chatRooms.stream()
-                .map(chatRoom -> new ChatRoomResponse(
-                        chatRoom.getId(),
-                        userRepository.findById(chatRoom.getId()).getName(),
-                        chatRoom.getRecentMessageContent(),
-                        chatRoom.getRecentMessageDt(),
-                        userRepository.findById(chatRoom.getId()).getImageUrl(),
-                        chatRoom.getIsRead()))
+                .map(chatRoom -> {
+                    ChatRoomUser otherUser = chatRoom.getChatRoomUsers().stream()
+                            .filter(user -> !user.getUser().getId().equals(userId))
+                            .findFirst()
+                            .orElseThrow(() -> new IllegalStateException("사용자 없음."));
+
+                    return new ChatRoomResponse(
+                            chatRoom.getId(),
+                            otherUser.getUser().getName(),
+                            chatRoom.getRecentMessageContent(),
+                            chatRoom.getRecentMessageDt(),
+                            otherUser.getUser().getImageUrl(),
+                            chatRoom.getIsRead());
+                })
                 .toList();
     }
 }

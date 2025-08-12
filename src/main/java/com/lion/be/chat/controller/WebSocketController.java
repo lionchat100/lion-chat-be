@@ -7,13 +7,11 @@ import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.service.UserReadService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.event.EventListener;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.socket.messaging.SessionConnectEvent;
 
 @RestController
 @RequestMapping("/api/ws")
@@ -46,17 +44,18 @@ public class WebSocketController {
      *
      * @param event 웹소켓 세션 연결 이벤트
      */
-    @EventListener
-    public void handleWebSocketConnectEvent(SessionConnectEvent event) {
-        Long userId = extractUserIdFromSession(event.getMessage());
-        if (userId != null) {
-            log.info("사용자 웹소켓 연결: {}", userId);
-            messageDelivery.deliverPendingMessages(userId);
-            log.info("미수신 메시지 전송 완료: userId={}", userId);
-        } else {
-            log.error("웹소켓 연결 실패: 사용자 ID 추출 불가");
-        }
-    }
+//    @Deprecated
+//    @EventListener
+//    public void handleWebSocketConnectEvent(SessionConnectEvent event) {
+//        Long userId = extractUserIdFromSession(event.getMessage());
+//        if (userId != null) {
+//            log.info("사용자 웹소켓 연결: {}", userId);
+//            messageDelivery.deliverPendingMessages(userId);
+//            log.info("미수신 메시지 전송 완료: userId={}", userId);
+//        } else {
+//            log.error("웹소켓 연결 실패: 사용자 ID 추출 불가");
+//        }
+//    }
 
     /**
      * STOMP 메시지에서 사용자 ID를 추출합니다.

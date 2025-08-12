@@ -1,5 +1,6 @@
 package com.lion.be.chat.service;
 
+import com.lion.be.chat.domain.dto.ChatMessageRequest;
 import com.lion.be.chat.domain.dto.ChatMessageResponse;
 
 public interface MessageProcessor {
@@ -9,7 +10,7 @@ public interface MessageProcessor {
      *
      * @param message 처리할 채팅 메시지 응답 DTO
      */
-    void processIncomingMessage(ChatMessageResponse message);
+    void processIncomingMessage(ChatMessageRequest message, Long senderId);
 
     /**
      * 메시지 처리에 실패했을 때 수행할 작업을 정의합니다.
