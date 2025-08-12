@@ -1,5 +1,9 @@
 package com.lion.be.user.controller;
 
+import com.lion.be.global.util.HttpHeaderParser;
+import com.lion.be.global.util.HttpHeaderType;
+import com.lion.be.user.controller.dto.UserIdResponse;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/users/")
+@RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -45,4 +49,12 @@ public class UserController {
 		);
 		return ResponseEntity.ok(response);
 	}
+
+    @GetMapping("/id")
+    public ResponseEntity<UserIdResponse> fetchUserId(@RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
+        String accessToken = HttpHeaderParser.parse(authHeader, HttpHeaderType.AUTH);
+        UserIdResponse response = userReadService.fetchUserId(accessToken);
+        return ResponseEntity.ok(response);
+    }
+
 }
