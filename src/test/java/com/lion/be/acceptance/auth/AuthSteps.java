@@ -19,6 +19,10 @@ public class AuthSteps {
         return 로그인한다(AuthFixture.사용자_원준_로그인_요청(), spec);
     }
 
+	public static ExtractableResponse<Response> 토킷이_로그인한다(RequestSpecification spec) {
+		return 로그인한다(AuthFixture.사용자_토킷_로그인_요청(), spec);
+	}
+
     public static ExtractableResponse<Response> 비회원이_로그인한다(RequestSpecification spec) {
         return 로그인한다(AuthFixture.비회원_로그인_요청(), spec);
     }
