@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
 
 @Aspect
@@ -18,19 +19,38 @@ public class RateLimitingAspect {
 
     private final RateLimitingService rateLimitingService;
 
-    @Around("@annotation(com.lion.be.global.aop.CheckRateLimit)")
-    public Object checkRateLimit(ProceedingJoinPoint joinPoint) throws Throwable {
+    // === 피드 생성 제한을 처리하는 Advice ===
+    @Around("@annotation(com.lion.be.global.aop.CheckRateLimitFeed)")
+    public Object checkFeedRateLimit(ProceedingJoinPoint joinPoint) throws Throwable {
         UserPrincipal userPrincipal = findUserPrincipal(joinPoint.getArgs());
         if (userPrincipal == null) {
-            // 인증 정보가 없는 경우, 로직을 그냥 통과시키거나 예외 처리 가능
+            // 인증 정보가 없으면 로직을 통과
             return joinPoint.proceed();
         }
 
-        Bucket bucket = rateLimitingService.resolveBucket(userPrincipal.getId());
+        Bucket bucket = rateLimitingService.resolveFeedBucket(userPrincipal.getId());
         if (bucket.tryConsume(1)) {
-            return joinPoint.proceed(); // 메소드 실행 계속
+            return joinPoint.proceed();
         } else {
-            // 예외 발생
+            throw new CustomException(ErrorCode.TOO_MANY_API_REQUEST_EXCEPTION);
+        }
+    }
+
+    // === 피드 댓글 생성 제한을 처리하는 Advice ===
+    @Around("@annotation(com.lion.be.global.aop.CheckRateLimitFeedComment)")
+    public Object checkFeedCommentRateLimit(ProceedingJoinPoint joinPoint) throws Throwable {
+        UserPrincipal userPrincipal = findUserPrincipal(joinPoint.getArgs());
+        Long feedId = findArgumentByName(joinPoint, "feedId", Long.class);
+
+        if (userPrincipal == null || feedId == null) {
+            // 필요한 정보가 없으면 로직을 통과 (혹은 예외 처리)
+            return joinPoint.proceed();
+        }
+
+        Bucket bucket = rateLimitingService.resolveFeedCommentBucket(feedId, userPrincipal.getId());
+        if (bucket.tryConsume(1)) {
+            return joinPoint.proceed();
+        } else {
             throw new CustomException(ErrorCode.TOO_MANY_API_REQUEST_EXCEPTION);
         }
     }
@@ -42,6 +62,22 @@ public class RateLimitingAspect {
             }
         }
         return null;
+    }
+
+    /**
+     * 메소드 파라미터에서 이름으로 특정 타입의 인자를 찾아 반환합니다.
+     */
+    private <T> T findArgumentByName(ProceedingJoinPoint joinPoint, String name, Class<T> returnType) {
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        String[] parameterNames = signature.getParameterNames();
+        Object[] args = joinPoint.getArgs();
+
+        for (int i = 0; i < parameterNames.length; i++) {
+            if (parameterNames[i].equals(name) && returnType.isInstance(args[i])) {
+                return returnType.cast(args[i]);
+            }
+        }
+        return null; // 못 찾으면 null 반환
     }
 
 }
