@@ -8,6 +8,7 @@ import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
+import java.time.ZonedDateTime;
 
 @Document(collection = "chat_message")
 @Getter
@@ -23,7 +24,7 @@ public class ChatMessage {
 
     private Long chatRoomId;
 
-    private Instant date;
+    private ZonedDateTime createdAt;
 
     private String content;
 
@@ -36,7 +37,7 @@ public class ChatMessage {
             Long senderId,
             String senderName,
             Long chatRoomId,
-            Instant date,
+            ZonedDateTime createdAt,
             String content,
             Boolean isRead,
             MessageStatus status
@@ -45,7 +46,7 @@ public class ChatMessage {
         this.senderId = senderId;
         this.senderName = senderName;
         this.chatRoomId = chatRoomId;
-        this.date = date;
+        this.createdAt = createdAt;
         this.content = content;
         this.isRead = isRead;
         this.status = status;
@@ -53,17 +54,15 @@ public class ChatMessage {
 
     public ChatMessage(
             Long senderId,
-            String senderName,
             Long chatRoomId,
-            Instant date,
+            ZonedDateTime createdAt,
             String content,
             Boolean isRead,
             MessageStatus status
     ) {
         this.senderId = senderId;
-        this.senderName = senderName;
         this.chatRoomId = chatRoomId;
-        this.date = date;
+        this.createdAt = createdAt;
         this.content = content;
         this.isRead = isRead;
         this.status = status;
