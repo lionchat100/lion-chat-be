@@ -653,3 +653,42 @@ operation::like_notification_sent[snippets='http-request,http-response']
 **400 Bad Request**
 * 자기 자신에게 좋아요 시도 시 (비즈니스 로직에 따라)
 * 잘못된 요청 파라미터 사용 시
+
+[[image-upload]]
+== 이미지 시스템
+=== 이미지를 업로드
+
+이미지를 업로드하면 성공한다.
+
+operation::image_upload_success[snippets='http-request,http-response']
+
+=== 이미지를 2개 업로드
+
+이미지를 2장 업로드시 성공한다.
+
+operation::image_list_upload_success[snippets='http-request,http-response']
+
+=== 이미지를 3개 업로드
+
+이미지를 3장 업로드시 성공한다.
+
+operation::image_list_upload_three_success[snippets='http-request,http-response']
+
+=== 이미지 삭제
+
+업로드된 이미지를 성공적으로 삭제한다.
+
+operation::image_delete_success[snippets='http-request,http-response']
+
+=== 이미지 없는 이미지 삭제
+
+존재 하지 않는 이미지를 삭제 404 반환한다.
+
+operation::image_delete_fail_not_found[snippets='http-request,http-response']
+
+=== 남의 이미지 삭제
+
+남의 이미지를 삭제시도하면 403 반환한다.
+
+operation::image_delete_fail_access_denied[snippets='http-request,http-response']
+
