@@ -31,4 +31,20 @@ public interface FeedCommentJpaRepository extends JpaRepository<FeedComment, Lon
             + "WHERE c.id = :id")
     void updateLikeCount(@Param("id") Long id, @Param("likeCount") long likeCount);
 
+    @Query("SELECT NEW com.lion.be.feed_comment.domain.dto.FeedCommentResponse(" +
+            "c.id, c.feed.id, c.content, c.createdAt, c.updatedAt, u.id, u.name, u.imageUrl, c.likeCount" // c.likeCount 추가
+            + ") " +
+            "FROM FeedComment c " +
+            "JOIN c.user u " +
+            "WHERE c.id = :commentId AND c.isDeleted = false")
+    FeedCommentResponse findCommentById(@Param("commentId") Long commentId);
+
+    @Modifying(clearAutomatically = true)
+    @Query("""
+        update FeedComment c
+        set c.isDeleted = true
+        where c.feed.id = :feedId
+    """)
+    void softDeleteByFeedId(@Param("feedId") Long feedId);
+
 }

@@ -9,14 +9,13 @@ import com.lion.be.user.domain.PreferenceType;
 import com.lion.be.user.domain.University;
 
 import jakarta.validation.constraints.AssertTrue;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public record OnboardingRequest(
 	@NotEmpty
-	@Size(min = 1, max = 100 ,message = "닉네임은 최대 20자 이하입니다.")
+	@Size(min = 1, max = 8 ,message = "닉네임은 최대 8자 이하입니다.")
 	String nickname,
 
 	@NotEmpty(message = "대표 사진을 최소 1장 추가해주세요.")
@@ -35,7 +34,8 @@ public record OnboardingRequest(
 	@NotNull(message = "MBTI를 선택해주세요.")
 	Mbti mbti,
 
-	@NotBlank(message = "한줄소개 입력해주세요.")
+	@NotEmpty(message = "한줄소개 입력해주세요.")
+	@Size(min = 1, max =30, message = "자기소개는 최대 30자 입니다.")
 	String bio,
 
 	@AssertTrue(message = "필수 약관에 동의해주세요.")

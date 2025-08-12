@@ -5,6 +5,7 @@ import static com.lion.be.acceptance.auth.AuthSteps.원준이_로그인한다;
 import static com.lion.be.acceptance.user.UserSteps.비회원_회원가입;
 import static com.lion.be.acceptance.user.UserSteps.원준_회원가입;
 import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.document;
+import static org.testcontainers.containers.localstack.LocalStackContainer.Service.S3;
 
 import com.lion.be.acceptance.util.DatabaseCleanup;
 import com.lion.be.acceptance.util.MongoCleanup;
@@ -32,6 +33,7 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.containers.RabbitMQContainer;
+import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
@@ -41,49 +43,73 @@ import org.testcontainers.utility.DockerImageName;
 @ActiveProfiles("test")
 public abstract class AcceptanceTest {
 
+    // Testcontainers 선언
+    private static final MySQLContainer<?> mysql;
+    private static final GenericContainer<?> redis;
+    private static final MongoDBContainer mongo;
     private static final RabbitMQContainer rabbitmq;
+    private static final LocalStackContainer localstack; // LocalStack 컨테이너 추가
 
+    // 테스트용 S3 버킷 이름 상수
+    public static final String S3_BUCKET_NAME = "test-bucket";
+
+    // static 초기화 블록: 모든 테스트 시작 전 단 한 번만 실행
     static {
         // MySQLContainer 시작
-        MySQLContainer<?> mysql = new MySQLContainer<>(DockerImageName.parse("mysql:8.0"));
+        mysql = new MySQLContainer<>(DockerImageName.parse("mysql:8.0"));
         mysql.start();
         System.setProperty("DB_URL", mysql.getJdbcUrl());
         System.setProperty("DB_USERNAME", mysql.getUsername());
         System.setProperty("DB_PASSWORD", mysql.getPassword());
 
         // Redis 시작
-        GenericContainer<?> redis = new GenericContainer<>(DockerImageName.parse("redis:7.2")).withExposedPorts(6379);
+        redis = new GenericContainer<>(DockerImageName.parse("redis:7.2")).withExposedPorts(6379);
         redis.start();
         System.setProperty("REDIS_HOST", redis.getHost());
         System.setProperty("REDIS_PORT", redis.getMappedPort(6379).toString());
 
         // MongoDB 시작
-        MongoDBContainer mongo = new MongoDBContainer(DockerImageName.parse("mongo:6.0"));
+        mongo = new MongoDBContainer(DockerImageName.parse("mongo:6.0"));
         mongo.start();
         System.setProperty("MONGO_URI", mongo.getReplicaSetUrl());
 
         // RabbitMQ 시작 (STOMP 플러그인 활성화)
         rabbitmq = new RabbitMQContainer(DockerImageName.parse("rabbitmq:3-management"))
-                .withPluginsEnabled("rabbitmq_stomp") // STOMP 플러그인 활성화
-                .withExposedPorts(5672, 15672, 61613); // AMQP, Management, STOMP 포트 노출
+                .withPluginsEnabled("rabbitmq_stomp")
+                .withExposedPorts(5672, 15672, 61613);
         rabbitmq.start();
         System.setProperty("RABBITMQ_HOST", rabbitmq.getHost());
         System.setProperty("RABBITMQ_PORT", String.valueOf(rabbitmq.getAmqpPort()));
-        System.setProperty("RABBITMQ_STOMP_PORT", String.valueOf(rabbitmq.getMappedPort(61613))); // STOMP 포트 설정
+        System.setProperty("RABBITMQ_STOMP_PORT", String.valueOf(rabbitmq.getMappedPort(61613)));
         System.setProperty("RABBITMQ_USERNAME", rabbitmq.getAdminUsername());
         System.setProperty("RABBITMQ_PASSWORD", rabbitmq.getAdminPassword());
+
+        // LocalStack 시작 (S3 서비스만 활성화)
+        localstack = new LocalStackContainer(DockerImageName.parse("localstack/localstack:2.3"))
+                .withServices(S3)
+                .withReuse(true);
+        localstack.start();
+
+        // 테스트 실행 전에 LocalStack 내부에 S3 버킷 생성
+        try {
+            localstack.execInContainer("awslocal", "s3api", "create-bucket", "--bucket", S3_BUCKET_NAME);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create S3 bucket in LocalStack", e);
+        }
     }
 
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {
-        // static 블록에서 System.setProperty로 설정한 값을 읽어와서 주입
+        // MySQL 설정
         registry.add("spring.datasource.url", () -> System.getProperty("DB_URL"));
         registry.add("spring.datasource.username", () -> System.getProperty("DB_USERNAME"));
         registry.add("spring.datasource.password", () -> System.getProperty("DB_PASSWORD"));
 
+        // Redis 설정
         registry.add("spring.data.redis.host", () -> System.getProperty("REDIS_HOST"));
         registry.add("spring.data.redis.port", () -> System.getProperty("REDIS_PORT"));
 
+        // MongoDB 설정
         registry.add("spring.data.mongodb.uri", () -> System.getProperty("MONGO_URI"));
 
         // RabbitMQ 설정
@@ -92,7 +118,7 @@ public abstract class AcceptanceTest {
         registry.add("spring.rabbitmq.username", () -> System.getProperty("RABBITMQ_USERNAME"));
         registry.add("spring.rabbitmq.password", () -> System.getProperty("RABBITMQ_PASSWORD"));
 
-        // STOMP 설정 추가
+        // STOMP 설정
         registry.add("spring.messaging.stomp.broker-relay.host", () -> System.getProperty("RABBITMQ_HOST"));
         registry.add("spring.messaging.stomp.broker-relay.port", () -> System.getProperty("RABBITMQ_STOMP_PORT"));
         registry.add("spring.messaging.stomp.broker-relay.system-login", () -> System.getProperty("RABBITMQ_USERNAME"));
@@ -101,6 +127,13 @@ public abstract class AcceptanceTest {
         registry.add("spring.messaging.stomp.broker-relay.client-login", () -> System.getProperty("RABBITMQ_USERNAME"));
         registry.add("spring.messaging.stomp.broker-relay.client-passcode",
                 () -> System.getProperty("RABBITMQ_PASSWORD"));
+
+        // AWS S3
+        registry.add("cloud.aws.s3.bucket", () -> S3_BUCKET_NAME);
+        registry.add("cloud.aws.region.static", () -> localstack.getRegion());
+        registry.add("cloud.aws.credentials.access-key", () -> localstack.getAccessKey());
+        registry.add("cloud.aws.credentials.secret-key", () -> localstack.getSecretKey());
+        registry.add("spring.cloud.aws.s3.endpoint", () -> localstack.getEndpointOverride(S3).toString());
     }
 
     @LocalServerPort

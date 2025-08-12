@@ -6,6 +6,7 @@ import com.lion.be.acceptance.AcceptanceTest;
 import com.lion.be.feed.domain.entity.Feed;
 import com.lion.be.feed.repository.FeedRepository;
 import com.lion.be.feed.service.FeedLikeScheduler;
+import com.lion.be.global.util.RedisKey;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.repository.UserRepository;
 import jakarta.persistence.EntityManager;
@@ -29,9 +30,6 @@ public class FeedLikeSchedulerAcceptanceTest extends AcceptanceTest {
     @Autowired
     private EntityManager em;
 
-    private static final String LIKE_COUNT_KEY_PREFIX = "feed:like_count:";
-    private static final String DIRTY_FEEDS_KEY = "dirty:feeds";
-
     @Test
     @Transactional
     @DisplayName("스케줄러가 실행되면 Redis의 피드 좋아요 수가 DB에 정확히 반영된다")
@@ -46,9 +44,9 @@ public class FeedLikeSchedulerAcceptanceTest extends AcceptanceTest {
         assertThat(feed.getLikeCount()).isZero(); // 초기 DB의 좋아요 수는 0
 
         // Redis에 '좋아요'가 25번 눌린 상황을 시뮬레이션
-        String likeCountKey = LIKE_COUNT_KEY_PREFIX + feedId;
+        String likeCountKey = RedisKey.FEED_LIKE_COUNT_KEY_PREFIX + feedId;
         redisTemplate.opsForValue().set(likeCountKey, "25");
-        redisTemplate.opsForSet().add(DIRTY_FEEDS_KEY, String.valueOf(feedId));
+        redisTemplate.opsForSet().add(RedisKey.DIRTY_FEED_LIKE_KEY, String.valueOf(feedId));
 
         // when: 스케줄러의 메서드를 직접 호출
         feedLikeScheduler.syncLikesToDb();
@@ -60,7 +58,7 @@ public class FeedLikeSchedulerAcceptanceTest extends AcceptanceTest {
         Feed updatedFeed = feedRepository.findById(feedId).orElseThrow();
         assertThat(updatedFeed.getLikeCount()).isEqualTo(25);
 
-        Long dirtySetSize = redisTemplate.opsForSet().size(DIRTY_FEEDS_KEY);
+        Long dirtySetSize = redisTemplate.opsForSet().size(RedisKey.DIRTY_FEED_LIKE_KEY);
         assertThat(dirtySetSize).isZero();
     }
 

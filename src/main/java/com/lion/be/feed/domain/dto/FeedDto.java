@@ -20,4 +20,12 @@ public class FeedDto {
     private Boolean isLiked;
     private Long commentCount;
 
+    public void like(){
+        this.isLiked = true;
+    }
+
+    public void unlike(){
+        this.isLiked = false;
+    }
+
 }

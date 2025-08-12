@@ -121,8 +121,11 @@ public class UserQueryDslRepository {
 	private BooleanBuilder buildBaseConditions(Long currentUserId, List<Long> excludeUserIds) {
 		BooleanBuilder whereClause = new BooleanBuilder();
 
-		whereClause.and(user.id.ne(currentUserId))
-			.and(user.onboardingStatus.eq(OnboardingStatus.COMPLETED));
+		if (currentUserId != null) {
+			whereClause.and(user.id.ne(currentUserId));
+		}
+
+		whereClause.and(user.onboardingStatus.eq(OnboardingStatus.COMPLETED));
 
 		if (excludeUserIds != null && !excludeUserIds.isEmpty()) {
 			whereClause.and(user.id.notIn(excludeUserIds));

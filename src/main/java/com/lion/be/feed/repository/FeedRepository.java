@@ -17,7 +17,7 @@ public interface FeedRepository extends JpaRepository<Feed, Long> {
     @Query("""
             SELECT new com.lion.be.feed.domain.dto.FeedResponse(
                 f.id, f.title, f.content, f.createdAt,
-                f.likeCount, false, 0L,
+                f.likeCount, f.commentCount,
                 u.name, u.id, u.imageUrl
             )
             FROM Feed f JOIN f.user u
@@ -32,7 +32,7 @@ public interface FeedRepository extends JpaRepository<Feed, Long> {
     @Query("""
             SELECT new com.lion.be.feed.domain.dto.FeedResponse(
                 f.id, f.title, f.content, f.createdAt,
-                f.likeCount, false, 0L,
+                f.likeCount, f.commentCount,
                 u.name, u.id, u.imageUrl
             )
             FROM Feed f JOIN f.user u
@@ -44,7 +44,7 @@ public interface FeedRepository extends JpaRepository<Feed, Long> {
     @Query("""
             SELECT new com.lion.be.feed.domain.dto.FeedResponse(
                 f.id, f.title, f.content, f.createdAt,
-                f.likeCount, false, 0L,
+                f.likeCount, f.commentCount,
                 u.name, u.id, u.imageUrl
             )
             FROM Feed f JOIN f.user u
@@ -57,7 +57,7 @@ public interface FeedRepository extends JpaRepository<Feed, Long> {
     @Query("""
             SELECT new com.lion.be.feed.domain.dto.FeedResponse(
                 f.id, f.title, f.content, f.createdAt,
-                f.likeCount, false, 0L,
+                f.likeCount, f.commentCount,
                 u.name, u.id, u.imageUrl
             )
             FROM Feed f JOIN f.user u
@@ -73,6 +73,18 @@ public interface FeedRepository extends JpaRepository<Feed, Long> {
     @Modifying(clearAutomatically = true)
     @Query("UPDATE Feed f SET f.likeCount = :likeCount WHERE f.id = :id")
     void updateLikeCount(@Param("id") Long id, @Param("likeCount") long likeCount);
+
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Feed f SET f.commentCount = :commentCount WHERE f.id = :id")
+    void updateCommentCount(@Param("id") Long id, @Param("commentCount") long commentCount);
+
+    @Modifying(clearAutomatically = true)
+    @Query("""
+        update Feed f
+        set f.isDeleted = true
+        where f.id = :feedId
+    """)
+    void softDeleteById(@Param("feedId") Long feedId);
 
     //생각할 것: 검색이 되는가? 검색이 된다면 어디까지 될 것인가?
 }

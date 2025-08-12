@@ -3,6 +3,8 @@ package com.lion.be.feed.service;
 import com.lion.be.feed.controller.dto.FeedSaveResponse;
 import com.lion.be.feed.domain.entity.Feed;
 import com.lion.be.feed.repository.FeedRepository;
+import com.lion.be.feed_comment.repository.FeedCommentRepository;
+import com.lion.be.feed_comment.service.FeedCommentWriteService;
 import com.lion.be.global.exception.CustomException;
 import com.lion.be.global.exception.ErrorCode;
 import com.lion.be.user.domain.entity.User;
@@ -16,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class FeedWriteService {
 
     private final FeedRepository feedRepository;
+    private final FeedCommentWriteService feedCommentWriteService;
     private final UserRepository userRepository;
 
     @Transactional
@@ -31,7 +34,8 @@ public class FeedWriteService {
             throw new CustomException(ErrorCode.USER_UNAUTHORIZED);
         }
 
-        feed.delete();
+        feedRepository.softDeleteById(feedId);
+        feedCommentWriteService.deleteAllByFeedId(feedId);
     }
 
     @Transactional

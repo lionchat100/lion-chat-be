@@ -31,6 +31,18 @@ public class UserCardSteps {
 		return 특정_사용자_로그인("front2@test.com", "이리액트", "https://test.com/image2.jpg");
 	}
 
+	public static String 박뷰js_로그인() {
+		return 특정_사용자_로그인("front3@test.com", "박뷰js", "https://test.com/image3.jpg");
+	}
+
+	public static String 이스프링_로그인() {
+		return 특정_사용자_로그인("back2@test.com", "이스프링", "https://test.com/image7.jpg");
+	}
+
+	public static String 박자바_로그인() {
+		return 특정_사용자_로그인("back3@test.com", "박자바", "https://test.com/image8.jpg");
+	}
+
 	public static String 특정_사용자_로그인(String email, String name, String imageUrl) {
 		Map<String, Object> loginRequest = Map.of(
 			"email", email,
@@ -115,7 +127,9 @@ public class UserCardSteps {
 			() -> assertThat(response.jsonPath().getString("university")).isNotEmpty(),
 			() -> assertThat(response.jsonPath().getBoolean("isUniversityVisible")).isNotNull(),
 			() -> assertThat(response.jsonPath().getString("position")).isNotEmpty(),
-			() -> assertThat(response.jsonPath().getList("imageUrls")).isNotEmpty()
+			() -> assertThat(response.jsonPath().getList("imageUrls")).isNotEmpty(),
+			() -> assertThat(response.jsonPath().getString("bio")).isNotEmpty(),
+			() -> assertThat(response.jsonPath().getBoolean("isLikedByMe")).isFalse()
 		);
 	}
 
@@ -202,19 +216,24 @@ public class UserCardSteps {
 
 	public static void 혼합_추천을_검증한다(ExtractableResponse<Response> response) {
 		List<Map<String, Object>> cards = response.jsonPath().getList("$");
-		assertThat(cards).isNotEmpty();
+		assertThat(cards).isNotNull().isNotEmpty();
 
-		// 다양한 클러스터의 사용자들이 섞여 있는지 확인
-		// 실제로는 클러스터 정보를 응답에 포함하지 않으므로,
-		// 다양한 Position이나 MBTI가 섞여있는지로 간접 확인
-
+		// null-safe position 추출
 		Set<String> positions = cards.stream()
-			.map(card -> (String) card.get("position"))
+			.filter(Objects::nonNull) // card 자체가 null인 경우 방지
+			.map(card -> card.get("position"))
+			.filter(Objects::nonNull) // position이 null인 경우 방지
+			.map(String.class::cast) // 안전한 캐스팅
+			.filter(pos -> !pos.trim().isEmpty()) // 빈 문자열 제거
 			.collect(Collectors.toSet());
 
-		// 여러 직무가 섞여있으면 혼합 추천이 잘 된 것으로 판단
-		assertThat(positions.size()).isGreaterThan(1);
+		// 최소 2개 이상의 서로 다른 직무가 있어야 혼합 추천으로 판단
+		assertThat(positions)
+			.as("혼합 추천을 위해 최소 2개 이상의 서로 다른 직무가 필요합니다")
+			.hasSizeGreaterThan(1);
+
 		System.out.println("추천된 직무 종류: " + positions);
+		System.out.println("직무 다양성: " + positions.size() + "개 직무");
 	}
 
 	public static void 사용자_정보_형식을_검증한다(ExtractableResponse<Response> response) {
@@ -231,7 +250,10 @@ public class UserCardSteps {
 			() -> assertThat(firstCard.get("isUniversityVisible")).isNotNull(),
 			() -> assertThat(firstCard.get("position")).isNotNull(),
 			() -> assertThat(firstCard.get("imageUrls")).isNotNull(),
-			() -> assertThat((List<?>) firstCard.get("imageUrls")).isNotEmpty()
+			() -> assertThat((List<?>) firstCard.get("imageUrls")).isNotEmpty(),
+			() -> assertThat(firstCard.get("bio")).isNotNull(),
+			() -> assertThat((String) firstCard.get("bio")).isNotEmpty(),
+			() -> assertThat(response.jsonPath().getBoolean("isLikedByMe")).isFalse()
 		);
 
 		System.out.println("첫 번째 카드 정보: " + firstCard);

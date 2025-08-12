@@ -4,6 +4,8 @@ import com.lion.be.auth.domain.UserPrincipal;
 import com.lion.be.feed_comment.domain.dto.FeedCommentResponse;
 import com.lion.be.feed_comment.domain.dto.FeedCommentSaveRequest;
 import com.lion.be.feed_comment.domain.dto.FeedCommentSaveResponse;
+import com.lion.be.feed_comment.domain.dto.FeedCommentUpdateRequest;
+import com.lion.be.feed_comment.domain.dto.FeedCommentUpdateResponse;
 import com.lion.be.feed_comment.service.FeedCommentReadService;
 import com.lion.be.feed_comment.service.FeedCommentWriteService;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -40,10 +43,27 @@ public class FeedCommentController {
         return ResponseEntity.ok(response);
     }
 
+    @PatchMapping("/api/feeds/comments/{commentId}")
+    public ResponseEntity<FeedCommentUpdateResponse> update(@PathVariable Long commentId,
+                                                            @AuthenticationPrincipal UserPrincipal userPrincipal,
+                                                            @RequestBody FeedCommentUpdateRequest request) {
+        FeedCommentUpdateResponse response = feedCommentWriteService.update(commentId, userPrincipal.getId(), request);
+        return ResponseEntity.ok(response);
+    }
+
     @DeleteMapping("/api/feeds/comments/{commentId}")
-    public ResponseEntity<Void> delete(@PathVariable Long commentId) {
-        feedCommentWriteService.delete(commentId);
+    public ResponseEntity<Void> delete(@PathVariable Long commentId,
+                                       @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        feedCommentWriteService.delete(commentId, userPrincipal.getId());
         return ResponseEntity.ok().build();
+    }
+
+    //테스트용 단일 댓글 조회
+    @GetMapping("/api/feeds/comments/{commentId}")
+    public ResponseEntity<FeedCommentResponse> fetchById(@PathVariable Long commentId,
+                                                         @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        FeedCommentResponse response = feedCommentReadService.fetchById(commentId, userPrincipal.getId());
+        return ResponseEntity.ok(response);
     }
 
 }

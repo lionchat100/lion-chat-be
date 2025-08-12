@@ -1,22 +1,14 @@
 package com.lion.be.acceptance.feed_comment;
 
+import static com.lion.be.acceptance.feed.FeedSteps.피드를_삭제한다;
 import static com.lion.be.acceptance.feed.FeedSteps.피드를_작성한다;
-import static com.lion.be.acceptance.feed_comment.FeedCommentSteps.feedCommentSaveRequest_생성;
-import static com.lion.be.acceptance.feed_comment.FeedCommentSteps.문서_없이_피드의_모든_댓글을_조회한다;
-import static com.lion.be.acceptance.feed_comment.FeedCommentSteps.상태코드가_200이다;
-import static com.lion.be.acceptance.feed_comment.FeedCommentSteps.피드_댓글_삭제_후_조회_응답을_검증한다;
-import static com.lion.be.acceptance.feed_comment.FeedCommentSteps.피드_댓글_작성_응답을_검증한다;
-import static com.lion.be.acceptance.feed_comment.FeedCommentSteps.피드_댓글_전체_조회_응답을_검증한다;
-import static com.lion.be.acceptance.feed_comment.FeedCommentSteps.피드_댓글_좋아요_정보를_검증한다;
-import static com.lion.be.acceptance.feed_comment.FeedCommentSteps.피드_댓글에_좋아요를_누른다;
-import static com.lion.be.acceptance.feed_comment.FeedCommentSteps.피드_댓글의_좋아요를_취소한다;
-import static com.lion.be.acceptance.feed_comment.FeedCommentSteps.피드의_댓글을_삭제한다;
-import static com.lion.be.acceptance.feed_comment.FeedCommentSteps.피드의_댓글을_작성한다;
-import static com.lion.be.acceptance.feed_comment.FeedCommentSteps.피드의_모든_댓글을_조회한다;
+import static com.lion.be.acceptance.feed_comment.FeedCommentSteps.*;
 
 import com.lion.be.acceptance.AcceptanceTest;
 import com.lion.be.acceptance.util.UserFixture;
 import io.restassured.RestAssured;
+import io.restassured.response.ExtractableResponse;
+import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -72,6 +64,22 @@ class FeedCommentAcceptanceTest extends AcceptanceTest {
             피드_댓글_작성_응답을_검증한다(response);
         }
 
+        @DisplayName("피드의 댓글을 수정한다.")
+        @Test
+        void  when_update_feed_comment_then_response_200() {
+            // given
+            api_문서_타이틀("update_feed_comment_success", spec);
+            var savedResponse = 피드의_댓글을_작성한다(feedCommentSaveRequest_생성("이것은 댓글 내용입니다."), feedId,
+                    accessToken, spec);
+            long commentId = savedResponse.jsonPath().getLong("commentId");
+
+            // when
+            var response = 피드의_댓글을_수정한다(feedCommentUpdateRequest_수정("이것은 새로운 댓글 내용입니다."), commentId, accessToken, spec);
+
+            // then
+            피드_댓글_수정_응답을_검증한다(response);
+        }
+
         @DisplayName("피드의 댓글을 모두 조회한다.")
         @Test
         void when_fetch_all_feed_comment_then_response_200() {
@@ -107,6 +115,22 @@ class FeedCommentAcceptanceTest extends AcceptanceTest {
             상태코드가_200이다(response);
         }
 
+        @DisplayName("권한 없는 자가 피드의 댓글을 삭제 시 거부된다.")
+        @Test
+        void when_soft_delete_comment_then_response_401() {
+            // given
+
+            // when
+            var commentResponse = 피드의_댓글을_작성한다(feedCommentSaveRequest_생성("댓글1"), feedId,
+                    accessToken, spec);
+            Long commentId = commentResponse.jsonPath().getLong("commentId");
+
+            var response = 피드의_댓글을_삭제한다(commentId, anotherAccessToken, spec);
+
+            // then
+            상태코드가_401이다(response);
+        }
+
         @DisplayName("피드의 댓글을 삭제 후 조회 시, 조회가 되지 않는다.")
         @Test
         void when_fetch_after_delete_then_comment_should_not_be_found() {
@@ -129,6 +153,27 @@ class FeedCommentAcceptanceTest extends AcceptanceTest {
             // then
             피드_댓글_삭제_후_조회_응답을_검증한다(response, 1, remainingContent, deletedContent);
         }
+
+        @DisplayName("피드의 댓글을 단 후 피드가 삭제될 시, 댓글 조회가 되지 않는다.")
+        @Test
+        void when_fetch_after_feed_delete_then_comment_should_not_be_found() {
+            // given
+            String deletedContent = "이 댓글은 삭제될 것입니다.";
+
+            var commentToDeleteResponse = 피드의_댓글을_작성한다(feedCommentSaveRequest_생성(deletedContent), feedId, accessToken,
+                    spec);
+
+            Long commentIdToDelete = commentToDeleteResponse.jsonPath().getLong("commentId");
+
+            // when
+            피드를_삭제한다(accessToken, spec, feedId);
+            var response = 피드의_댓글을_하나를_조회한다(commentIdToDelete, accessToken, spec);
+
+            // then
+            피드_삭제_후_댓글_조회_응답을_검증한다(response);
+        }
+
+
 
     }
 
