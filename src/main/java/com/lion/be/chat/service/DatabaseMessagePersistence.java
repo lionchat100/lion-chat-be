@@ -7,15 +7,14 @@ import com.lion.be.chat.domain.entity.ChatRoom;
 import com.lion.be.chat.repository.ChatMessageRepository;
 import com.lion.be.chat.repository.ChatRoomRepository;
 import com.lion.be.user.repository.UserRepository;
+import java.time.ZonedDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.time.ZonedDateTime;
-import java.util.List;
 
 @Service
 @Slf4j
@@ -46,6 +45,7 @@ public class DatabaseMessagePersistence implements MessagePersistence {
                         room -> {
                             room.updateRecentMessage(message.getContent(), ZonedDateTime.now());
                             room.markAsRead();
+                            chatRoomRepository.save(room);
                         }, () -> log.warn("채팅방을 찾을 수 없습니다. ChatRoomId: {}", message.getChatRoomId())
                 );
 
@@ -145,11 +145,12 @@ public class DatabaseMessagePersistence implements MessagePersistence {
                         message.getChatRoomId(),
                         message.getSenderId(),
                         message.getSenderName(),
-                        userRepository.findById(message.getSenderId()).getImageUrl(),
+                        userRepository.findById(message.getSenderId()).getImageUrl(), // FIXME: N+1 문제
                         message.getCreatedAt(),
                         message.getContent(),
                         isEnd
                 )
         );
     }
+
 }
