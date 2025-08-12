@@ -8,7 +8,7 @@ import com.lion.be.feed_comment.domain.dto.FeedCommentUpdateRequest;
 import com.lion.be.feed_comment.domain.dto.FeedCommentUpdateResponse;
 import com.lion.be.feed_comment.service.FeedCommentReadService;
 import com.lion.be.feed_comment.service.FeedCommentWriteService;
-import com.lion.be.global.aop.CheckRateLimit;
+import com.lion.be.global.aop.CheckRateLimitFeedComment;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -29,7 +29,7 @@ public class FeedCommentController {
     private final FeedCommentReadService feedCommentReadService;
     private final FeedCommentWriteService feedCommentWriteService;
 
-    @CheckRateLimit
+    @CheckRateLimitFeedComment
     @PostMapping("/api/feeds/{feedId}/comments")
     public ResponseEntity<FeedCommentSaveResponse> save(@PathVariable Long feedId,
                                                         @AuthenticationPrincipal UserPrincipal userPrincipal,
