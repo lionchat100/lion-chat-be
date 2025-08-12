@@ -49,7 +49,7 @@ public class FeedLikeScheduler {
             }
         }
 
-        log.info("피드 댓글 좋아요 카운트 Batch update 끝: {}번", objFeedIds.size());
+        log.info("피드 좋아요 카운트 Batch update 끝: {}번", objFeedIds.size());
     }
 
 }
