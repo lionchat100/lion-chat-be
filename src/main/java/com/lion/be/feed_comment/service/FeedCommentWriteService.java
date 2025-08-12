@@ -73,14 +73,14 @@ public class FeedCommentWriteService {
 
         // 댓글 작성자와 요청한 사용자가 일치하는지 확인
         Long writerId = feedComment.feedCommentUserResponse().userId();
-        if(user.getRole() != Role.ADMIN || !requestedUserId.equals(writerId)){
+        if(!requestedUserId.equals(writerId) && !user.getRole().equals(Role.ADMIN)) {
             throw new CustomException(ErrorCode.USER_UNAUTHORIZED);
         }
 
         String commentCountKey = RedisKey.COMMENT_COUNT_KEY + feedId;
         Long currentCommentCount = Long.parseLong(redisTemplate.opsForValue().get(commentCountKey).toString());
 
-        if (currentCommentCount > 0) {
+        if (currentCommentCount != null && currentCommentCount > 0) {
             redisTemplate.opsForValue().decrement(commentCountKey);
             redisTemplate.opsForSet().add(RedisKey.DIRTY_COMMENT_COUNT_KEY, String.valueOf(feedId));
         }

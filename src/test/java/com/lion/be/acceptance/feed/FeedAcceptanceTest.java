@@ -196,7 +196,7 @@ public class FeedAcceptanceTest extends AcceptanceTest {
                 "Test Content 5");
 
         for (int i = 0; i < 5; i++) {
-            피드를_작성한다(accessToken, spec, feedTitles.get(i), feedContents.get(i));
+            피드의_제한을_조심하며_작성한다(accessToken, spec, feedTitles.get(i), feedContents.get(i));
         }
 
         List<String> expectedTitles = List.of("Test Title 5", "Test Title 4", "Test Title 3", "Test Title 2",
@@ -226,7 +226,7 @@ public class FeedAcceptanceTest extends AcceptanceTest {
                 List.of("Test Content 1", "Test Content 2", "Test Content 3", "Test Content 4", "Test Content 5"));
 
         for (int i = 0; i < 5; i++) {
-            피드를_작성한다(accessToken, spec, feedTitles.get(i), feedContents.get(i));
+            피드의_제한을_조심하며_작성한다(accessToken, spec, feedTitles.get(i), feedContents.get(i));
         }
 
         List<String> expectedTitles = List.of("Test Title 5", "Test Title 4", "Test Title 3", "Test Title 2");
@@ -257,7 +257,7 @@ public class FeedAcceptanceTest extends AcceptanceTest {
                 List.of("Test Content 1", "Test Content 2", "Test Content 3", "Test Content 4", "Test Content 5"));
 
         for (int i = 0; i < 5; i++) {
-            피드를_작성한다(accessToken1, spec, feedTitles.get(i), feedContents.get(i));
+            피드의_제한을_조심하며_작성한다(accessToken1, spec, feedTitles.get(i), feedContents.get(i));
         }
 
         피드에_좋아요를_누른다(accessToken1, spec, 1L);
@@ -401,7 +401,7 @@ public class FeedAcceptanceTest extends AcceptanceTest {
         List<String> feedContents = List.of("내용 1", "내용 2", "내용 3");
 
         for (int i = 0; i < feedTitles.size(); i++) {
-            피드를_작성한다(accessToken, spec, feedTitles.get(i), feedContents.get(i));
+            피드의_제한을_조심하며_작성한다(accessToken, spec, feedTitles.get(i), feedContents.get(i));
         }
 
         List<String> expectedTitles = List.of("내 피드 3", "내 피드 2", "내 피드 1");
@@ -412,6 +412,50 @@ public class FeedAcceptanceTest extends AcceptanceTest {
 
         // then
         피드_전체_조회_응답을_검증한다(response, 3, expectedTitles, expectedContents, List.of(false, false, false));
+    }
+
+    @Test
+    @DisplayName("같은 유저가 3초 내에 글을 2번 쓰면 실패한다.")
+    void when_write_feeds_twice_in_3seconds_then_429(){
+        //given
+        var loginResponse = 비회원이_로그인한다(spec);
+        String accessToken = loginResponse.jsonPath().getString("accessToken");
+        온보딩을_완료한다(회원_멋사2_온보딩_요청(), accessToken, spec);
+
+        List<String> feedTitles = List.of("내 피드 1", "내 피드 2");
+        List<String> feedContents = List.of("내용 1", "내용 2");
+
+        피드를_작성한다(accessToken, spec, feedTitles.get(0), feedContents.get(0));
+
+        //when
+        var response = 피드를_작성한다(accessToken, spec, feedTitles.get(1), feedContents.get(1));
+
+        //then
+        다회_요청제한을_검증한다(response);
+    }
+
+    @Test
+    @DisplayName("같은 유저가 10초 내에 글을 5번 쓰면 실패한다.")
+    void when_write_feeds_many_in_10seconds_then_429(){
+        //given
+        var loginResponse = 비회원이_로그인한다(spec);
+        String accessToken = loginResponse.jsonPath().getString("accessToken");
+        온보딩을_완료한다(회원_멋사2_온보딩_요청(), accessToken, spec);
+
+        List<String> feedTitles = List.of("내 피드 1", "내 피드 2","내 피드 3", "내 피드 4","내 피드 5", "내 피드 6");
+        List<String> feedContents = List.of("내 피드 1", "내 피드 2","내 피드 3", "내 피드 4","내 피드 5", "내 피드 6");
+
+        피드의_제한을_조심하며_작성한다(accessToken, spec, feedTitles.get(0), feedContents.get(0));
+        피드의_제한을_조심하며_작성한다(accessToken, spec, feedTitles.get(1), feedContents.get(1));
+        피드의_제한을_조심하며_작성한다(accessToken, spec, feedTitles.get(2), feedContents.get(2));
+        피드의_제한을_조심하며_작성한다(accessToken, spec, feedTitles.get(3), feedContents.get(3));
+        피드의_제한을_조심하며_작성한다(accessToken, spec, feedTitles.get(4), feedContents.get(4));
+
+        //when
+        var response = 피드의_제한을_조심하며_작성한다(accessToken, spec, feedTitles.get(5), feedContents.get(5));
+
+        //then
+        다회_요청제한을_검증한다(response);
     }
 
 }

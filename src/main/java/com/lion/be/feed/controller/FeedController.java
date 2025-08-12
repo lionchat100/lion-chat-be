@@ -8,6 +8,7 @@ import com.lion.be.feed.domain.dto.FeedUpdateRequest;
 import com.lion.be.feed.domain.dto.FeedWriteRequest;
 import com.lion.be.feed.service.FeedReadService;
 import com.lion.be.feed.service.FeedWriteService;
+import com.lion.be.global.aop.CheckRateLimitFeed;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
@@ -60,6 +61,7 @@ public class FeedController {
     }
 
     @PostMapping("/api/feeds")
+    @CheckRateLimitFeed
     public ResponseEntity<FeedSaveResponse> writeFeed(@RequestBody FeedWriteRequest feedWriteRequest,
                                                       @AuthenticationPrincipal UserPrincipal userPrincipal) {
         Long userId = userPrincipal.getId();
