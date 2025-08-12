@@ -4,6 +4,7 @@ import com.lion.be.chat.domain.MessageStatus;
 import com.lion.be.chat.domain.dto.ChatMessageRequest;
 import com.lion.be.chat.domain.dto.ChatMessageResponse;
 import com.lion.be.chat.domain.entity.ChatMessage;
+import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
@@ -15,11 +16,12 @@ import java.time.ZonedDateTime;
 @RequiredArgsConstructor
 public class MessageEntityAdapter {
 
+    private final UserRepository userRepository;
     private final UserRepository userRoomRepository;
 
-    public ChatMessage fromRequest(ChatMessageRequest request) {
+    public ChatMessage fromRequest(ChatMessageRequest request, Long senderId) {
         return new ChatMessage(
-                request.senderId(),
+                senderId,
                 request.chatRoomId(),
                 ZonedDateTime.now(),
                 request.content(),
@@ -42,10 +44,13 @@ public class MessageEntityAdapter {
     }
 
     public ChatMessageResponse toResponse(ChatMessage message, boolean isEnd) {
+        User sender = userRoomRepository.findById(message.getSenderId());
         return new ChatMessageResponse(
                 message.getId() != null ? message.getId().toString() : new ObjectId().toString(),
                 message.getChatRoomId(),
                 message.getSenderId(),
+                sender.getName(),
+                sender.getImageUrl() != null ? sender.getImageUrl() : "",
                 message.getCreatedAt(),
                 message.getContent(),
                 isEnd
