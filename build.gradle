@@ -102,6 +102,8 @@ dependencies {
 
     implementation platform('software.amazon.awssdk:bom:2.25.46') // AWS SDK BOM(Bill of Materials)
     implementation 'software.amazon.awssdk:s3'
+
+    implementation 'com.github.vladimir-bukhtoyarov:bucket4j-core:7.6.0'
 }
 
 ext {

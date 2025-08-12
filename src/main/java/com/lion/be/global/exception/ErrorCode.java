@@ -33,7 +33,9 @@ public enum ErrorCode {
 	USER_CAN_NOT_LIKE_HIMSELF(HttpStatus.BAD_REQUEST, "자기 자신에게 좋아요를 누를수 없습니다."),
 
     IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "이미지를 찾을 수 없습니다."),
-    UPLOAD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "업로드 중 에러가 발생했습니다.");
+    UPLOAD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "업로드 중 에러가 발생했습니다."),
+
+    TOO_MANY_API_REQUEST_EXCEPTION(HttpStatus.TOO_MANY_REQUESTS, "API 요청 횟수를 초과했습니다.");
 
     private final HttpStatus status;
     private final String message;
