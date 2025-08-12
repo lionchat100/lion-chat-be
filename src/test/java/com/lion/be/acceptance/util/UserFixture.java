@@ -57,7 +57,7 @@ public enum UserFixture {
 			Map.entry("requiredAgreements", true),
 			Map.entry("marketingAgreement", false),
 			Map.entry("isUniversityView", true),
-			Map.entry("preferenceType", PreferenceType.MBTI_FOCUSED)
+			Map.entry("preferenceType", PreferenceType.PREFERENCE_FOCUSED)
 		);
 	}
 
@@ -73,7 +73,7 @@ public enum UserFixture {
 			Map.entry("requiredAgreements", true),
 			Map.entry("marketingAgreement", false),
 			Map.entry("isUniversityView", true),
-			Map.entry("preferenceType", PreferenceType.MBTI_FOCUSED)
+			Map.entry("preferenceType", PreferenceType.PREFERENCE_FOCUSED)
 		);
 	}
 

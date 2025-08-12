@@ -1,5 +1,7 @@
 package com.lion.be.user.domain;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -13,4 +15,9 @@ public enum Position {
 	FULLSTACK("풀스택");
 
 	private final String koreanName;
+
+	@JsonValue
+	public String getKoreanName() {
+		return koreanName;
+	}
 }
