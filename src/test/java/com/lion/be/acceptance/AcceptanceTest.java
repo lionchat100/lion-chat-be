@@ -11,6 +11,7 @@ import com.lion.be.acceptance.util.DatabaseCleanup;
 import com.lion.be.acceptance.util.MongoCleanup;
 import com.lion.be.acceptance.util.SqlFileExecutor;
 import com.lion.be.acceptance.util.TableCleanup;
+import com.lion.be.global.service.RateLimitingService;
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.specification.RequestSpecification;
@@ -43,14 +44,12 @@ import org.testcontainers.utility.DockerImageName;
 @ActiveProfiles("test")
 public abstract class AcceptanceTest {
 
-    // Testcontainers 선언
     private static final MySQLContainer<?> mysql;
     private static final GenericContainer<?> redis;
     private static final MongoDBContainer mongo;
     private static final RabbitMQContainer rabbitmq;
-    private static final LocalStackContainer localstack; // LocalStack 컨테이너 추가
+    private static final LocalStackContainer localstack;
 
-    // 테스트용 S3 버킷 이름 상수
     public static final String S3_BUCKET_NAME = "test-bucket";
 
     // static 초기화 블록: 모든 테스트 시작 전 단 한 번만 실행
@@ -97,6 +96,9 @@ public abstract class AcceptanceTest {
             throw new RuntimeException("Failed to create S3 bucket in LocalStack", e);
         }
     }
+
+    @Autowired
+    private RateLimitingService rateLimitingService;
 
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {
@@ -187,8 +189,10 @@ public abstract class AcceptanceTest {
         databaseCleanup.execute();
         mongoCleanup.execute();
         sqlFileExecutor.execute("data.sql");
-
         redisTemplate.getConnectionFactory().getConnection().flushAll();
+
+        // 여기에 초기화 코드 추가
+        rateLimitingService.clearBuckets();
 
         initAccessToken();
         this.spec = new RequestSpecBuilder().addFilter(
