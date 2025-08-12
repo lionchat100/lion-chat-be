@@ -1,15 +1,10 @@
 package com.lion.be.chat.domain.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public record ChatRoomCreationEvent(
-        String eventId,
-        Long senderId,
-        Long receiverId,
-        String senderName,
-        String messageContent,
-        LocalDateTime requestTime,
-        String correlationId,
-        String replyTo
+        Long user1Id,
+        Long user2Id,
+        Instant requestTime
 ) {
 }

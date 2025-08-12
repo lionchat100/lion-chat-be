@@ -52,7 +52,7 @@ public class RabbitMessagePublisher implements MessagePublisher {
     public void publishMessage(ChatMessage message) {
         String routingKey = "chat.message." + message.getChatRoomId();
 
-        ChatMessageResponse response = adapter.toResponse(message);
+        ChatMessageResponse response = adapter.toResponse(message, false);
 
         rabbitTemplate.convertAndSend(
                 RabbitMQConfig.CHAT_EXCHANGE_NAME,

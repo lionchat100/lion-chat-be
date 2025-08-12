@@ -1,6 +1,6 @@
 package com.lion.be.chat.domain.dto;
 
-public record ChatRoomCreationResponse(
+public record ChatRoomInitResponse(
         Long chatRoomId
 ) {
 }

@@ -1,16 +1,21 @@
 package com.lion.be.chat.service;
 
 import com.lion.be.chat.domain.MessageStatus;
+import com.lion.be.chat.domain.dto.ChatMessageResponse;
 import com.lion.be.chat.domain.entity.ChatMessage;
 import com.lion.be.chat.domain.entity.ChatRoom;
 import com.lion.be.chat.repository.ChatMessageRepository;
 import com.lion.be.chat.repository.ChatRoomRepository;
+import com.lion.be.chat.repository.MessageEntityAdapter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Service
@@ -20,6 +25,7 @@ public class DatabaseMessagePersistence implements MessagePersistence {
 
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
+    private final MessageEntityAdapter adapter;
 
     /**
      * 채팅 메시지를 DB에 저장
@@ -45,7 +51,8 @@ public class DatabaseMessagePersistence implements MessagePersistence {
                                     room.getRegDt(),
                                     room.getChatRoomUsers(),
                                     message.getContent(),
-                                    Instant.now()
+                                    ZonedDateTime.now(),
+                                    true
                             );
                             room.getChatRoomUsers().forEach(updatedRoom::addChatRoomUser);
                             chatRoomRepository.save(updatedRoom);
@@ -76,7 +83,7 @@ public class DatabaseMessagePersistence implements MessagePersistence {
                             entity.getSenderId(),
                             entity.getSenderName(),
                             entity.getChatRoomId(),
-                            entity.getDate(),
+                            entity.getCreatedAt(),
                             entity.getContent(),
                             entity.getIsRead(),
                             status
@@ -111,7 +118,7 @@ public class DatabaseMessagePersistence implements MessagePersistence {
                                 entity.getSenderId(),
                                 entity.getSenderName(),
                                 entity.getChatRoomId(),
-                                entity.getDate(),
+                                entity.getCreatedAt(),
                                 entity.getContent(),
                                 true,
                                 MessageStatus.READ
@@ -140,5 +147,22 @@ public class DatabaseMessagePersistence implements MessagePersistence {
     @Override
     public List<ChatMessage> getPendingMessages(Long userId) {
         return chatMessageRepository.findPendingMessageByReceiverId(userId);
+    }
+
+    @Override
+    public Page<ChatMessageResponse> findMessagesByIdAndLastId(Long roomId, Long lastId, Pageable pageable) {
+        Page<ChatMessage> messages = chatMessageRepository.findMessagesByIdAndLastId(roomId, lastId, pageable);
+        boolean isEnd = !messages.hasNext();
+
+        return messages.map(message ->
+                new ChatMessageResponse(
+                        message.getId().toString(),
+                        message.getChatRoomId(),
+                        message.getSenderId(),
+                        message.getCreatedAt(),
+                        message.getContent(),
+                        isEnd
+                )
+        );
     }
 }

@@ -39,7 +39,7 @@ public class WebSocketMessageDelivery implements MessageDelivery {
         List<ChatMessage> pendingMessages = messagePersistence.getPendingMessages(userId);
 
         for (ChatMessage message : pendingMessages) {
-            ChatMessageResponse response = adapter.toResponse(message);
+            ChatMessageResponse response = adapter.toResponse(message, false);
             if (deliverToClient(userId, response)) {
                 messagePersistence.updateMessageStatus(message.getId(), MessageStatus.DELIVERED);
             }

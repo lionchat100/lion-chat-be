@@ -1,8 +1,11 @@
 package com.lion.be.chat.service;
 
 import com.lion.be.chat.domain.MessageStatus;
+import com.lion.be.chat.domain.dto.ChatMessageResponse;
 import com.lion.be.chat.domain.entity.ChatMessage;
 import org.bson.types.ObjectId;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -39,5 +42,16 @@ public interface MessagePersistence {
      * @return 미처리 메시지 목록
      */
     List<ChatMessage> getPendingMessages(Long userId);
+
+    /**
+     * 채팅방의 메시지를 조회합니다.
+     *
+     * @param roomId 채팅방 ID
+     * @param lastId 마지막으로 조회한 메시지 ID (0이면 최신부터)
+     * @param pageable 페이징 정보
+     * @return 메시지 목록
+     */
+    Page<ChatMessageResponse> findMessagesByIdAndLastId(Long roomId, Long lastId, Pageable pageable);
+
 }
 
