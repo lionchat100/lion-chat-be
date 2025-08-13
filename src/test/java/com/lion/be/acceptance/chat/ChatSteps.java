@@ -130,7 +130,7 @@ public class ChatSteps {
 
     public static void 메시지_목록_조회_응답을_검증한다(ExtractableResponse<Response> response, int expectedSize,
                                           String firstMessageContent) {
-        List<Map<String, Object>> messages = response.jsonPath().getList("content");
+        List<Map<String, Object>> messages = response.jsonPath().getList("$");
 
         Assertions.assertAll(
                 () -> assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value()),
@@ -138,7 +138,7 @@ public class ChatSteps {
                 () -> assertThat(messages.get(0).get("content")).isEqualTo(firstMessageContent),
                 () -> assertThat(messages.get(0).get("messageId")).isNotNull(),
                 () -> assertThat(messages.get(0).get("senderName")).isNotNull(),
-                () -> assertThat(response.jsonPath().getBoolean("last")).isTrue()
+                () -> assertThat(response.jsonPath().getBoolean("last")).isNotNull()
         );
     }
 

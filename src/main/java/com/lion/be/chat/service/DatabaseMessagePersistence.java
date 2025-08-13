@@ -8,17 +8,19 @@ import com.lion.be.chat.repository.ChatMessageRepository;
 import com.lion.be.chat.repository.ChatRoomRepository;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.repository.UserRepository;
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.lion.be.user.repository.persistence.jpa.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -28,13 +30,14 @@ public class DatabaseMessagePersistence implements MessagePersistence {
     private final UserRepository userRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
+    private final UserJpaRepository userJpaRepository;
 
     /**
      * 채팅 메시지를 DB에 저장
      *
      * @param message 저장할 채팅 메시지(도메인 객체)
      * @return 저장된 채팅 메시지(도메인 객체, ID 및 저장 시각이 반영됨)
-     *
+     * <p>
      * 과정:
      * 1. 도메인 객체를 DB 엔티티로 변환
      * 2. DB에 저장
@@ -115,7 +118,7 @@ public class DatabaseMessagePersistence implements MessagePersistence {
      *
      * @param userId 사용자 ID
      * @return 해당 사용자가 보낸 PENDING 상태의 메시지 리스트(도메인 객체)
-     *
+     * <p>
      * 과정:
      * 1. senderId와 상태로 메시지 필터링 조회
      * 2. 엔티티를 도메인 객체로 변환
@@ -127,35 +130,30 @@ public class DatabaseMessagePersistence implements MessagePersistence {
     }
 
     @Override
-    public Page<ChatMessageResponse> findMessagesByIdAndLastId(Long roomId, Long lastId, Pageable pageable) {
-        chatRoomRepository.findById(roomId).ifPresent(
-                chatRoom -> chatRoomRepository.save(new ChatRoom(
-                        chatRoom.getId(),
-                        chatRoom.getIsDeleted(),
-                        chatRoom.getRegDt(),
-                        chatRoom.getChatRoomUsers(),
-                        chatRoom.getRecentMessageContent(),
-                        chatRoom.getRecentMessageDt(),
-                        true
-                ))
-        );
+    public List<ChatMessageResponse> findMessagesByIdAndLastId(Long roomId, Long lastId, Pageable pageable) {
+        chatRoomRepository.findById(roomId).ifPresent(ChatRoom::markAsRead);
 
         Page<ChatMessage> messages = chatMessageRepository.findMessagesByIdAndLastId(roomId, lastId, pageable);
-        boolean isEnd = !messages.hasNext();
+        boolean isEnd = messages.hasNext();
+        Set<Long> senderIds = messages.stream()
+                .map(ChatMessage::getSenderId)
+                .collect(Collectors.toSet());
+        Map<Long, User> users = userJpaRepository.findByIdIn(senderIds).stream()
+                .collect(Collectors.toMap(User::getId, user -> user));
 
-        return messages.map(message ->
-                new ChatMessageResponse(
-                        message.getId().toString(),
-                        message.getChatRoomId(),
-                        message.getSenderId(),
-                        message.getSenderName(),
-                        // FIXME: N+1 문제 (senderId 목록은 Set, Map 사용해서 2번 호출하면 됨)
-                        userRepository.findById(message.getSenderId()).getImageUrl(),
-                        message.getCreatedAt(),
-                        message.getContent(),
-                        isEnd
-                )
-        );
+        return messages.map(message -> {
+            User sender = users.get(message.getSenderId());
+            String imageUrl = (sender != null) ? sender.getImageUrl() : null;
+            return new ChatMessageResponse(
+                    message.getId().toString(),
+                    message.getChatRoomId(),
+                    message.getSenderId(),
+                    message.getSenderName(),
+                    imageUrl,
+                    message.getCreatedAt(),
+                    message.getContent(),
+                    isEnd
+            );
+        }).getContent();
     }
-
 }
