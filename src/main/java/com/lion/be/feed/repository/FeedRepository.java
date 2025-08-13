@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.repository.query.Param;
 
-public interface FeedRepository extends JpaRepository<Feed, Long> {
+public interface FeedRepository extends JpaRepository<Feed, Long>, FeedRepositoryCustom {
     //첫 전체 조회
     @Query("""
             SELECT new com.lion.be.feed.domain.dto.FeedResponse(
