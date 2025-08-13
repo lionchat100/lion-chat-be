@@ -114,4 +114,20 @@ public class ChatSteps {
         );
     }
 
+    public static void 상태코드가_200이다(ExtractableResponse<Response> response) {
+        Assertions.assertAll(
+                () -> 상태코드를_검증한다(response, HttpStatus.OK)
+        );
+    }
+
+    public static void 상태코드가_429이다(ExtractableResponse<Response> response) {
+        Assertions.assertAll(
+                () -> 상태코드를_검증한다(response, HttpStatus.TOO_MANY_REQUESTS)
+        );
+    }
+
+    private static void 상태코드를_검증한다(ExtractableResponse<Response> response, HttpStatus expectedHttpStatus) {
+        assertThat(response.statusCode()).isEqualTo(expectedHttpStatus.value());
+    }
+
 }
