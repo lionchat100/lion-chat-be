@@ -23,12 +23,12 @@ public class FeedCommentCountScheduler {
     @Scheduled(fixedRate = 10000)
     @Transactional
     public void syncLikesToDb() {
-        log.info("피드 댓글 카운트 Batch update 시작");
+        log.debug("피드 댓글 카운트 Batch update 시작");
 
         List<Object> objFeedIds = redisTemplate.opsForSet().pop(RedisKey.DIRTY_COMMENT_COUNT_KEY, 100);
 
         if (objFeedIds == null || objFeedIds.isEmpty()) {
-            log.info("업데이트 할 피드 댓글 수가 존재하지 않음");
+            log.debug("업데이트 할 피드 댓글 수가 존재하지 않음");
             return;
         }
 
@@ -54,6 +54,6 @@ public class FeedCommentCountScheduler {
             }
         }
 
-        log.info("피드 댓글 수 카운트 Batch update 끝: {}번", objFeedIds.size());
+        log.debug("피드 댓글 수 카운트 Batch update 끝: {}번", objFeedIds.size());
     }
 }

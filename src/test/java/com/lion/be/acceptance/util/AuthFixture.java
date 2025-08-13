@@ -1,7 +1,6 @@
 package com.lion.be.acceptance.util;
 
-import static com.lion.be.acceptance.util.UserFixture.비회원;
-import static com.lion.be.acceptance.util.UserFixture.회원_원준;
+import static com.lion.be.acceptance.util.UserFixture.*;
 
 import java.util.Map;
 
@@ -20,5 +19,12 @@ public class AuthFixture {
                 "name", 회원_원준.getName(),
                 "imageUrl", 회원_원준.getImageUrl());
     }
+
+	public static Map<String, Object> 사용자_토킷_로그인_요청() {
+		return Map.of(
+			"email", 회원_토킷.getEmail(),
+			"name", 회원_토킷.getName(),
+			"imageUrl", 회원_토킷.getImageUrl());
+	}
 
 }

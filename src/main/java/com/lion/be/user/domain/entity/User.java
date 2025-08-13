@@ -9,6 +9,7 @@ import com.lion.be.feed.domain.entity.Feed;
 import com.lion.be.global.entity.BaseEntity;
 import com.lion.be.global.exception.CustomException;
 import com.lion.be.global.exception.ErrorCode;
+import com.lion.be.image.domain.entity.Image;
 import com.lion.be.user.domain.AgreementType;
 import com.lion.be.user.domain.Gender;
 import com.lion.be.user.domain.Mbti;
@@ -29,6 +30,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -60,7 +62,8 @@ public class User extends BaseEntity {
     private List<ChatRoomUser> chatRoomUsers = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserPhoto> userPhotos = new ArrayList<>();
+	@OrderBy("orderIndex ASC")
+	private List<UserPhoto> userPhotos = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FeedComment> feedComments = new ArrayList<>();
@@ -132,11 +135,6 @@ public class User extends BaseEntity {
         this.agreements.add(new Agreements(this, AgreementType.MARKETING, data.marketingAgreements()));
         this.isUniversityView = data.isUniversityView();
 		this.preferenceType = data.preferenceType();
-
-
-        for (int i = 0; i < data.userPhotos().size(); i++) {
-            this.userPhotos.add(new UserPhoto(this, data.userPhotos().get(i), i + 1));
-        }
         this.onboardingStatus = OnboardingStatus.COMPLETED;
     }
 
@@ -154,16 +152,10 @@ public class User extends BaseEntity {
     }
 
     private void validateOnboardingData(OnboardingData data) {
-        if (data.gender() == null || data.university() == null || data.position() == null ||
-                 data.mbti() == null || data.userPhotos() == null) {
-            throw new CustomException(ErrorCode.USER_ONBOARDING_PROFILE_INCOMPLETE);
-        }
-        if (data.userPhotos().isEmpty()) {
-            throw new CustomException(ErrorCode.MINIMUM_PHOTOS_REQUIRED);
-        }
-        if (data.userPhotos().size() > 3) {
-            throw new CustomException(ErrorCode.MAXIMUM_PHOTOS_REQUIRED);
-        }
+		if (data.gender() == null || data.university() == null || data.position() == null ||
+			data.mbti() == null) {
+			throw new CustomException(ErrorCode.USER_ONBOARDING_PROFILE_INCOMPLETE);
+		}
     }
 
     /**
@@ -180,4 +172,8 @@ public class User extends BaseEntity {
         this.clusterId = clusterId;
     }
 
+	public void addProfileImage(Image image, int orderIndex) {
+		UserPhoto userPhoto = new UserPhoto(this, image, orderIndex);
+		this.userPhotos.add(userPhoto);
+	}
 }

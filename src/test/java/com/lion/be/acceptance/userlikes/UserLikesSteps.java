@@ -26,7 +26,7 @@ public class UserLikesSteps {
 			.auth().oauth2(accessToken)
 			.log().all()
 			.when()
-			.post("/api/user/likes/" + targetUserId)
+			.post("/api/user/likes/{targetUserId}", targetUserId)
 			.then()
 			.log().all()
 			.extract();

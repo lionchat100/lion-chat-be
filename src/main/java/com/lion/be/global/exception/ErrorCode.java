@@ -35,7 +35,8 @@ public enum ErrorCode {
     IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "이미지를 찾을 수 없습니다."),
     UPLOAD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "업로드 중 에러가 발생했습니다."),
 
-    TOO_MANY_API_REQUEST_EXCEPTION(HttpStatus.TOO_MANY_REQUESTS, "API 요청 횟수를 초과했습니다.");
+    TOO_MANY_API_REQUEST_EXCEPTION(HttpStatus.TOO_MANY_REQUESTS, "API 요청 횟수를 초과했습니다."), IMAGE_DELETE_ACCESS_DENIED(
+		HttpStatus.FORBIDDEN,"이미지 소유권자 가 아닙니다." );
 
     private final HttpStatus status;
     private final String message;

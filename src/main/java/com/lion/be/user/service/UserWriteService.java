@@ -1,10 +1,14 @@
 package com.lion.be.user.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.lion.be.global.exception.CustomException;
 import com.lion.be.global.exception.ErrorCode;
+import com.lion.be.image.domain.entity.Image;
+import com.lion.be.image.repository.ImageRepository;
 import com.lion.be.user.controller.dto.OnboardingRequest;
 import com.lion.be.user.controller.dto.OnboardingResponse;
 import com.lion.be.user.domain.entity.User;
@@ -21,35 +25,61 @@ public class UserWriteService {
 
     private final UserRepository userRepository;
     private final UserCardFilterUtil userCardFilterUtil;
+	private final ImageRepository imageRepository;
 
-    public void save(User user) {
+	public void save(User user) {
         userRepository.save(user);
     }
 
-    public OnboardingResponse completeUserOnboarding(Long userId, OnboardingRequest request) {
-        User user = userRepository.fetchById(userId)
-            .orElseThrow(()-> new CustomException(ErrorCode.USER_NOT_FOUND));
+	public OnboardingResponse completeUserOnboarding(Long userId, OnboardingRequest request) {
+		User user = userRepository.fetchById(userId)
+			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
 		if (userRepository.existsByNickname(request.nickname())) {
 			throw new CustomException(ErrorCode.NICKNAME_ALREADY_EXISTS);
 		}
 
-        OnboardingData data = OnboardingData.from(request);
-        user.completeOnboarding(data);
+		// 1. 이미지 ID 검증 및 조회
+		List<Image> images = validateAndGetImages(request.imageIds());
 
-        // 온보딩 완료와 함께 클러스터 배정
-        Integer clusterId = assignClusterToNewUser(user);
-        user.assignToCluster(clusterId);
+		// 2. UserPhoto 생성 (중간 테이블을 통한 연결)
+		for (int i = 0; i < images.size(); i++) {
+			user.addProfileImage(images.get(i), i + 1);
+		}
 
-        userRepository.save(user);
+		// 3. 온보딩 데이터 설정 (이미지 관련 로직 제외)
+		OnboardingData data = OnboardingData.from(request);
+		user.completeOnboarding(data);
 
-        return OnboardingResponse.success(userId);
-    }
+		// 4. 클러스터 배정
+		Integer clusterId = assignClusterToNewUser(user);
+		user.assignToCluster(clusterId);
 
-    /**
-     * UserCardFilterUtil의 클러스터링 로직을 활용해서 신규 사용자 클러스터 배정
-     */
-    private Integer assignClusterToNewUser(User newUser) {
-        return userCardFilterUtil.assignNewUserToCluster(newUser);
-    }
+		userRepository.save(user);
+
+		return OnboardingResponse.success(userId);
+	}
+
+	private List<Image> validateAndGetImages(List<Long> imageIds) {
+		if (imageIds == null || imageIds.isEmpty()) {
+			throw new CustomException(ErrorCode.MINIMUM_PHOTOS_REQUIRED);
+		}
+		if (imageIds.size() > 3) {
+			throw new CustomException(ErrorCode.MAXIMUM_PHOTOS_REQUIRED);
+		}
+
+		return imageIds.stream()
+			.map(imageId -> {
+				try {
+					return imageRepository.fetchById(imageId);
+				} catch (CustomException e) {
+					throw new CustomException(ErrorCode.IMAGE_NOT_FOUND);
+				}
+			})
+			.toList();
+	}
+
+	private Integer assignClusterToNewUser(User newUser) {
+		return userCardFilterUtil.assignNewUserToCluster(newUser);
+	}
 }

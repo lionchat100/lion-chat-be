@@ -22,6 +22,10 @@ public class UserSteps {
         로그인한다(UserFixture.사용자_원준_회원가입_요청(), new RequestSpecBuilder().build()).jsonPath().getString("accessToken");
     }
 
+	public static void 토킷_회원가입() {
+		로그인한다(UserFixture.사용자_토킷_회원가입_요청(), new RequestSpecBuilder().build()).jsonPath().getString("accessToken");
+	}
+
     public static void 비회원_회원가입() {
         로그인한다(UserFixture.비회원_회원가입_요청(), new RequestSpecBuilder().build()).jsonPath().getString("accessToken");
     }

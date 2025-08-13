@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -41,11 +42,11 @@ class UserLikesAcceptanceTest extends AcceptanceTest {
 
 		@DisplayName("이미 좋아요한 사용자에게 다시 좋아요를 누르면 좋아요가 취소된다")
 		@Test
-		void when_user_unlikes_already_liked_user_then_like_is_removed() {
+		void when_user_unlikes_already_liked_user_then_like_is_removed() throws IOException {
 			api_문서_타이틀("toggle_like", spec);
 
-			// given - 김프론트가 로그인하고 먼저 좋아요를 누름
-			String accessToken = 김프론트_로그인();
+			// given
+			String accessToken = 원준_완전_온보딩();
 			Long targetUserId = 3L; // 박뷰js
 
 			좋아요를_누른다(spec, accessToken, targetUserId); // 첫 번째 좋아요
@@ -126,11 +127,12 @@ class UserLikesAcceptanceTest extends AcceptanceTest {
 
 		@DisplayName("좋아요 목록에서 사용자 정보가 올바르게 반환된다")
 		@Test
-		void when_user_requests_liked_users_then_returns_complete_user_info() {
+		void when_user_requests_liked_users_then_returns_complete_user_info() throws IOException {
 			api_문서_타이틀("liked_users_info_validation", spec);
 
 			// given - 사용자가 로그인하고 좋아요
-			String accessToken = 김백엔드_로그인();
+			String accessToken = 원준_완전_온보딩(); 	// 유저 아이디 1
+			토킷_완전_온보딩(); 						// 유저 아이디가 2
 			Long targetUserId = 2L;
 
 			좋아요를_누른다(spec, accessToken, targetUserId);
@@ -150,11 +152,11 @@ class UserLikesAcceptanceTest extends AcceptanceTest {
 
 		@DisplayName("카드 조회 시 좋아요하지 않은 사용자는 isLikedByMe가 false로 표시된다")
 		@Test
-		void when_user_views_cards_then_not_liked_users_show_false_status() {
+		void when_user_views_cards_then_not_liked_users_show_false_status() throws IOException {
 			api_문서_타이틀("card_like_status_false", spec);
 
-			// given - 김백엔드가 로그인 (아무도 좋아요하지 않음)
-			String accessToken = 김백엔드_로그인();
+			// given - 토킷가 로그인 (아무도 좋아요하지 않음)
+			String accessToken = 토킷_완전_온보딩();
 
 			// when - 카드 목록 조회
 			ExtractableResponse<Response> response = 카드리스트를_조회한다(spec, accessToken, 5);
@@ -200,11 +202,11 @@ class UserLikesAcceptanceTest extends AcceptanceTest {
 
 		@DisplayName("자기 자신에게는 좋아요를 누를 수 없다 (비즈니스 로직 검증)")
 		@Test
-		void when_user_tries_to_like_self_then_handles_appropriately() {
+		void when_user_tries_to_like_self_then_handles_appropriately() throws IOException {
 			api_문서_타이틀("self_like_prevention", spec);
 
-			// given - 김프론트가 로그인 (userId: 1)
-			String accessToken = 김프론트_로그인();
+			// given - 원준 로그인 (userId: 1)
+			String accessToken = 원준_완전_온보딩();
 
 			// when - 자기 자신에게 좋아요 시도
 			ExtractableResponse<Response> response = 좋아요를_누른다(spec, accessToken, 1L);
