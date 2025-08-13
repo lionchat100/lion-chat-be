@@ -1,5 +1,7 @@
 package com.lion.be.user.service;
 
+import com.lion.be.global.util.JwtTokenProvider;
+import com.lion.be.user.controller.dto.UserIdResponse;
 import java.util.Arrays;
 import java.util.List;
 
@@ -29,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 public class UserReadService {
 
     private final UserRepository userRepository;
+    private final JwtTokenProvider jwtTokenProvider;
 
     public User fetchByEmail(String email) {
         return userRepository.fetchByEmail(email)
@@ -106,4 +109,11 @@ public class UserReadService {
 				preferenceType.getKoreanName()))
 			.toList();
 	}
+
+    public UserIdResponse fetchUserId(String accessToken) {
+        String email = jwtTokenProvider.getEmailFromToken(accessToken);
+        User user = fetchByEmail(email);
+        return new UserIdResponse(user.getId());
+    }
+
 }
