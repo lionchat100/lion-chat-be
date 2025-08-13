@@ -70,6 +70,20 @@ public class ChatSteps {
                 .extract();
     }
 
+    public static ExtractableResponse<Response> 채팅방의_초기_메시지_목록을_조회한다(
+            String accessToken, Long chatRoomId, Long lastId, RequestSpecification spec) {
+        return RestAssured
+                .given().log().all()
+                .spec(spec)
+                .auth().oauth2(accessToken)
+                .queryParam("roomId", chatRoomId)
+                .queryParam("lastId", lastId)
+                .when()
+                .get("/api/chatrooms/chats/messages")
+                .then().log().all()
+                .extract();
+    }
+
     public static ExtractableResponse<Response> 채팅방의_메시지_목록을_조회한다(
             String accessToken, Long chatRoomId, Long lastId, RequestSpecification spec) {
         return RestAssured
@@ -126,6 +140,22 @@ public class ChatSteps {
                 () -> assertThat(messages.get(0).get("senderName")).isNotNull(),
                 () -> assertThat(response.jsonPath().getBoolean("last")).isTrue()
         );
+    }
+
+    public static void 상태코드가_200이다(ExtractableResponse<Response> response) {
+        Assertions.assertAll(
+                () -> 상태코드를_검증한다(response, HttpStatus.OK)
+        );
+    }
+
+    public static void 상태코드가_429이다(ExtractableResponse<Response> response) {
+        Assertions.assertAll(
+                () -> 상태코드를_검증한다(response, HttpStatus.TOO_MANY_REQUESTS)
+        );
+    }
+
+    private static void 상태코드를_검증한다(ExtractableResponse<Response> response, HttpStatus expectedHttpStatus) {
+        assertThat(response.statusCode()).isEqualTo(expectedHttpStatus.value());
     }
 
 }

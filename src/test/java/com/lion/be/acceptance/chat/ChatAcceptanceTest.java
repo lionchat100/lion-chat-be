@@ -1,6 +1,17 @@
 package com.lion.be.acceptance.chat;
 
-import static com.lion.be.acceptance.chat.ChatSteps.*;
+import static com.lion.be.acceptance.chat.ChatSteps._1대1_채팅방을_생성_또는_조회한다;
+import static com.lion.be.acceptance.chat.ChatSteps.기존_채팅방_조회_응답을_검증한다;
+import static com.lion.be.acceptance.chat.ChatSteps.메시지_목록_조회_응답을_검증한다;
+import static com.lion.be.acceptance.chat.ChatSteps.메시지_전송_응답을_검증한다;
+import static com.lion.be.acceptance.chat.ChatSteps.상태코드가_200이다;
+import static com.lion.be.acceptance.chat.ChatSteps.상태코드가_429이다;
+import static com.lion.be.acceptance.chat.ChatSteps.자신의_채팅방_목록을_조회한다;
+import static com.lion.be.acceptance.chat.ChatSteps.채팅방_목록_조회_응답을_검증한다;
+import static com.lion.be.acceptance.chat.ChatSteps.채팅방_생성_응답을_검증한다;
+import static com.lion.be.acceptance.chat.ChatSteps.채팅방에_메시지를_전송한다;
+import static com.lion.be.acceptance.chat.ChatSteps.채팅방의_메시지_목록을_조회한다;
+import static com.lion.be.acceptance.chat.ChatSteps.채팅방의_초기_메시지_목록을_조회한다;
 import static com.lion.be.acceptance.user.UserSteps.회원_id를_가져온다;
 
 import com.lion.be.acceptance.AcceptanceTest;
@@ -146,6 +157,64 @@ public class ChatAcceptanceTest extends AcceptanceTest {
 
             // then
             메시지_목록_조회_응답을_검증한다(response, 3, "반갑습니다.");
+        }
+
+    }
+
+    @Nested
+    @DisplayName("채팅 메시지 전송 속도 제한 테스트")
+    class RateLimitingTest {
+
+        private Long chatRoomId;
+
+        @BeforeEach
+        void before() {
+            // 모든 테스트 전에 채팅방을 하나 생성합니다.
+            var response = _1대1_채팅방을_생성_또는_조회한다(사용자1_토큰, 사용자2_ID, spec);
+            chatRoomId = response.jsonPath().getLong("chatRoomId");
+        }
+
+        @DisplayName("1초에 2개를 초과하여 메시지를 보내면 429 에러가 발생한다")
+        @Test
+        void when_send_message_too_fast_then_throw_429() throws InterruptedException {
+            // given
+            api_문서_타이틀("chat_rate_limit_sustained_fail", spec);
+
+            // when & then
+            // 1. 첫 번째, 두 번째 요청은 1초 안에 보내도 성공한다.
+            var firstResponse = 채팅방에_메시지를_전송한다(사용자1_토큰, chatRoomId, "첫 번째 메시지", spec);
+            상태코드가_200이다(firstResponse);
+
+            var secondResponse = 채팅방에_메시지를_전송한다(사용자1_토큰, chatRoomId, "두 번째 메시지", spec);
+            상태코드가_200이다(secondResponse);
+
+            // 2. 1초가 지나기 전 세 번째 요청은 실패한다.
+            var thirdResponse = 채팅방에_메시지를_전송한다(사용자1_토큰, chatRoomId, "세 번째 메시지", spec);
+            상태코드가_429이다(thirdResponse);
+
+            // 3. 1초가 지난 후의 요청은 다시 성공한다.
+            Thread.sleep(1100); // 1.1초 대기
+            var fourthResponse = 채팅방에_메시지를_전송한다(사용자1_토큰, chatRoomId, "네 번째 메시지", spec);
+            상태코드가_200이다(fourthResponse);
+        }
+
+        @DisplayName("10초에 10개를 초과하여 메시지를 보내면 429 에러가 발생한다")
+        @Test
+        void when_send_more_than_10_messages_in_10_seconds_then_throw_429() throws InterruptedException {
+            // given
+            api_문서_타이틀("chat_rate_limit_burst_fail", spec);
+
+            // when & then
+            // 1. 10개의 요청을 단기 제한(1초에 2개)에 걸리지 않도록 0.6초 간격으로 보내 모두 성공시킨다.
+            for (int i = 0; i < 10; i++) {
+                var response = 채팅방에_메시지를_전송한다(사용자1_토큰, chatRoomId, "메시지 " + (i + 1), spec);
+                상태코드가_200이다(response);
+                Thread.sleep(600); // 단기 제한(2/sec)을 피하기 위해 0.5초 이상 대기
+            }
+
+            // 2. 11번째 요청은 10초 제한에 걸려 실패한다.
+            var eleventhResponse = 채팅방에_메시지를_전송한다(사용자1_토큰, chatRoomId, "열한 번째 메시지", spec);
+            상태코드가_429이다(eleventhResponse);
         }
 
     }
