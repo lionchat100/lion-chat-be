@@ -2,6 +2,9 @@ package com.lion.be.auth.service;
 
 import com.lion.be.auth.domain.OAuth2Attributes;
 import com.lion.be.auth.domain.UserPrincipal;
+import com.lion.be.global.exception.CustomException;
+import com.lion.be.global.exception.ErrorCode;
+import com.lion.be.user.domain.Role;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.service.UserConvertor;
 import com.lion.be.user.service.UserReadService;
@@ -52,17 +55,24 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     private User login(OAuth2Attributes attributes) {
         User user;
 
-        try {
-            // FIXME: 다른 oauth 플랫폼과 이메일이 같은 경우, 재로그인하도록 돌리기 (혹시나 시간이 없으면 카카오만)
-            user = userReadService.fetchByEmail(attributes.getEmail());
-            log.info("{} 유저 인식 완료.", attributes.getName());
-        } catch (RuntimeException e) {
-            user = UserConvertor.attributesToUser(attributes);
-            userWriteService.save(user);
-            log.info("{} 유저 최초 로그인.", attributes.getName());
-        }
+		try {
+			// FIXME: 다른 oauth 플랫폼과 이메일이 같은 경우, 재로그인하도록 돌리기 (혹시나 시간이 없으면 카카오만)
+			user = userReadService.fetchByEmail(attributes.getEmail());
 
-        return user;
-    }
+			if(user.getRole() == Role.BANNED){
+				log.info("차단된 유저가 로그인 시도 : {}", attributes.getEmail());
+				throw new CustomException(ErrorCode.BANNED_USER_LOGIN);
+			}
 
+			log.info("{} 유저 인식 완료.", attributes.getName());
+		} catch (CustomException e) {
+			throw e;
+		} catch (RuntimeException e) {
+			user = UserConvertor.attributesToUser(attributes);
+			userWriteService.save(user);
+			log.info("{} 유저 최초 로그인.", attributes.getName());
+		}
+
+		return user;
+	}
 }
