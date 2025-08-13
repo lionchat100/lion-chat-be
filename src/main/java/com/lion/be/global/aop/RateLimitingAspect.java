@@ -20,7 +20,6 @@ import org.springframework.stereotype.Component;
 public class RateLimitingAspect {
 
     private final RateLimitingService rateLimitingService;
-    private final UserReadService userReadService;
 
     // === 피드 생성 제한을 처리하는 Advice ===
     @Around("@annotation(com.lion.be.global.aop.CheckRateLimitFeed)")
@@ -63,23 +62,18 @@ public class RateLimitingAspect {
     public Object checkChatRateLimit(ProceedingJoinPoint joinPoint) throws Throwable {
         UserPrincipal userPrincipal = findUserPrincipal(joinPoint.getArgs());
 
-        // --- roomId를 찾는 로직을 수정합니다 ---
         Long roomId = null;
         Object[] args = joinPoint.getArgs();
         for (Object arg : args) {
-            // @RequestBody로 매핑된 ChatMessageRequest 인자를 찾습니다.
             if (arg instanceof ChatMessageRequest) {
-                // record 타입이므로 getter는 필드 이름과 동일한 메소드명을 가집니다.
                 roomId = ((ChatMessageRequest) arg).chatRoomId();
                 break;
             }
         }
 
-        // STOMP(@DestinationVariable)와 HTTP(@RequestParam) 방식을 모두 지원하기 위한 이전 코드 (유지해도 좋음)
         if (roomId == null) {
             roomId = findArgumentByName(joinPoint, "roomId", Long.class);
         }
-        // --- 수정 끝 ---
 
         if (userPrincipal == null || roomId == null) {
             return joinPoint.proceed();

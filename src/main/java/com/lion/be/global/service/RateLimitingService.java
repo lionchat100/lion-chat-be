@@ -23,7 +23,7 @@ public class RateLimitingService {
 
     public Bucket resolveFeedBucket(Long userId) {
         String key = "rate-limit:feed:" + userId;
-        return proxyManager.builder().build(key, this::createNewFeedBucketConfig); // 메소드명 변경
+        return proxyManager.builder().build(key, this::createNewFeedBucketConfig);
     }
 
     public Bucket resolveFeedCommentBucket(Long feedId, Long userId) {
@@ -39,7 +39,6 @@ public class RateLimitingService {
     private BucketConfiguration createNewFeedBucketConfig() {
         Bandwidth limitPer3Seconds = Bandwidth.classic(1, Refill.intervally(1, Duration.ofSeconds(3)));
         Bandwidth limitPer10Minutes = Bandwidth.classic(5, Refill.intervally(5, Duration.ofMinutes(10)));
-        // BucketConfiguration 빌더 사용
         return BucketConfiguration.builder()
                 .addLimit(limitPer3Seconds)
                 .addLimit(limitPer10Minutes)
@@ -49,7 +48,6 @@ public class RateLimitingService {
     private BucketConfiguration createNewFeedCommentBucketConfig() {
         Bandwidth limitPer3Seconds = Bandwidth.classic(1, Refill.intervally(1, Duration.ofSeconds(3)));
         Bandwidth limitPer1Minute = Bandwidth.classic(5, Refill.intervally(5, Duration.ofMinutes(1)));
-        // BucketConfiguration 빌더 사용
         return BucketConfiguration.builder()
                 .addLimit(limitPer3Seconds)
                 .addLimit(limitPer1Minute)
