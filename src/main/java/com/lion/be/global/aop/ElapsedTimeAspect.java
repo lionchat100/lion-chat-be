@@ -16,7 +16,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @Slf4j
 public class ElapsedTimeAspect {
     @Around("@annotation(com.lion.be.global.aop.ElapsedTime)")
-    public Object checkFeedRateLimit(ProceedingJoinPoint joinPoint) throws Throwable{
+    public Object checkElapsedTime(ProceedingJoinPoint joinPoint) throws Throwable{
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
 
         String httpMethod = request.getMethod();
