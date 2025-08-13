@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/chatrooms/chats")
 @RequiredArgsConstructor
@@ -63,11 +65,11 @@ public class ChatController {
      */
     @PreAuthorize("@chatRoomUserRepository.existsById_ChatRoomIdAndId_UserId(#roomId, #userPrincipal.id)")
     @GetMapping("/messages")
-    public ResponseEntity<Page<ChatMessageResponse>> getInitialMessages(
+    public ResponseEntity<List<ChatMessageResponse>> getInitialMessages(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestParam Long roomId
     ) {
-        Page<ChatMessageResponse> messages = messagePersistence.findMessagesByIdAndLastId(
+        List<ChatMessageResponse> messages = messagePersistence.findMessagesByIdAndLastId(
                 roomId, 0L, PageRequest.of(0, 30, Sort.by("_id").descending()));
         return ResponseEntity.ok(messages);
     }
@@ -81,12 +83,12 @@ public class ChatController {
      */
     @PreAuthorize("@chatRoomUserRepository.existsById_ChatRoomIdAndId_UserId(#roomId, #userPrincipal.id)")
     @GetMapping(value = "/messages", params = {"roomId", "lastId"})
-    public ResponseEntity<Page<ChatMessageResponse>> getMessageHistory(
+    public ResponseEntity<List<ChatMessageResponse>> getMessageHistory(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestParam Long roomId,
             @RequestParam Long lastId
     ) {
-        Page<ChatMessageResponse> messages = messagePersistence.findMessagesByIdAndLastId(
+        List<ChatMessageResponse> messages = messagePersistence.findMessagesByIdAndLastId(
                 roomId, lastId, PageRequest.of(0, 30, Sort.by("_id").descending()));
         return ResponseEntity.ok(messages);
     }

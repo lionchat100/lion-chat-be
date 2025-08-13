@@ -3,7 +3,7 @@ package com.lion.be.chat.service;
 import com.lion.be.chat.domain.dto.ChatRoomResponse;
 import com.lion.be.chat.domain.entity.ChatRoom;
 import com.lion.be.chat.domain.entity.ChatRoomUser;
-import com.lion.be.chat.repository.ChatMessageRepository;
+import com.lion.be.chat.repository.ChatRoomQueryDslRepository;
 import com.lion.be.chat.repository.ChatRoomRepository;
 import com.lion.be.chat.repository.ChatRoomUserRepository;
 import com.lion.be.user.domain.entity.User;
@@ -27,7 +27,7 @@ public class ChatRoomService {
     private final UserRepository userRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomUserRepository chatRoomUserRepository;
-    private final ChatMessageRepository chatMessageRepository;
+    private final ChatRoomQueryDslRepository chatRoomQueryDslRepository;
 
     @Transactional
     public Long findOrCreateChatRoom(Long senderId, Long receiverId) {
@@ -103,23 +103,6 @@ public class ChatRoomService {
      * @return 채팅방 리스트
      */
     public List<ChatRoomResponse> getChatRooms(Long userId) {
-        // FIXME: JPQL로 최적화
-        List<ChatRoom> chatRooms = chatRoomRepository.findByChatRoomUsers_User_IdOrderByRecentMessageDtDesc(userId);
-        return chatRooms.stream()
-                .map(chatRoom -> {
-                    ChatRoomUser otherUser = chatRoom.getChatRoomUsers().stream()
-                            .filter(user -> !user.getUser().getId().equals(userId))
-                            .findFirst()
-                            .orElseThrow(() -> new IllegalStateException("사용자 없음."));
-
-                    return new ChatRoomResponse(
-                            chatRoom.getId(),
-                            otherUser.getUser().getName(),
-                            chatRoom.getRecentMessageContent(),
-                            chatRoom.getRecentMessageDt(),
-                            otherUser.getUser().getImageUrl(),
-                            chatRoom.getIsRead());
-                })
-                .toList();
+        return chatRoomQueryDslRepository.findChatRoomResponsesByUserIdQueryDsl(userId);
     }
 }
