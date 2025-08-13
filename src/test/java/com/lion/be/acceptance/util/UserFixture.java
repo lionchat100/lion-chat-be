@@ -13,6 +13,7 @@ public enum UserFixture {
 
     회원_원준("wj1234@gmail.com", "정원준", "https://www", false),
 	회원_토킷("tokit@gmail.com", "김토킷", "https://www", false),
+	어드민_멋사("admin@gmail.com", "어드민", "https://www", true),
 	비회원("asd1234@naver.com", "성이름", "https://www", false);
 
     private String email;

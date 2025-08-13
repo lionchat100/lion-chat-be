@@ -42,6 +42,18 @@ public class UserSteps {
                 .extract();
     }
 
+	public static ExtractableResponse<Response> 회원_email를_가져온다(RequestSpecification spec, String accessToken) {
+		return RestAssured
+			.given()
+			.spec(spec)
+			.contentType(MediaType.APPLICATION_JSON_VALUE)
+			.auth().oauth2(accessToken)
+			.when()
+			.get("/api/users/me")
+			.then()
+			.extract();
+	}
+
     public static ExtractableResponse<Response> 온보딩을_완료한다(
         Map<String, Object> onboardingRequest,
         String accessToken,
