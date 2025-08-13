@@ -11,7 +11,9 @@ import java.util.Map;
 
 public enum UserFixture {
 
-    회원_원준("wj1234@gmail.com", "정원준", "https://www", false), 비회원("asd1234@naver.com", "성이름", "https://www", false);
+    회원_원준("wj1234@gmail.com", "정원준", "https://www", false),
+	회원_토킷("tokit@gmail.com", "김토킷", "https://www", false),
+	비회원("asd1234@naver.com", "성이름", "https://www", false);
 
     private String email;
     private String name;
@@ -41,39 +43,59 @@ public enum UserFixture {
         return Map.of("email", 회원_원준.email, "name", 회원_원준.name, "imageUrl", 회원_원준.imageUrl);
     }
 
+	public static Map<String, Object> 사용자_토킷_회원가입_요청() {
+		return Map.of("email", 회원_토킷.email, "name", 회원_토킷.name, "imageUrl", 회원_토킷.imageUrl);
+	}
+
     public static Map<String, Object> 비회원_회원가입_요청() {
         return Map.of("email", 비회원.email, "name", 비회원.name, "imageUrl", 비회원.imageUrl);
     }
 
-	public static Map<String, Object> 회원_멋사_온보딩_요청(){
+	public static Map<String, Object> 회원_멋사_온보딩_요청(List<Long> imageIds){
 		return Map.ofEntries(
 			Map.entry("nickname", "멋진 호랑이"),
-			Map.entry("userPhotos", List.of("photo1.jpg", "photo2.jpg")),
+			Map.entry("imageIds", imageIds),
 			Map.entry("gender", Gender.MEN),
 			Map.entry("university", University.LIKELION),
 			Map.entry("position", Position.FRONTEND),
 			Map.entry("mbti", Mbti.ENFJ),
 			Map.entry("bio", "안녕하세요 멋진호랑이 입니다."),
 			Map.entry("requiredAgreements", true),
-			Map.entry("marketingAgreement", false),
+			Map.entry("marketingAgreements", false),
 			Map.entry("isUniversityView", true),
 			Map.entry("preferenceType", PreferenceType.PREFERENCE_FOCUSED)
 		);
 	}
 
-	public static Map<String, Object> 회원_멋사2_온보딩_요청() {
+	public static Map<String, Object> 회원_멋사2_온보딩_요청(List<Long> imageIds) {
 		return Map.ofEntries(
 			Map.entry("nickname", "멋진 사자"),
-			Map.entry("userPhotos", List.of("photo1.jpg")),
+			Map.entry("imageIds", imageIds),
 			Map.entry("gender", Gender.WOMEN),
 			Map.entry("university", University.LIKELION),
 			Map.entry("position", Position.BACKEND),
 			Map.entry("mbti", Mbti.ENFP),
 			Map.entry("bio", "안녕하세요 멋진사자 입니다."),
 			Map.entry("requiredAgreements", true),
-			Map.entry("marketingAgreement", false),
+			Map.entry("marketingAgreements", false),
 			Map.entry("isUniversityView", true),
 			Map.entry("preferenceType", PreferenceType.PREFERENCE_FOCUSED)
+		);
+	}
+
+	public static Map<String, Object> 토킷_온보딩_요청(List<Long> imageIds) {
+		return Map.ofEntries(
+			Map.entry("nickname", "토킷개발자"),
+			Map.entry("imageIds", imageIds),
+			Map.entry("gender", Gender.WOMEN),
+			Map.entry("university", University.LIKELION),
+			Map.entry("position", Position.BACKEND),
+			Map.entry("mbti", Mbti.INTJ),
+			Map.entry("bio", "안녕하세요 토킷입니다."),
+			Map.entry("requiredAgreements", true),
+			Map.entry("marketingAgreements", false),
+			Map.entry("isUniversityView", true),
+			Map.entry("preferenceType", PreferenceType.POSITION_FOCUSED)
 		);
 	}
 

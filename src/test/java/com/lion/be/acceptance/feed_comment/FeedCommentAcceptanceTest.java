@@ -22,6 +22,8 @@ import static com.lion.be.acceptance.feed_comment.FeedCommentSteps.피드의_댓
 import static com.lion.be.acceptance.feed_comment.FeedCommentSteps.피드의_댓글을_하나를_조회한다;
 import static com.lion.be.acceptance.feed_comment.FeedCommentSteps.피드의_모든_댓글을_조회한다;
 
+import java.io.IOException;
+
 import com.lion.be.acceptance.AcceptanceTest;
 import com.lion.be.acceptance.util.UserFixture;
 import io.restassured.RestAssured;
@@ -35,22 +37,10 @@ class FeedCommentAcceptanceTest extends AcceptanceTest {
     String anotherAccessToken;
 
     @BeforeEach
-    void before() {
-        accessToken = 회원_원준_액세스토큰;
-        anotherAccessToken = 비회원_엑세스토큰;
-        var onboardingResponse = RestAssured
-                .given()
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .spec(spec)
-                .auth().oauth2(accessToken)
-                .log().all()
-                .body(UserFixture.회원_멋사2_온보딩_요청()) // "멋사대학교"를 사용
-                .when()
-                .patch("/api/users/onboarding")
-                .then()
-                .log().all()
-                .extract();
-    }
+	void before() throws IOException {
+		accessToken = 원준_완전_온보딩();
+		anotherAccessToken = 비회원_완전_온보딩();
+	}
 
     @Nested
     @DisplayName("피드 댓글 CRUD 테스트")

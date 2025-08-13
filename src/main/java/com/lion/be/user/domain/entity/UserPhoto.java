@@ -1,6 +1,8 @@
 package com.lion.be.user.domain.entity;
 
 import com.lion.be.global.entity.BaseEntity;
+import com.lion.be.image.domain.entity.Image;
+
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -20,13 +22,19 @@ public class UserPhoto extends BaseEntity {
 	@JoinColumn(name = "user_id")
 	private User user;
 
-	private String imageUrl;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "image_id")
+	private Image image;
 
 	private int orderIndex; // 사진 순서 (1, 2, 3)
 
-	public UserPhoto(User user, String imageUrl, int orderIndex) {
+	public UserPhoto(User user, Image image, int orderIndex) {
 		this.user = user;
-		this.imageUrl = imageUrl;
+		this.image = image;
 		this.orderIndex = orderIndex;
+	}
+
+	public String getImageUrl() {
+		return image.getImageUrl();
 	}
 }
