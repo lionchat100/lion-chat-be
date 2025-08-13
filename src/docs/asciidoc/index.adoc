@@ -142,6 +142,38 @@ operation::fetch_chat_messages_success[snippets='http-request,http-response']
 
 operation::fetch_my_chat_rooms_success[snippets='http-request,http-response']
 
+[[chat-read]]
+=== 채팅 읽음 신호
+
+채팅 메시지를 읽었다는 신호(MessageAck)를 WebSocket으로 전송합니다.
+서버는 해당 메시지의 읽음 상태를 업데이트합니다.
+
+요청 경로: `/app/message.ack`
+
+==== 요청 필드
+
+|===
+| 필드명 | 타입 | 필수 여부 | 설명
+
+| messageId | string | ✅ | 읽음 처리할 메시지의 고유 ID
+| userId    | long   | ✅ | 읽은 사용자의 ID
+|===
+
+==== 요청 예시
+
+[source,json]
+----
+{
+  "messageId": "64df7a8e2f1a4c3b98b7c001",
+  "userId": 42
+}
+----
+
+==== 응답
+
+별도의 응답 본문은 없습니다.
+읽음 신호 수신 후 서버 로그에 처리 결과가 기록됩니다.
+
 [[feed-comment]]
 == 피드 댓글
 
