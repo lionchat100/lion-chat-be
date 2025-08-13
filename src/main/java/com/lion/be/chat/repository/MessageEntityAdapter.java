@@ -20,8 +20,10 @@ public class MessageEntityAdapter {
     private final UserRepository userRoomRepository;
 
     public ChatMessage fromRequest(ChatMessageRequest request, Long senderId) {
+        User sender = userRepository.findById(senderId);
         return new ChatMessage(
                 senderId,
+                sender.getName(),
                 request.chatRoomId(),
                 ZonedDateTime.now(),
                 request.content(),
