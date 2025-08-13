@@ -9,7 +9,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableJpaAuditing
 @SpringBootApplication
 @EnableAsync
-//@EnableScheduling
+@EnableScheduling
 public class LionChatBeApplication {
 
     public static void main(String[] args) {
