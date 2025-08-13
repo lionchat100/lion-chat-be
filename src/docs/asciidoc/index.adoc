@@ -91,127 +91,47 @@ operation::onboarding_complete_success[snippets='http-request,http-response']
 
 operation::test_login_success[snippets='http-request,http-response']
 
-[[chat]]
 == 채팅
 
-채팅 관련 기능입니다. 채팅방 생성 및 목록 조회는 REST API로, 메시지 송수신은 REST API와 WebSocket(STOMP)을 함께 사용합니다.
+[[chatrooms-chats-init]]
+=== 채팅방 생성
 
-아래는 메시지 송수신 전반의 흐름입니다.
+상대방의 id를 통해 새 채팅방을 생성합니다. 이미 채팅방이 존재할 경우 존재하는 채팅방의 id를 반환합니다.
 
-. **메시지 전송 (클라이언트 → 서버)**
-클라이언트는 상황에 따라 `POST /api/chats/message` REST API 또는 WebSocket(STOMP) 메시지를 통해 채팅 메시지를 서버로 전송할 수 있습니다.
-서버는 메시지를 데이터베이스에 저장합니다.
-. **메시지 발행 및 실시간 푸시 (서버 → 클라이언트)**
-저장된 메시지는 메시지 브로커(RabbitMQ 등)에 발행되고, WebSocket을 통해 연결된 모든 클라이언트에 실시간 푸시됩니다.
-. **메시지 수신 확인 (클라이언트 → 서버)**
-클라이언트가 푸시된 메시지를 수신하면, `/app/message.ack` STOMP 메시지를 서버로 전송하여 읽음(전송 완료) 상태로 갱신합니다.
-. **미수신 메시지 재전송 (서버 → 클라이언트)**
-클라이언트가 오프라인이었을 경우, WebSocket 재연결 시 서버가 이전에 받지 못한 메시지를 찾아 일괄 푸시합니다.
+==== 성공
 
----
+operation::create_chat_room_success[snippets='http-request,http-response']
 
-[[send-chat-message-rest]]
-=== 메시지 전송 (REST API)
+[[chat-sendMessage]]
+=== 채팅 메시지 전송
 
-클라이언트가 채팅 메시지를 서버로 전송합니다.
-서버는 메시지를 저장한 뒤 메시지 브로커를 통해 WebSocket 구독자들에게 전달합니다.
+채팅 메시지를 전송합니다.
 
-* **요청 본문 예시**
-+
-[source,json]
-----
-{
-    "chatRoomId": 1,
-    "senderName": "홍길동",
-    "senderId": 2,
-    "receiverId": 3,
-    "content": "안녕하세요!"
-}
+요청 경로: /app/chat.sendMessage/{roomId}
 
-----
+별도의 응답값이 반환되지 않습니다. 하위 response는 무시해주세요.
 
-* **설명**
-** `chatRoomId` — 메시지를 보낼 채팅방의 ID (채팅방이 없을 경우, 서버에서 새로 생성)
-** `senderName` — 메시지를 보낸 사용자의 이름
-** `senderId` — 메시지를 보낸 사용자의 ID
-** `receiverId` — 메시지를 받을 사용자의 ID
-** `content` — 전송할 메시지 내용
+==== 성공
 
----
+operation::send_chat_message_success[snippets='http-request,http-response']
 
-* **응답 본문 예시**
-+
-[source,json]
-----
-{
-    "messageId": "60c72b2f6b8c9b2f6b8c9b2f",
-    "chatRoomId": 1,
-    "senderName": "사용자이름",
-    "senderId": 2,
-    "timestamp": "2025-08-04T20:42:52.104Z",
-    "content": "안녕하세요!"
-}
-----
+[[chatrooms-chats-message]]
+=== 채팅 내역 조회
 
-* **설명**
-** `messageId` — 저장된 메시지의 고유 ID
-** `chatRoomId` — 메시지가 속한 채팅방의 ID
-** `senderName` — 메시지를 보낸 사용자의 이름
-** `senderId` — 메시지를 보낸 사용자의 ID
-** `timestamp` — 서버에 메시지가 저장된 시간 (UTC)
-** `content` — 전송된 메시지 내용
+특정 채팅방에 대한 채팅 내역을 조회합니다.
 
----
+==== 성공
 
-[[send-chat-message-ws]]
-=== 메시지 전송 (WebSocket)
+operation::fetch_chat_messages_success[snippets='http-request,http-response']
 
-STOMP를 통해 특정 채팅방으로 메시지를 전송합니다.
-서버는 이 메시지를 저장한 후, 해당 채팅방을 구독 중인 모든 클라이언트에게 브로드캐스팅합니다.
+[[chatrooms]]
+=== 채팅방 리스트 조회
 
-|===
-| 항목 | 설명 | 예시
+요청자의 채팅방 리스트를 조회합니다.
 
-| **Endpoint**
-| STOMP SEND 목적지
-| `/app/chat.sendMessage`
+==== 성공
 
-| **Subscribe**
-| 구독할 토픽 경로
-| `/topic/chatroom/{roomId}`
-
-| **Request Body**
-| 메시지 요청 객체 (JSON)
-| `{"chatRoomId": 1, "content": "안녕하세요!", "date": "2025-08-04T20:42:52.104"}`
-|===
-
----
-
-[[acknowledge-message]]
-=== 메시지 읽음 확인 (WebSocket)
-
-클라이언트가 수신한 메시지를 읽었음을 서버에 알립니다.
-서버는 해당 메시지의 상태를 `SENT`(전송 완료)로 갱신합니다.
-
-|===
-| 항목 | 설명 | 예시
-
-| **Endpoint**
-| STOMP SEND 목적지
-| `/app/message.ack`
-
-| **Request Body**
-| 읽음 확인 요청 객체 (JSON)
-| `{"messageId": "a1b2c3d4", "userId": 2}`
-|===
-
----
-
-[[pending-message-delivery]]
-=== 미수신 메시지 전달
-
-클라이언트가 WebSocket에 새로 연결되면, 서버는 이전에 받지 못한 메시지를 찾아 일괄 전송합니다.
-이 동작은 서버 내부적으로 처리되며, 별도의 요청이 필요하지 않습니다.
+operation::fetch_my_chat_rooms_success[snippets='http-request,http-response']
 
 [[feed-comment]]
 == 피드 댓글
