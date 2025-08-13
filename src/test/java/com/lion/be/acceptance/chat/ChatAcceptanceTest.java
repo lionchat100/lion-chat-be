@@ -1,14 +1,6 @@
 package com.lion.be.acceptance.chat;
 
-import static com.lion.be.acceptance.chat.ChatSteps._1대1_채팅방을_생성_또는_조회한다;
-import static com.lion.be.acceptance.chat.ChatSteps.기존_채팅방_조회_응답을_검증한다;
-import static com.lion.be.acceptance.chat.ChatSteps.메시지_목록_조회_응답을_검증한다;
-import static com.lion.be.acceptance.chat.ChatSteps.메시지_전송_응답을_검증한다;
-import static com.lion.be.acceptance.chat.ChatSteps.자신의_채팅방_목록을_조회한다;
-import static com.lion.be.acceptance.chat.ChatSteps.채팅방_목록_조회_응답을_검증한다;
-import static com.lion.be.acceptance.chat.ChatSteps.채팅방_생성_응답을_검증한다;
-import static com.lion.be.acceptance.chat.ChatSteps.채팅방에_메시지를_전송한다;
-import static com.lion.be.acceptance.chat.ChatSteps.채팅방의_메시지_목록을_조회한다;
+import static com.lion.be.acceptance.chat.ChatSteps.*;
 import static com.lion.be.acceptance.user.UserSteps.회원_id를_가져온다;
 
 import com.lion.be.acceptance.AcceptanceTest;
@@ -119,6 +111,24 @@ public class ChatAcceptanceTest extends AcceptanceTest {
             메시지_전송_응답을_검증한다(response);
         }
 
+        @DisplayName("채팅방의 초기 메시지 목록을 페이지네이션으로 조회한다.")
+        @Test
+        void when_fetch_init_messages_then_response_200() throws InterruptedException {
+            // given
+            api_문서_타이틀("fetch_init_chat_messages_success", spec);
+            채팅방에_메시지를_전송한다(사용자1_토큰, chatRoomId, "첫 번째 메시지", spec);
+            Thread.sleep(10);
+            채팅방에_메시지를_전송한다(사용자2_토큰, chatRoomId, "아, 네. 안녕하세요.", spec);
+            Thread.sleep(10);
+            채팅방에_메시지를_전송한다(사용자1_토큰, chatRoomId, "반갑습니다.", spec);
+
+            // when
+            var response = 채팅방의_초기_메시지_목록을_조회한다(사용자1_토큰, chatRoomId, spec);
+
+            // then
+            메시지_목록_조회_응답을_검증한다(response, 3, "반갑습니다.");
+        }
+
         @DisplayName("채팅방의 메시지 목록을 페이지네이션으로 조회한다.")
         @Test
         void when_fetch_messages_then_response_200() throws InterruptedException {
@@ -129,9 +139,10 @@ public class ChatAcceptanceTest extends AcceptanceTest {
             채팅방에_메시지를_전송한다(사용자2_토큰, chatRoomId, "아, 네. 안녕하세요.", spec);
             Thread.sleep(10);
             채팅방에_메시지를_전송한다(사용자1_토큰, chatRoomId, "반갑습니다.", spec);
+            Long lastId = 0L;
 
             // when
-            var response = 채팅방의_메시지_목록을_조회한다(사용자1_토큰, chatRoomId, spec);
+            var response = 채팅방의_메시지_목록을_조회한다(사용자1_토큰, chatRoomId, lastId, spec);
 
             // then
             메시지_목록_조회_응답을_검증한다(response, 3, "반갑습니다.");

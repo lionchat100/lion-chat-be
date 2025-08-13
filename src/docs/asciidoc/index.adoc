@@ -118,6 +118,15 @@ operation::send_chat_message_success[snippets='http-request,http-response']
 [[chatrooms-chats-message]]
 === 채팅 내역 조회
 
+특정 채팅방에 대한 채팅 초기 내역을 조회합니다.
+
+==== 성공
+
+operation::fetch_init_chat_messages_success[snippets='http-request,http-response']
+
+[[chatrooms-chats-message]]
+=== 채팅 내역 lastId를 기준으로 조회
+
 특정 채팅방에 대한 채팅 내역을 조회합니다.
 
 ==== 성공
