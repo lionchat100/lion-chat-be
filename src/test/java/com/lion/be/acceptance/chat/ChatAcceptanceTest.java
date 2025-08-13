@@ -75,7 +75,7 @@ public class ChatAcceptanceTest extends AcceptanceTest {
             api_문서_타이틀("fetch_my_chat_rooms_success", spec);
 
             // data.sql에 있는 ID 6번 '김백엔드' 유저와 채팅방 생성
-            Long 김백엔드_ID = 6L;
+            Long 김백엔드_ID = 8L;
 
             var chatRoomResponse1 = _1대1_채팅방을_생성_또는_조회한다(사용자1_토큰, 사용자2_ID, spec);
             Long chatRoomId1 = chatRoomResponse1.jsonPath().getLong("chatRoomId");
