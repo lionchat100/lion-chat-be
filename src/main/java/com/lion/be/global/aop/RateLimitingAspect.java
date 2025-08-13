@@ -5,10 +5,8 @@ import com.lion.be.chat.domain.dto.ChatMessageRequest;
 import com.lion.be.global.exception.CustomException;
 import com.lion.be.global.exception.ErrorCode;
 import com.lion.be.global.service.RateLimitingService;
-import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.service.UserReadService;
 import io.github.bucket4j.Bucket;
-import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -63,24 +61,36 @@ public class RateLimitingAspect {
     // === 채팅 메시지 제한을 처리하는 Advice 추가 ===
     @Around("@annotation(com.lion.be.global.aop.CheckRateLimitChat)")
     public Object checkChatRateLimit(ProceedingJoinPoint joinPoint) throws Throwable {
-        // 1. 메소드 인자에서 필요한 정보 추출
         UserPrincipal userPrincipal = findUserPrincipal(joinPoint.getArgs());
-        // @DestinationVariable("roomId") 값을 이름으로 찾기
-        Long roomId = findArgumentByName(joinPoint, "roomId", Long.class);
+
+        // --- roomId를 찾는 로직을 수정합니다 ---
+        Long roomId = null;
+        Object[] args = joinPoint.getArgs();
+        for (Object arg : args) {
+            // @RequestBody로 매핑된 ChatMessageRequest 인자를 찾습니다.
+            if (arg instanceof ChatMessageRequest) {
+                // record 타입이므로 getter는 필드 이름과 동일한 메소드명을 가집니다.
+                roomId = ((ChatMessageRequest) arg).chatRoomId();
+                break;
+            }
+        }
+
+        // STOMP(@DestinationVariable)와 HTTP(@RequestParam) 방식을 모두 지원하기 위한 이전 코드 (유지해도 좋음)
+        if (roomId == null) {
+            roomId = findArgumentByName(joinPoint, "roomId", Long.class);
+        }
+        // --- 수정 끝 ---
 
         if (userPrincipal == null || roomId == null) {
-            // 필수 정보가 없으면 로직을 통과시킴 (또는 예외 발생)
             return joinPoint.proceed();
         }
 
         Long userId = userPrincipal.getId();
 
-        // 2. 버킷을 가져와서 토큰 소비 시도
         Bucket bucket = rateLimitingService.resolveChatBucket(roomId, userId);
         if (bucket.tryConsume(1)) {
-            return joinPoint.proceed(); // 성공 시 메소드 실행
+            return joinPoint.proceed();
         } else {
-            // 실패 시 예외 발생. 클라이언트는 이 에러를 받고 재시도 UI를 보여줄 수 있음
             throw new CustomException(ErrorCode.TOO_MANY_API_REQUEST_EXCEPTION);
         }
     }
