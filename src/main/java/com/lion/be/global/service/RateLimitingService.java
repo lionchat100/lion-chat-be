@@ -12,8 +12,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class RateLimitingService {
 
-    // 모든 종류의 버킷을 하나의 맵에서 관리
-    private final Map<String, Bucket> cache = new ConcurrentHashMap<>();
+    private final Map<String, Bucket> feedCache = new ConcurrentHashMap<>();
+    private final Map<String, Bucket> feedCommentCache = new ConcurrentHashMap<>();
 
     /**
      * 피드 생성용 버킷을 조회/생성합니다.
@@ -21,7 +21,7 @@ public class RateLimitingService {
      */
     public Bucket resolveFeedBucket(Long userId) {
         String key = "feed-" + userId;
-        return cache.computeIfAbsent(key, k -> createNewFeedBucket());
+        return feedCache.computeIfAbsent(key, k -> createNewFeedBucket());
     }
 
     /**
@@ -30,7 +30,7 @@ public class RateLimitingService {
      */
     public Bucket resolveFeedCommentBucket(Long feedId, Long userId) {
         String key = "comment-" + feedId + "-" + userId;
-        return cache.computeIfAbsent(key, k -> createNewFeedCommentBucket());
+        return feedCommentCache.computeIfAbsent(key, k -> createNewFeedCommentBucket());
     }
 
     /**
@@ -63,7 +63,8 @@ public class RateLimitingService {
      * 테스트용: 모든 버킷 캐시를 비웁니다.
      */
     public void clearBuckets() {
-        cache.clear();
+        feedCache.clear();
+        feedCommentCache.clear();
     }
 
 }
