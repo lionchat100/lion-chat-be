@@ -70,6 +70,20 @@ public class ChatSteps {
                 .extract();
     }
 
+    public static ExtractableResponse<Response> 채팅방의_초기_메시지_목록을_조회한다(
+            String accessToken, Long chatRoomId, Long lastId, RequestSpecification spec) {
+        return RestAssured
+                .given().log().all()
+                .spec(spec)
+                .auth().oauth2(accessToken)
+                .queryParam("roomId", chatRoomId)
+                .queryParam("lastId", lastId)
+                .when()
+                .get("/api/chatrooms/chats/messages")
+                .then().log().all()
+                .extract();
+    }
+
     public static ExtractableResponse<Response> 채팅방의_메시지_목록을_조회한다(
             String accessToken, Long chatRoomId, Long lastId, RequestSpecification spec) {
         return RestAssured
