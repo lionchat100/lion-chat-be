@@ -3,6 +3,7 @@ package com.lion.be.controller;
 import com.lion.be.auth.domain.UserPrincipal;
 import com.lion.be.chat.domain.dto.ChatMessageRequest;
 import com.lion.be.chat.service.MessageProcessor;
+import com.lion.be.global.aop.CheckRateLimitChat;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,7 @@ public class TestChatController {
     private final MessageProcessor messageProcessor;
 
     @PostMapping("/messages")
+    @CheckRateLimitChat
     public ResponseEntity<Void> sendMessageForTest(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestBody ChatMessageRequest request) {

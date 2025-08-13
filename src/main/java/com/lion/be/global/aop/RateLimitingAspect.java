@@ -1,9 +1,11 @@
 package com.lion.be.global.aop;
 
 import com.lion.be.auth.domain.UserPrincipal;
+import com.lion.be.chat.domain.dto.ChatMessageRequest;
 import com.lion.be.global.exception.CustomException;
 import com.lion.be.global.exception.ErrorCode;
 import com.lion.be.global.service.RateLimitingService;
+import com.lion.be.user.service.UserReadService;
 import io.github.bucket4j.Bucket;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -55,18 +57,38 @@ public class RateLimitingAspect {
         }
     }
 
-    private UserPrincipal findUserPrincipal(Object[] args) {
+    // === 채팅 메시지 제한을 처리하는 Advice 추가 ===
+    @Around("@annotation(com.lion.be.global.aop.CheckRateLimitChat)")
+    public Object checkChatRateLimit(ProceedingJoinPoint joinPoint) throws Throwable {
+        UserPrincipal userPrincipal = findUserPrincipal(joinPoint.getArgs());
+
+        Long roomId = null;
+        Object[] args = joinPoint.getArgs();
         for (Object arg : args) {
-            if (arg instanceof UserPrincipal) {
-                return (UserPrincipal) arg;
+            if (arg instanceof ChatMessageRequest) {
+                roomId = ((ChatMessageRequest) arg).chatRoomId();
+                break;
             }
         }
-        return null;
+
+        if (roomId == null) {
+            roomId = findArgumentByName(joinPoint, "roomId", Long.class);
+        }
+
+        if (userPrincipal == null || roomId == null) {
+            return joinPoint.proceed();
+        }
+
+        Long userId = userPrincipal.getId();
+
+        Bucket bucket = rateLimitingService.resolveChatBucket(roomId, userId);
+        if (bucket.tryConsume(1)) {
+            return joinPoint.proceed();
+        } else {
+            throw new CustomException(ErrorCode.TOO_MANY_API_REQUEST_EXCEPTION);
+        }
     }
 
-    /**
-     * 메소드 파라미터에서 이름으로 특정 타입의 인자를 찾아 반환합니다.
-     */
     private <T> T findArgumentByName(ProceedingJoinPoint joinPoint, String name, Class<T> returnType) {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         String[] parameterNames = signature.getParameterNames();
@@ -77,7 +99,16 @@ public class RateLimitingAspect {
                 return returnType.cast(args[i]);
             }
         }
-        return null; // 못 찾으면 null 반환
+        return null;
+    }
+
+    private UserPrincipal findUserPrincipal(Object[] args) {
+        for (Object arg : args) {
+            if (arg instanceof UserPrincipal) {
+                return (UserPrincipal) arg;
+            }
+        }
+        return null;
     }
 
 }

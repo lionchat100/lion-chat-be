@@ -5,6 +5,7 @@ import com.lion.be.chat.domain.dto.ChatMessageRequest;
 import com.lion.be.chat.domain.dto.ChatMessageResponse;
 import com.lion.be.chat.service.MessagePersistence;
 import com.lion.be.chat.service.MessageProcessor;
+import com.lion.be.global.aop.CheckRateLimitChat;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -45,6 +46,7 @@ public class ChatController {
 //    }
 
     @MessageMapping("/chat.sendMessage/{roomId}")
+    @CheckRateLimitChat
     public void sendMessageByWebSocket(
             @DestinationVariable Long roomId,
             @Payload ChatMessageRequest request,

@@ -104,6 +104,7 @@ dependencies {
     implementation 'software.amazon.awssdk:s3'
 
     implementation 'com.github.vladimir-bukhtoyarov:bucket4j-core:7.6.0'
+    implementation 'com.bucket4j:bucket4j-redis:8.7.0'
 }
 
 ext {

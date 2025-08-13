@@ -37,10 +37,10 @@ class FeedCommentAcceptanceTest extends AcceptanceTest {
     String anotherAccessToken;
 
     @BeforeEach
-	void before() throws IOException {
-		accessToken = 원준_완전_온보딩();
-		anotherAccessToken = 비회원_완전_온보딩();
-	}
+    void before() throws IOException {
+        accessToken = 원준_완전_온보딩();
+        anotherAccessToken = 비회원_완전_온보딩();
+    }
 
     @Nested
     @DisplayName("피드 댓글 CRUD 테스트")
@@ -325,7 +325,8 @@ class FeedCommentAcceptanceTest extends AcceptanceTest {
 
         @DisplayName("5개를 작성 한 후 1분 후에 댓글을 작성하면 작성할 수 있다.")
         @Test
-        @Disabled //시간이 좀 오래 걸리므로, 눈으로 확인하고 싶다면 주석을 해제하세요
+        @Disabled
+            //시간이 좀 오래 걸리므로, 눈으로 확인하고 싶다면 주석을 해제하세요
         void when_comment_after_1_minutes_then_200() throws InterruptedException {
             // given
             var request = feedCommentSaveRequest_생성("이것은 10분 제한 테스트 댓글입니다.");
