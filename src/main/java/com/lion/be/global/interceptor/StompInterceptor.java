@@ -35,7 +35,9 @@ public class StompInterceptor implements ChannelInterceptor {
                 // JWT 토큰 유효성 검증
                 if (jwtTokenProvider.validateToken(token)) {
                     Authentication auth = jwtTokenProvider.getAuthentication(token);
+                    log.info("auth: {}", auth);
                     accessor.setUser(auth); // WebSocket 세션에 사용자 정보 저장
+                    log.info("accessor: {}", accessor);
                     log.info("User '{}' connected.", auth.getName());
                 } else {
                     log.warn("Invalid JWT token received.");
@@ -48,8 +50,10 @@ public class StompInterceptor implements ChannelInterceptor {
             // 연결 시 저장된 사용자 정보(Principal)를 가져옴
             Authentication authentication = (Authentication) accessor.getUser();
 
+            log.info("======= 메시지 발생 전 =========");
             if (authentication != null && authentication.getPrincipal() instanceof UserPrincipal) {
                 UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+                log.info("======= 메시지 발생 후 =========, userPrincipal={}", userPrincipal);
 
                 // STOMP 세션 속성에 사용자 ID와 이름을 저장 -> Controller에서 사용
                 Objects.requireNonNull(accessor.getSessionAttributes())
