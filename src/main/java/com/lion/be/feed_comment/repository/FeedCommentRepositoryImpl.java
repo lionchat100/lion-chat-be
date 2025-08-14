@@ -1,6 +1,5 @@
 package com.lion.be.feed_comment.repository;
 
-import com.lion.be.feed.domain.entity.QFeed;
 import com.lion.be.feed_comment.domain.dto.FeedCommentResponse;
 import com.lion.be.feed_comment.domain.dto.FeedCommentSaveResponse;
 import com.lion.be.feed_comment.domain.entity.FeedComment;

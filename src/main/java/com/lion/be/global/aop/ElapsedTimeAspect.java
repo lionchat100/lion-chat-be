@@ -17,15 +17,11 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 public class ElapsedTimeAspect {
     @Around("@annotation(com.lion.be.global.aop.ElapsedTime)")
     public Object checkElapsedTime(ProceedingJoinPoint joinPoint) throws Throwable{
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
-
-        String httpMethod = request.getMethod();
-        String requestURI = request.getRequestURI();
-
         long startTime = System.currentTimeMillis();
         Object returnObject = joinPoint.proceed();
         long elapsedTime = System.currentTimeMillis() - startTime;
-        log.info("{} {} Elasped Time: {} ms", httpMethod, requestURI, elapsedTime);
+
+        log.info("{} Elasped Time: {} ms", joinPoint.getSignature().toShortString(), elapsedTime);
 
         return returnObject;
     }

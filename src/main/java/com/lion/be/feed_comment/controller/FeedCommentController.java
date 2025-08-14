@@ -40,7 +40,6 @@ public class FeedCommentController {
     }
 
     @GetMapping("/api/feeds/{feedId}/comments")
-    @ElapsedTime
     public ResponseEntity<Slice<FeedCommentResponse>> fetchAll(@PathVariable Long feedId, Pageable pageable,
                                                                @AuthenticationPrincipal UserPrincipal userPrincipal) {
         Slice<FeedCommentResponse> response = feedCommentReadService.fetchAll(feedId, pageable, userPrincipal.getId());

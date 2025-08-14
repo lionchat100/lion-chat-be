@@ -13,6 +13,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -76,16 +77,43 @@ public class FeedReadService {
     }
 
     private Slice<FeedResponse> enrichFeedsWithRedisData(Slice<FeedResponse> feeds, Long currentUserId) {
-        feeds.getContent().forEach(feedResponse -> {
+
+        List<Long> feedIds = feeds.getContent().stream()
+                .map(feedResponse -> feedResponse.getFeed().getId())
+                .toList();
+
+        List<Object> likeCounts = redisTemplate.opsForValue().multiGet(
+                feedIds.stream()
+                        .map(id -> RedisKey.FEED_LIKE_COUNT_KEY_PREFIX + id)
+                        .collect(Collectors.toList())
+        );
+
+        List<Object> commentCounts = redisTemplate.opsForValue().multiGet(
+                feedIds.stream()
+                        .map(id -> RedisKey.COMMENT_COUNT_KEY + id)
+                        .collect(Collectors.toList())
+        );
+
+        for(int i=0; i< feeds.getContent().size(); i++) {
+            FeedResponse feedResponse = feeds.getContent().get(i);
             FeedDto feedDto = feedResponse.getFeed();
             long feedId = feedDto.getId();
 
             // ✨ 수정: 캐시 워밍업 로직을 포함한 메서드 호출
-            long finalLikeCount = getAndCacheLikeCount(feedId, feedDto.getLikeCount());
-            feedDto.setLikeCount(finalLikeCount);
+            Object likeCountObj = likeCounts.get(i);
+            if(likeCountObj != null){
+                feedDto.setLikeCount(((Number) likeCountObj).longValue());
+            }else{
+                redisTemplate.opsForValue().set(RedisKey.FEED_LIKE_COUNT_KEY_PREFIX + feedId, feedDto.getLikeCount());
+            }
 
-            long finalCommentCount = getAndCacheCommentCount(feedId, feedDto.getCommentCount());
-            feedDto.setCommentCount(finalCommentCount);
+
+            Object commentCountObj = commentCounts.get(i);
+            if(commentCountObj != null){
+                feedDto.setCommentCount(((Number) commentCountObj).longValue());
+            }else{
+                redisTemplate.opsForValue().set(RedisKey.COMMENT_COUNT_KEY + feedId, feedDto.getCommentCount());
+            }
 
             if (currentUserId != null) {
                 if(isLikedByCurrentUser(feedId, currentUserId)){
@@ -94,7 +122,8 @@ public class FeedReadService {
                     feedDto.unlike();
                 }
             }
-        });
+        }
+
         return feeds;
     }
 
