@@ -6,6 +6,7 @@ import com.lion.be.chat.domain.dto.ChatMessageResponse;
 import com.lion.be.chat.service.MessagePersistence;
 import com.lion.be.chat.service.MessageProcessor;
 import com.lion.be.global.aop.CheckRateLimitChat;
+import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -16,6 +17,7 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,8 +53,13 @@ public class ChatController {
     @CheckRateLimitChat
     public void sendMessageByWebSocket(
             @Payload ChatMessageRequest request,
-            @AuthenticationPrincipal UserPrincipal userPrincipal
+            Principal principal
     ) {
+        if (principal == null) {
+            throw new IllegalStateException("Cannot send message without a valid user principal.");
+        }
+
+        UserPrincipal userPrincipal = (UserPrincipal) ((Authentication) principal).getPrincipal();
         messageProcessor.processIncomingMessage(request, userPrincipal.getId());
     }
 
