@@ -7,6 +7,8 @@ import com.lion.be.feed_comment.domain.entity.FeedComment;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
+import java.util.List;
+
 public interface FeedCommentRepository {
 
     Slice<FeedCommentResponse> fetchAllByFeedId(Long feedId, Pageable pageable);
@@ -22,5 +24,7 @@ public interface FeedCommentRepository {
     void softDeleteByFeedId(Long feedId);
 
     FeedComment fetchById(Long commentId);
+
+    void batchUpdateFeedCommentLikeCount(List<Long> commentIds, List<Long> likeCounts);
 
 }

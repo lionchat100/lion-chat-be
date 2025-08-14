@@ -9,6 +9,7 @@ import com.lion.be.feed_comment.domain.dto.FeedCommentUpdateResponse;
 import com.lion.be.feed_comment.service.FeedCommentReadService;
 import com.lion.be.feed_comment.service.FeedCommentWriteService;
 import com.lion.be.global.aop.CheckRateLimitFeedComment;
+import com.lion.be.global.aop.ElapsedTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -39,6 +40,7 @@ public class FeedCommentController {
     }
 
     @GetMapping("/api/feeds/{feedId}/comments")
+    @ElapsedTime
     public ResponseEntity<Slice<FeedCommentResponse>> fetchAll(@PathVariable Long feedId, Pageable pageable,
                                                                @AuthenticationPrincipal UserPrincipal userPrincipal) {
         Slice<FeedCommentResponse> response = feedCommentReadService.fetchAll(feedId, pageable, userPrincipal.getId());

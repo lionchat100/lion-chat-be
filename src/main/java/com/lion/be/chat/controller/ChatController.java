@@ -47,10 +47,9 @@ public class ChatController {
 //        messageProcessor.processIncomingMessage(request, userPrincipal.getId());
 //    }
 
-    @MessageMapping("/chat.sendMessage/{roomId}")
+    @MessageMapping("/chat.sendMessage")
     @CheckRateLimitChat
     public void sendMessageByWebSocket(
-            @DestinationVariable Long roomId,
             @Payload ChatMessageRequest request,
             @AuthenticationPrincipal UserPrincipal userPrincipal
     ) {

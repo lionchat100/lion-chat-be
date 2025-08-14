@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum University {
-	LIKELION("멋사대학교"),
 	CATHOLIC("가톨릭대학교"),
 	KANGNAM("강남대학교"),
 	KYUNGPOOK("경북대학교"),
