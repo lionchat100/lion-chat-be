@@ -76,7 +76,7 @@ public class ChatController {
             @RequestParam Long roomId
     ) {
         List<ChatMessageResponse> messages = messagePersistence.findMessagesByIdAndLastId(
-                roomId, 0L, PageRequest.of(0, 30, Sort.by("_id").descending()));
+                roomId, 0L, PageRequest.of(0, 30, Sort.by("createdAt").descending()));
         return ResponseEntity.ok(messages);
     }
 
@@ -95,7 +95,7 @@ public class ChatController {
             @RequestParam Long lastId
     ) {
         List<ChatMessageResponse> messages = messagePersistence.findMessagesByIdAndLastId(
-                roomId, lastId, PageRequest.of(0, 30, Sort.by("_id").descending()));
+                roomId, lastId, PageRequest.of(0, 30, Sort.by("createdAt").descending()));
         return ResponseEntity.ok(messages);
     }
 }
