@@ -10,11 +10,14 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 @Getter
 public class UserPrincipal implements UserDetails, OAuth2User {
 
-    private final Long id;
-    private final String email;
-    private final Collection<? extends GrantedAuthority> authorities;
+    private Long id;
+    private String email;
+    private Collection<? extends GrantedAuthority> authorities;
     private Map<String, Object> attributes;
     private boolean isNewUser;
+
+    public UserPrincipal() {
+    }
 
     public UserPrincipal(Long id, String email, Collection<? extends GrantedAuthority> authorities) {
         this.id = id;

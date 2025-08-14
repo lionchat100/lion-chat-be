@@ -26,7 +26,7 @@ public class FeedCommentRepositoryImpl implements FeedCommentRepository {
 
     @Override
     public Slice<FeedCommentResponse> fetchAllByFeedId(Long feedId, Pageable pageable) {
-        return feedCommentJpaRepository.fetchAllByFeedId(feedId, pageable);
+        return feedCommentJpaRepository.findAllByFeedId(feedId, pageable);
     }
 
     @Override

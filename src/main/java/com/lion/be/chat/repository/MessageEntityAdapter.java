@@ -7,11 +7,13 @@ import com.lion.be.chat.domain.entity.ChatMessage;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Component;
 
 import java.time.ZonedDateTime;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class MessageEntityAdapter {
@@ -21,6 +23,7 @@ public class MessageEntityAdapter {
 
     public ChatMessage fromRequest(ChatMessageRequest request, Long senderId) {
         User sender = userRepository.findById(senderId);
+        log.info("sender={}", sender);
         return new ChatMessage(
                 senderId,
                 sender.getName(),
@@ -28,7 +31,7 @@ public class MessageEntityAdapter {
                 ZonedDateTime.now(),
                 request.content(),
                 false,
-                MessageStatus.SENT
+                MessageStatus.DELIVERED
         );
     }
 
@@ -41,12 +44,13 @@ public class MessageEntityAdapter {
                 response.createdAt(),
                 response.content(),
                 false,
-                MessageStatus.SENT
+                MessageStatus.DELIVERED
         );
     }
 
     public ChatMessageResponse toResponse(ChatMessage message, boolean isEnd) {
         User sender = userRoomRepository.findById(message.getSenderId());
+        log.info("sender={}", sender);
         return new ChatMessageResponse(
                 message.getId() != null ? message.getId().toString() : new ObjectId().toString(),
                 message.getChatRoomId(),

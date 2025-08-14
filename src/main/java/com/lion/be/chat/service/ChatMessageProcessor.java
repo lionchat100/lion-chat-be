@@ -26,6 +26,9 @@ public class ChatMessageProcessor implements MessageProcessor {
 
     @Override
     public void processIncomingMessage(ChatMessageRequest request, Long senderId) {
+        log.info("메시지 요청 들어옴: {}", request);
+        log.info("senderId: {}", senderId);
+
         ChatMessage messageToSave = adapter.fromRequest(request, senderId);
         ChatMessage savedMessage = messagePersistence.saveMessage(messageToSave);
         log.info("채팅 메시지 저장 완료: {}", savedMessage);
@@ -33,7 +36,7 @@ public class ChatMessageProcessor implements MessageProcessor {
         messagePublisher.publishMessage(savedMessage);
         log.info("채팅 메시지 발행 완료: {}", savedMessage);
 
-        messagePersistence.updateMessageStatus(savedMessage.getId(), MessageStatus.SENT);
+        messagePersistence.updateMessageStatus(savedMessage.getId(), MessageStatus.DELIVERED);
     }
 
     /**

@@ -23,7 +23,7 @@ public class WebSocketMessageDelivery implements MessageDelivery {
     @Override
     public boolean deliverToClient(Long userId, ChatMessageResponse message) {
         try {
-            String destination = "/topic/chat/" + message.chatRoomId();
+            String destination = "/topic/chatroom/" + message.chatRoomId();
             messagingTemplate.convertAndSend(destination, message);
             log.info("WebSocket 메시지 전송 성공: userId={}, messageId={}", userId, message.messageId());
             return true;
