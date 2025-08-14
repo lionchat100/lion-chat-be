@@ -19,7 +19,7 @@ public interface FeedCommentJpaRepository extends JpaRepository<FeedComment, Lon
             "WHERE c.feed.id = :feedId "
             + "AND c.isDeleted = false "
             + "AND u.role != 'BANNED'")
-    Slice<FeedCommentResponse> fetchAllByFeedId(@Param("feedId") Long feedId, Pageable pageable);
+    Slice<FeedCommentResponse> findAllByFeedId(@Param("feedId") Long feedId, Pageable pageable);
 
     @Modifying
     @Query("UPDATE FeedComment c "
