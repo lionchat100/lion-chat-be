@@ -176,4 +176,7 @@ public class User extends BaseEntity {
 		UserPhoto userPhoto = new UserPhoto(this, image, orderIndex);
 		this.userPhotos.add(userPhoto);
 	}
+	public void updateRole(Role role) {
+		this.role = role;
+	}
 }

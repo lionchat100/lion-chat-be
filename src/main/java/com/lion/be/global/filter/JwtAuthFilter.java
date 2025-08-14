@@ -37,7 +37,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String token = resolveToken(request);
         if (token != null && jwtTokenProvider.validateToken(token)) {
-            Authentication authentication = jwtTokenProvider.getAuthentication(token);
+			Authentication authentication = jwtTokenProvider.getAuthentication(token);
+			boolean isBanned = authentication.getAuthorities().stream()
+				.anyMatch(auth -> "ROLE_BANNED".equals(auth.getAuthority()));
+
+			if (isBanned) {
+				response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+				response.setContentType("application/json;charset=UTF-8");
+				response.getWriter().write("{\"error\":\"계정이 정지되었습니다.\"}");
+				return;
+			}
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
 

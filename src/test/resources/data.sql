@@ -35,8 +35,8 @@ VALUES
     (19, '이웹개발', '즐거운개발자', 'web1@test.com', 'https://test.com/image17.jpg', 'USER', 'WOMEN', 'DONGDUK', 'FRONTEND', 'ESFP', 'COMPLETED', '즐겁게 웹 개발하는 개발자', true, 3, 'PREFERENCE_FOCUSED', NOW(), NOW()),
     (20, '박멀티', '융합개발자', 'multi1@test.com', 'https://test.com/image18.jpg', 'USER', 'MEN', 'SOOKMYUNG', 'FULLSTACK', 'ESFJ', 'COMPLETED', '다양한 기술을 융합하는 개발자', true, 3, 'POSITION_FOCUSED', NOW(), NOW()),
     (21, '최리더', '액션리더', 'leader1@test.com', 'https://test.com/image19.jpg', 'USER', 'WOMEN', 'EWHA', 'PM', 'ESTP', 'COMPLETED', '액션형 프로젝트 리더', false, 3, 'PREFERENCE_FOCUSED', NOW(), NOW()),
-    (22, '정올인원', '효율개발자', 'all1@test.com', 'https://test.com/image20.jpg', 'USER', 'MEN', 'SEOUL', 'FULLSTACK', 'ISTP', 'COMPLETED', '실용적이고 효율적인 개발을 추구합니다', true, 3, 'CAREER_FOCUSED', NOW(), NOW());
-
+    (22, '정올인원', '효율개발자', 'all1@test.com', 'https://test.com/image20.jpg', 'USER', 'MEN', 'SEOUL', 'FULLSTACK', 'ISTP', 'COMPLETED', '실용적이고 효율적인 개발을 추구합니다', true, 3, 'CAREER_FOCUSED', NOW(), NOW()),
+    (23, '어드민', '어드민','admin@gmail.com', 'https://www', 'ADMIN', 'MEN', 'SEOUL', 'FULLSTACK', 'ISTP', 'COMPLETED',  '실용적이고 효율적인 개발을 추구합니다', true, 3, 'CAREER_FOCUSED', NOW(), NOW());
 -- === 더미 유저용 이미지 데이터 (각 유저마다 최소 1장 이상) ===
 INSERT INTO image (id, original_file_name, stored_file_name, image_url, uploader_id, is_deleted, created_at, updated_at)
 VALUES
@@ -77,7 +77,8 @@ VALUES
     (30, 'multi1-1.jpg', 'uuid30_multi1-1.jpg', 'https://test.com/photo18-1.jpg', 20, false, NOW(), NOW()),
     (31, 'leader1-1.jpg', 'uuid31_leader1-1.jpg', 'https://test.com/photo19-1.jpg', 21, false, NOW(), NOW()),
     (32, 'all1-1.jpg', 'uuid32_all1-1.jpg', 'https://test.com/photo20-1.jpg', 22, false, NOW(), NOW()),
-    (33, 'all1-2.jpg', 'uuid33_all1-2.jpg', 'https://test.com/photo20-2.jpg', 22, false, NOW(), NOW());
+    (33, 'all1-2.jpg', 'uuid33_all1-2.jpg', 'https://test.com/photo20-2.jpg', 22, false, NOW(), NOW()),
+    (34, 'admin-3.jpg', 'admin-2.jpg', 'https://test.com/admin-2.jpg', 23, false, NOW(), NOW());
 
 -- === UserPhoto 중간 테이블 데이터 (온보딩 완료한 사용자들만) ===
 INSERT INTO user_photo (user_id, image_id, order_index, created_at, updated_at)
@@ -119,7 +120,8 @@ VALUES
     (20, 30, 1, NOW(), NOW()), -- 박멀티
     (21, 31, 1, NOW(), NOW()), -- 최리더
     (22, 32, 1, NOW(), NOW()), -- 정올인원
-    (22, 33, 2, NOW(), NOW());
+    (22, 33, 2, NOW(), NOW()),
+    (23, 34, 1, NOW(), NOW()); -- 어드민
 
 -- === 약관 동의 데이터 (온보딩 완료한 사용자들만) ===
 INSERT INTO agreements (user_id, agreement_type, agreed)
@@ -168,4 +170,6 @@ VALUES
     (21, 'REQUIRED', true),  -- 최리더
     (21, 'MARKETING', true),
     (22, 'REQUIRED', true),  -- 정올인원
-    (22, 'MARKETING', false);
+    (22, 'MARKETING', false),
+    (23, 'REQUIRED', true),  -- 어드민
+    (23, 'MARKETING', false);

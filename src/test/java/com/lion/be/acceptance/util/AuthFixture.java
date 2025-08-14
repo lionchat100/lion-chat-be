@@ -27,4 +27,11 @@ public class AuthFixture {
 			"imageUrl", 회원_토킷.getImageUrl());
 	}
 
+	public static Map<String, Object> 어드민_멋사_로그인_요청() {
+		return Map.of(
+			"email", 어드민_멋사.getEmail(),
+			"name", 어드민_멋사.getName(),
+			"imageUrl", 어드민_멋사.getImageUrl());
+	}
+
 }
