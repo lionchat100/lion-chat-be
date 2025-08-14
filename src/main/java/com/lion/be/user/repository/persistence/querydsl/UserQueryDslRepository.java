@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import com.lion.be.user.domain.OnboardingStatus;
+import com.lion.be.user.domain.Role;
 import com.lion.be.user.domain.entity.User;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -43,6 +44,7 @@ public class UserQueryDslRepository {
 
 	/**
 	 * 동일 클러스터 내 사용자 조회
+	 * 어드민 유저는 제외
 	 */
 	public List<User> findUsersByClusterExcluding(
 		Integer clusterId,
@@ -58,7 +60,8 @@ public class UserQueryDslRepository {
 
 		whereClause.and(user.clusterId.eq(clusterId))
 			.and(user.id.ne(currentUserId))
-			.and(user.onboardingStatus.eq(OnboardingStatus.COMPLETED));
+			.and(user.onboardingStatus.eq(OnboardingStatus.COMPLETED))
+			.and(user.role.ne(Role.ADMIN));
 
 		if (excludeUserIds != null && !excludeUserIds.isEmpty()) {
 			whereClause.and(user.id.notIn(excludeUserIds));
@@ -117,6 +120,7 @@ public class UserQueryDslRepository {
 
 	/**
 	 * 기본 조건 생성 (온보딩 완료 + 제외 목록)
+	 * 어드민 유저는제외
 	 */
 	private BooleanBuilder buildBaseConditions(Long currentUserId, List<Long> excludeUserIds) {
 		BooleanBuilder whereClause = new BooleanBuilder();
@@ -126,6 +130,7 @@ public class UserQueryDslRepository {
 		}
 
 		whereClause.and(user.onboardingStatus.eq(OnboardingStatus.COMPLETED));
+		whereClause.and(user.role.ne(Role.ADMIN));
 
 		if (excludeUserIds != null && !excludeUserIds.isEmpty()) {
 			whereClause.and(user.id.notIn(excludeUserIds));

@@ -21,7 +21,7 @@ public class LikeEventListener {
 	public void handleLikeCreated(LikeCreatedEvent event) {
 		LikeNotification notification = new LikeNotification(
 			event.getFromUserId(),
-			event.getFromUserName(),
+			event.getFromUserNickname(),
 			"님이 회원님을 좋아합니다"
 		);
 

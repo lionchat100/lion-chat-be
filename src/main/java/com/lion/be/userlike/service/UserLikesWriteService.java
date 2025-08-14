@@ -47,7 +47,7 @@ public class UserLikesWriteService {
 			LikeCreatedEvent event = new LikeCreatedEvent(
 				currentUserId,
 				targetUserId,
-				fromUser.getName()
+				fromUser.getNickname()
 			);
 			eventPublisher.publishEvent(event);
 

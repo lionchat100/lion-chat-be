@@ -11,7 +11,7 @@ import com.lion.be.user.domain.entity.UserPhoto;
 
 public record UserCardResponse (
 	Long userId,
-	String name,
+	String nickname,
 	University university,
 	Boolean isUniversityVisible,
 	Position position,
@@ -27,7 +27,7 @@ public record UserCardResponse (
 	public static UserCardResponse from(User user, boolean isLikedByMe) {
 		return new UserCardResponse(
 			user.getId(),
-			user.getName(),
+			user.getNickname(),
 			user.getUniversity(),
 			user.getIsUniversityView(),
 			user.getPosition(),
