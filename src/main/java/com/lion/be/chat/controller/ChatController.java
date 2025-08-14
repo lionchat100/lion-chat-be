@@ -6,14 +6,9 @@ import com.lion.be.chat.domain.dto.ChatMessageResponse;
 import com.lion.be.chat.service.MessagePersistence;
 import com.lion.be.chat.service.MessageProcessor;
 import com.lion.be.global.aop.CheckRateLimitChat;
-import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -48,7 +44,6 @@ public class ChatController {
 //    ) {
 //        messageProcessor.processIncomingMessage(request, userPrincipal.getId());
 //    }
-
     @MessageMapping("/chat.sendMessage")
     @CheckRateLimitChat
     public void sendMessageByWebSocket(
@@ -75,8 +70,7 @@ public class ChatController {
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestParam Long roomId
     ) {
-        List<ChatMessageResponse> messages = messagePersistence.findMessagesByIdAndLastId(
-                roomId, 0L, PageRequest.of(0, 30, Sort.by("createdAt").descending()));
+        List<ChatMessageResponse> messages = messagePersistence.findMessagesByIdAndLastId(roomId, 0L);
         return ResponseEntity.ok(messages);
     }
 
@@ -94,8 +88,7 @@ public class ChatController {
             @RequestParam Long roomId,
             @RequestParam Long lastId
     ) {
-        List<ChatMessageResponse> messages = messagePersistence.findMessagesByIdAndLastId(
-                roomId, lastId, PageRequest.of(0, 30, Sort.by("createdAt").descending()));
+        List<ChatMessageResponse> messages = messagePersistence.findMessagesByIdAndLastId(roomId, lastId);
         return ResponseEntity.ok(messages);
     }
 }
