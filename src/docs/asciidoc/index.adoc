@@ -60,6 +60,35 @@ operation::fetch_my_info_fail_no_token[snippets='http-request,http-response']
 [[user-management]]
 == 사용자 관리
 
+[[admin-user-ban-system]]
+=== 어드민 유저는 유저를 밴할수 있습니다.
+
+어드민 유저는 유저아이디를 통해 해당 유저를 밴할 수 있습니다.
+
+operation::should_ban_user_when_admin_requests[snippets='http-request,http-response']
+
+[[adnim-user-unban-system]]
+=== 어드민 유저는 밴된 유저를 해지 할수 있습니다.
+
+어드민 유저는 유저아이디를 통해 밴된 유저를 해지 할 수 있습니다.
+
+operation::should_unban_user_when_admin_requests[snippets='http-request,http-response']
+
+[[user-cannot-use-ban-system]]
+=== 유저는 밴시스템에 접근할수 없습니다.
+
+유저는 밴시스템에 접근할 수 없습니다. .
+
+operation::should_deny_access_when_regular_user_tries_ban[snippets='http-request,http-response']
+
+[[user-cannot-use-unban-system]]
+=== 유저는 밴해제시스템에 접근할수 없습니다.
+
+유저는 밴해제시스템에 접근할 수 없습니다. .
+
+operation::should_deny_access_when_regular_user_tries_unban[snippets='http-request,http-response']
+
+
 [[onboarding-enums]]
 === 온보딩에 필요한 이넘 리스트를 불러옵니다
 
@@ -621,7 +650,7 @@ operation::like_notification_sent[snippets='http-request,http-response']
 
 이미지를 업로드하면 성공한다.
 
-=== http-request
+*http-request**
 ```http
 POST /api/images/upload/list HTTP/1.1
 Content-Type: multipart/form-data; boundary="jS1C_feE6jbyqap2dn9V0uCfgbOsfk1"; boundary=6o2knFse3p53ty9dmcQvWAIx1zInP11uCfbm
@@ -634,7 +663,7 @@ dummy-image-content
 --6o2knFse3p53ty9dmcQvWAIx1zInP11uCfbm--
 ```
 
-=== http-response
+*http-response*
 
 ```http
 Vary: Origin
@@ -663,7 +692,7 @@ Content-Length: 520
 
 이미지를 2장 업로드시 성공한다.
 
-=== http-request
+*ttp-request*
 ```http
 POST /api/images/upload/list HTTP/1.1
 Content-Type: multipart/form-data; boundary="jS1C_feE6jbyqap2dn9V0uCfgbOsfk1"; boundary=6o2knFse3p53ty9dmcQvWAIx1zInP11uCfbm
@@ -682,7 +711,7 @@ dummy-image-content
 --6o2knFse3p53ty9dmcQvWAIx1zInP11uCfbm--
 ```
 
-=== http-response
+*http-response*
 
 ```http
 Vary: Origin
@@ -717,15 +746,13 @@ Content-Length: 520
 
 업로드된 이미지를 성공적으로 삭제한다.
 
-operation::image_delete_success[snippets='http-request,http-response']
-
-=== http-request
+*http-request*
 ```http
 DELETE /api/images/34 HTTP/1.1
 Host: localhost:50540
 ```
 
-=== http-response
+*http-response*
 
 ```http
 HTTP/1.1 200 OK
@@ -746,14 +773,13 @@ Connection: keep-alive
 
 존재 하지 않는 이미지를 삭제 404 반환한다.
 
-operation::image_delete_fail_not_found[snippets='http-request,http-response']
-=== http-request
+**http-reques**t
 ```http
 DELETE /api/images/9999 HTTP/1.1
 Host: localhost:50540
 ```
 
-=== http-response
+*http-response*
 
 ```http
 HTTP/1.1 404 Not Found
@@ -774,14 +800,13 @@ Connection: keep-alive
 
 남의 이미지를 삭제시도하면 403 반환한다.
 
-operation::image_delete_fail_access_denied[snippets='http-request,http-response']
-=== http-request
+*http-request*
 ```http
 DELETE /api/images/34 HTTP/1.1
 Host: localhost:50540
 ```
 
-=== http-response
+*http-response*
 
 ```http
 HTTP/1.1 403 Forbidden

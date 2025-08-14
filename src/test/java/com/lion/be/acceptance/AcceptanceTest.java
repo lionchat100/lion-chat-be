@@ -1,8 +1,6 @@
 package com.lion.be.acceptance;
 
-import static com.lion.be.acceptance.auth.AuthSteps.비회원이_로그인한다;
-import static com.lion.be.acceptance.auth.AuthSteps.원준이_로그인한다;
-import static com.lion.be.acceptance.auth.AuthSteps.토킷이_로그인한다;
+import static com.lion.be.acceptance.auth.AuthSteps.*;
 import static com.lion.be.acceptance.image.ImageSteps.이미지_리스트를_업로드한다;
 import static com.lion.be.acceptance.user.UserSteps.비회원_회원가입;
 import static com.lion.be.acceptance.user.UserSteps.온보딩을_완료한다;
@@ -25,6 +23,7 @@ import io.restassured.specification.RequestSpecification;
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -152,6 +151,7 @@ public abstract class AcceptanceTest {
 
     public String 회원_원준_액세스토큰;
     public String 회원_토킷_액세스토큰;
+	public String 어드민_멋사_액세스토큰;
     public String 비회원_엑세스토큰;
 
     @Autowired
@@ -211,6 +211,7 @@ public abstract class AcceptanceTest {
     private void initAccessToken() {
         회원_원준_액세스토큰 = 원준_액세스토큰_요청();
         회원_토킷_액세스토큰 = 토킷_엑세스토큰_요청();
+		어드민_멋사_액세스토큰 = 어드민_멋사_액세스토큰_요청();
         비회원_엑세스토큰 = 비회원_액세스토큰_요청();
     }
 
@@ -228,6 +229,10 @@ public abstract class AcceptanceTest {
         비회원_회원가입();
         return 비회원이_로그인한다(new RequestSpecBuilder().build()).jsonPath().getString("accessToken");
     }
+
+	private static String 어드민_멋사_액세스토큰_요청() {
+		return 어드민이_로그인한다(new RequestSpecBuilder().build()).jsonPath().getString("accessToken");
+	}
 
     /**
      * 토킷 완전 온보딩 (로그인 → 이미지 리스트 업로드 → 온보딩) - 더 효율적!
@@ -280,4 +285,8 @@ public abstract class AcceptanceTest {
         return accessToken;
     }
 
+	protected static final Map<String, Object> 토킷_사용자의_로그인_정보 = Map.of(
+		"email", "토킷_이메일@example.com",
+		"password", "토킷_비밀번호"
+	);
 }

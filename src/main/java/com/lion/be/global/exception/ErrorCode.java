@@ -36,7 +36,7 @@ public enum ErrorCode {
     UPLOAD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "업로드 중 에러가 발생했습니다."),
 
     TOO_MANY_API_REQUEST_EXCEPTION(HttpStatus.TOO_MANY_REQUESTS, "API 요청 횟수를 초과했습니다."), IMAGE_DELETE_ACCESS_DENIED(
-		HttpStatus.FORBIDDEN,"이미지 소유권자 가 아닙니다." );
+		HttpStatus.FORBIDDEN,"이미지 소유권자 가 아닙니다." ), BANNED_USER_LOGIN(HttpStatus.UNAUTHORIZED,"밴된 유저입니다. " );
 
     private final HttpStatus status;
     private final String message;
