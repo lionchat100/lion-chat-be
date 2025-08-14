@@ -101,7 +101,7 @@
     backBtn.addEventListener("click", backToList);
 
     let chatRoomId = 0;
-    let opponent = 0;
+    let opponentId = 0;
 
     function unsubscribe() {
         if (subscription) {
@@ -177,7 +177,7 @@
                 const listItem = document.createElement("li");
                 listItem.textContent = `Chat Room ID: ${chatRoom.chatRoomId} - 상대: ${chatRoom.name} - 최근 메시지:${chatRoom.lastContent} - 읽음: ${chatRoom.isRead}`;
                 listItem.addEventListener("click", () => {
-                    joinTheRoom(event, chatRoom.chatRoomId);
+                    joinTheRoom(event, chatRoom.chatRoomId, chatRoom.name);
                 });
                 chatRoomList.appendChild(listItem);
             });
@@ -186,8 +186,8 @@
 
     async function connect(event) {
         event.preventDefault();
-        opponent = opponentIdInput.value.trim();
-        if (token && opponent) {
+        opponentId = opponentIdInput.value.trim();
+        if (token && opponentId) {
             chatRoomListForm.classList.add("d-none");
             chatRoom.classList.remove("d-none");
 
@@ -197,10 +197,11 @@
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify({ receiverId: opponent }),
+                body: JSON.stringify({ receiverId: opponentId }),
             });
 
             const body = await res.json();
+            console.log(body);
             chatRoomId = body.chatRoomId;
 
             subscription = stompClient.subscribe(
@@ -251,13 +252,13 @@
             const listItem = document.createElement("li");
             listItem.textContent = `Chat Room ID: ${chatRoom.chatRoomId} - 상대: ${chatRoom.name} - 최근 메시지:${chatRoom.lastContent} - 읽음: ${chatRoom.isRead}`;
             listItem.addEventListener("click", () => {
-                joinTheRoom(event, chatRoom.chatRoomId);
+                joinTheRoom(event, chatRoom.chatRoomId, chatRoom.name);
             });
             chatRoomList.appendChild(listItem);
         });
     }
 
-    async function joinTheRoom(event, roomId) {
+    async function joinTheRoom(event, roomId, chatroomOpponent) {
         event.preventDefault();
 
         chatRoomListForm.classList.add("d-none");
@@ -266,6 +267,9 @@
         messagesArea.replaceChildren();
 
         chatRoomId = roomId;
+
+        console.log(roomId);
+        console.log(chatRoomId)
 
         subscription = stompClient.subscribe(
             `/topic/chatroom/${chatRoomId}`,
@@ -288,6 +292,9 @@
         chats.reverse();
 
         chats.forEach((message) => {
+            if(message.senderName === chatroomOpponent){
+                opponentId = message.senderId;
+            }
             displayMessage(message);
         });
     }
@@ -353,17 +360,18 @@
     function onMessageReceived(payload) {
         const message = JSON.parse(payload.body);
         displayMessage(message);
-        // if (message.senderId === opponent) {
-        //     stompClient.publish({
-        //         destination: "/app/chat.ack",
-        //         headers: { Authorization: `Bearer ${token}` },
-        //         body: JSON.stringify({
-        //             chatRoomId: chatRoomId,
-        //             senderId: message.senderId,
-        //             date: message.date,
-        //         }),
-        //     });
-        // }
+        console.log(message);
+        console.log(opponent);
+        if (message.senderId === opponentId) {
+            stompClient.publish({
+                destination: "/app/message.ack",
+                headers: { Authorization: `Bearer ${token}` },
+                body: JSON.stringify({
+                    messageId: message.messageId,
+                    userId: message.senderId
+                }),
+            });
+        }
     }
 
     function displayMessage(message) {
