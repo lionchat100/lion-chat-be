@@ -28,7 +28,7 @@ public class MessageEntityAdapter {
                 ZonedDateTime.now(),
                 request.content(),
                 false,
-                MessageStatus.SENT
+                MessageStatus.DELIVERED
         );
     }
 
@@ -41,7 +41,7 @@ public class MessageEntityAdapter {
                 response.createdAt(),
                 response.content(),
                 false,
-                MessageStatus.SENT
+                MessageStatus.DELIVERED
         );
     }
 
