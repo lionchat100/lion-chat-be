@@ -163,7 +163,7 @@
             loginForm.classList.add("d-none");
             chatRoomListForm.classList.remove("d-none");
 
-            const res = await fetch("/api/chats", {
+            const res = await fetch("/api/chatrooms", {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -175,9 +175,9 @@
 
             body.forEach((chatRoom) => {
                 const listItem = document.createElement("li");
-                listItem.textContent = `Chat Room ID: ${chatRoom.roomId} - 상대: ${chatRoom.opponentName} - 최근 메시지:${chatRoom.lastChat} - 읽음: ${chatRoom.isRead}`;
+                listItem.textContent = `Chat Room ID: ${chatRoom.chatRoomId} - 상대: ${chatRoom.name} - 최근 메시지:${chatRoom.lastContent} - 읽음: ${chatRoom.isRead}`;
                 listItem.addEventListener("click", () => {
-                    joinTheRoom(event, chatRoom.roomId, chatRoom.opponentId);
+                    joinTheRoom(event, chatRoom.chatRoomId);
                 });
                 chatRoomList.appendChild(listItem);
             });
@@ -191,24 +191,24 @@
             chatRoomListForm.classList.add("d-none");
             chatRoom.classList.remove("d-none");
 
-            const res = await fetch("/api/chats", {
+            const res = await fetch("/api/chatrooms/init", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify({ id: opponent }),
+                body: JSON.stringify({ receiverId: opponent }),
             });
 
             const body = await res.json();
             chatRoomId = body.id;
 
             subscription = stompClient.subscribe(
-                `/topic/chatroom${chatRoomId}`,
+                `/topic/chatroom/${chatRoomId}`,
                 onMessageReceived
             );
 
-            const result = await fetch("/api/chats/message/" + chatRoomId, {
+            const result = await fetch("/api/chatrooms/chats/messages?roomId=" + chatRoomId, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -237,7 +237,7 @@
         chatRoomList.replaceChildren();
         chatRoomId = 0;
 
-        const res = await fetch("/api/chats", {
+        const res = await fetch("/api/chatrooms", {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -249,15 +249,15 @@
 
         body.forEach((chatRoom) => {
             const listItem = document.createElement("li");
-            listItem.textContent = `Chat Room ID: ${chatRoom.roomId} - 상대: ${chatRoom.opponentName} - 최근 메시지:${chatRoom.lastChat} - 읽음: ${chatRoom.isRead}`;
+            listItem.textContent = `Chat Room ID: ${chatRoom.chatRoomId} - 상대: ${chatRoom.name} - 최근 메시지:${chatRoom.lastContent} - 읽음: ${chatRoom.isRead}`;
             listItem.addEventListener("click", () => {
-                joinTheRoom(event, chatRoom.roomId, chatRoom.opponentId);
+                joinTheRoom(event, chatRoom.chatRoomId);
             });
             chatRoomList.appendChild(listItem);
         });
     }
 
-    async function joinTheRoom(event, roomId, opponentId) {
+    async function joinTheRoom(event, roomId) {
         event.preventDefault();
 
         chatRoomListForm.classList.add("d-none");
@@ -266,14 +266,13 @@
         messagesArea.replaceChildren();
 
         chatRoomId = roomId;
-        opponent = opponentId;
 
         subscription = stompClient.subscribe(
-            `/topic/chatroom${chatRoomId}`,
+            `/topic/chatroom/${chatRoomId}`,
             onMessageReceived
         );
 
-        const result = await fetch("/api/chats/message/" + chatRoomId, {
+        const result = await fetch("/api/chatrooms/chats/messages?roomId=" + chatRoomId, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -283,8 +282,11 @@
 
         const chats = await result.json();
         if (chats.length > 0) {
-            lastId = chats[0].id;
+            lastId = chats.at(-1).id;
         }
+
+        chats.reverse();
+
         chats.forEach((message) => {
             displayMessage(message);
         });
@@ -302,7 +304,7 @@
         if (subscription) {
             unsubscribe();
             subscription = stompClient.subscribe(
-                `/topic/chatroom${chatRoomId}`,
+                `/topic/chatroom/${chatRoomId}`,
                 onMessageReceived
             );
         }
@@ -314,8 +316,7 @@
         if (messageContent && stompClient && stompClient.active) {
             const chatMessageValue = {
                 chatRoomId: chatRoomId,
-                content: messageContent,
-                date: new Date(),
+                content: messageContent
             };
             stompClient.publish({
                 destination: "/app/chat.sendMessage",
@@ -329,7 +330,7 @@
     async function fetchOldMessage() {
         if (lastId) {
             const result = await fetch(
-                "/api/chats/message/" + chatRoomId + "?lastId=" + lastId,
+                "/api/chatrooms/chats/messages?roomId=" + chatRoomId + "&lastId=" + lastId,
                 {
                     method: "GET",
                     headers: {
@@ -352,17 +353,17 @@
     function onMessageReceived(payload) {
         const message = JSON.parse(payload.body);
         displayMessage(message);
-        if (message.senderId === opponent) {
-            stompClient.publish({
-                destination: "/app/chat.ack",
-                headers: { Authorization: `Bearer ${token}` },
-                body: JSON.stringify({
-                    chatRoomId: chatRoomId,
-                    senderId: message.senderId,
-                    date: message.date,
-                }),
-            });
-        }
+        // if (message.senderId === opponent) {
+        //     stompClient.publish({
+        //         destination: "/app/chat.ack",
+        //         headers: { Authorization: `Bearer ${token}` },
+        //         body: JSON.stringify({
+        //             chatRoomId: chatRoomId,
+        //             senderId: message.senderId,
+        //             date: message.date,
+        //         }),
+        //     });
+        // }
     }
 
     function displayMessage(message) {
