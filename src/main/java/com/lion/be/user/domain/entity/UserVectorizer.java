@@ -37,9 +37,9 @@ public class UserVectorizer {
 	private static final Map<Mbti, Map<String, List<Mbti>>> COMPATIBILITY_MAP = createCompatibilityMap();
 
 	/**
-	 * User 객체를 9차원 벡터로 변환 (머신러닝/클러스터링용)
+	 * User 객체를 10차원 벡터로 변환 (AI 포지션 추가로 차원 확장)
 	 *
-	 * 벡터 구조: [E/I, S/N, T/F, J/P, BACKEND, FRONTEND, UX_UI, PM, FULLSTACK]
+	 * 벡터 구조: [E/I, S/N, T/F, J/P, BACKEND, FRONTEND, UX_UI, PM, FULLSTACK, AI]
 	 *
 	 * 사용 목적:
 	 * - Weka 라이브러리 기반 클러스터링
@@ -47,21 +47,22 @@ public class UserVectorizer {
 	 * - 추천 알고리즘의 입력 데이터
 	 *
 	 * @param user 벡터화할 사용자 객체
-	 * @return 9차원 double 배열 (MBTI 4차원 + Position 5차원)
+	 * @return 10차원 double 배열 (MBTI 4차원 + Position 6차원)
 	 * @throws CustomException 온보딩 미완료 사용자인 경우
 	 */
+	@Deprecated //향후 쓸수도 있어서 내비둠 createVectorBasedClusterMap 내에서 이미 동일한 작업 진행
 	public double[] vectorize(User user) {
 		validateUser(user);
 
-		double[] vector = new double[9];
+		double[] vector = new double[10]; // 10차원으로 확장
 
 		// MBTI 4차원 벡터 생성 및 추가
 		double[] mbtiBinary = getMbtiBinary(user.getMbti());
 		System.arraycopy(mbtiBinary, 0, vector, 0, 4);
 
-		// Position 5차원 벡터 생성 및 추가
+		// Position 6차원 벡터 생성 및 추가
 		double[] positionVector = getPositionVector(user.getPosition());
-		System.arraycopy(positionVector, 0, vector, 4, 5);
+		System.arraycopy(positionVector, 0, vector, 4, 6);
 
 		return vector;
 	}
@@ -93,40 +94,44 @@ public class UserVectorizer {
 	}
 
 	/**
-	 * Position을 5차원 유사도 벡터로 변환
+	 * Position을 6차원 유사도 벡터로 변환 (AI 포지션 추가)
 	 *
 	 * 각 Position이 다른 Position들과 얼마나 유사한지를 수치화
-	 * 벡터 구조: [BACKEND, FRONTEND, UX_UI, PM, FULLSTACK]
+	 * 벡터 구조: [BACKEND, FRONTEND, UX_UI, PM, FULLSTACK, AI]
 	 *
 	 * 유사도 기준:
 	 * - 자기 자신: 1.0 (완전 일치)
 	 * - 기술적 유사성: 0.3~0.8 (개발 분야 공통점)
 	 * - 협업 관계: 0.1~0.6 (업무 협업 빈도)
+	 * - AI 관련: 0.7~0.9 (AI는 모든 개발 분야와 높은 연관성)
 	 *
-	 * 예시:
-	 * - BACKEND: 풀스택과 높은 유사도(0.8), PM과 낮은 유사도(0.2)
-	 * - FRONTEND: UX/UI와 높은 협업(0.6), 백엔드와 일부 공통(0.3)
+	 * AI 포지션 특징:
+	 * - BACKEND와 높은 유사도 (데이터 처리, 서버 개발)
+	 * - FRONTEND와 중간 유사도 (AI 모델 UI 통합)
+	 * - FULLSTACK과 매우 높은 유사도 (전체적인 기술 스택 활용)
 	 *
 	 * @param position Position 열거형
-	 * @return 5차원 유사도 벡터
+	 * @return 6차원 유사도 벡터
 	 */
 	public double[] getPositionVector(Position position) {
-		double[] vector = new double[5];
+		double[] vector = new double[6]; // 5차원 → 6차원으로 확장
 
 		switch (position) {
 			case BACKEND -> {
 				vector[0] = 1.0;   // BACKEND (자기 자신)
-				vector[1] = 0.3;   // FRONTEND (일부 공통 기술)
+				vector[1] = 0.3;   // FRONTEND (일부 공통 기술: API, 데이터베이스)
 				vector[2] = 0.1;   // UX_UI (협업 정도)
 				vector[3] = 0.2;   // PM (협업 정도)
 				vector[4] = 0.8;   // FULLSTACK (높은 유사도)
+				vector[5] = 0.8;   // AI (데이터 처리, ML 모델 서빙, API 개발)
 			}
 			case FRONTEND -> {
 				vector[0] = 0.3;   // BACKEND
 				vector[1] = 1.0;   // FRONTEND (자기 자신)
 				vector[2] = 0.6;   // UX_UI (UI 관련 협업)
-				vector[3] = 0.3;   // PM
+				vector[3] = 0.3;   // PM (기획 협업)
 				vector[4] = 0.7;   // FULLSTACK
+				vector[5] = 0.5;   // AI (AI 모델 UI 통합, 데이터 시각화)
 			}
 			case UX_UI -> {
 				vector[0] = 0.1;   // BACKEND
@@ -134,6 +139,7 @@ public class UserVectorizer {
 				vector[2] = 1.0;   // UX_UI (자기 자신)
 				vector[3] = 0.4;   // PM (기획 협업)
 				vector[4] = 0.4;   // FULLSTACK
+				vector[5] = 0.3;   // AI (AI 서비스 UX 설계, 사용자 경험)
 			}
 			case PM -> {
 				vector[0] = 0.2;   // BACKEND
@@ -141,6 +147,7 @@ public class UserVectorizer {
 				vector[2] = 0.4;   // UX_UI
 				vector[3] = 1.0;   // PM (자기 자신)
 				vector[4] = 0.3;   // FULLSTACK
+				vector[5] = 0.4;   // AI (AI 프로젝트 기획, 요구사항 정의)
 			}
 			case FULLSTACK -> {
 				vector[0] = 0.8;   // BACKEND
@@ -148,6 +155,15 @@ public class UserVectorizer {
 				vector[2] = 0.4;   // UX_UI
 				vector[3] = 0.3;   // PM
 				vector[4] = 1.0;   // FULLSTACK (자기 자신)
+				vector[5] = 0.9;   // AI (전체 스택 + AI 통합 개발)
+			}
+			case AI -> {
+				vector[0] = 0.8;   // BACKEND (ML 모델 서빙, 데이터 파이프라인)
+				vector[1] = 0.5;   // FRONTEND (AI 서비스 UI, 실시간 추론 결과 표시)
+				vector[2] = 0.3;   // UX_UI (AI 제품의 사용자 경험 고려)
+				vector[3] = 0.4;   // PM (AI 제품 기획 이해 필요)
+				vector[4] = 0.9;   // FULLSTACK (AI + 웹 서비스 통합)
+				vector[5] = 1.0;   // AI (자기 자신)
 			}
 		}
 
