@@ -201,7 +201,7 @@
             });
 
             const body = await res.json();
-            chatRoomId = body.id;
+            chatRoomId = body.chatRoomId;
 
             subscription = stompClient.subscribe(
                 `/topic/chatroom/${chatRoomId}`,
