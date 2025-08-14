@@ -103,15 +103,15 @@ public class UserSteps {
             () -> assertThat(response.jsonPath().getList("genders")).isNotEmpty(),
             () -> assertThat(response.jsonPath().getList("universities")).isNotEmpty(),
             () -> assertThat(response.jsonPath().getList("positions")).isNotEmpty(),
-            () -> assertThat(response.jsonPath().getList("mbtis")).isNotEmpty(),
+            () -> assertThat(response.jsonPath().getList("mbti")).isNotEmpty(),
             () -> assertThat(response.jsonPath().getString("genders[0].code")).isNotNull(),
             () -> assertThat(response.jsonPath().getString("genders[0].name")).isNotNull(),
             () -> assertThat(response.jsonPath().getString("universities[0].code")).isNotNull(),
             () -> assertThat(response.jsonPath().getString("universities[0].name")).isNotNull(),
             () -> assertThat(response.jsonPath().getString("positions[0].code")).isNotNull(),
             () -> assertThat(response.jsonPath().getString("positions[0].name")).isNotNull(),
-            () -> assertThat(response.jsonPath().getString("mbtis[0].code")).isNotNull(),
-            () -> assertThat(response.jsonPath().getString("mbtis[0].name")).isNotNull()
+            () -> assertThat(response.jsonPath().getString("mbti[0].code")).isNotNull(),
+            () -> assertThat(response.jsonPath().getString("mbti[0].name")).isNotNull()
         );
     }
 

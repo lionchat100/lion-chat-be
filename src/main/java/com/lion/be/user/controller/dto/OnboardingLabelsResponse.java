@@ -6,7 +6,7 @@ public record OnboardingLabelsResponse(
 	List<GenderOption> genders,
 	List<UniversityOption> universities,
 	List<PositionOption> positions,
-	List<MbtiOption> mbtis,
+	List<MbtiOption> mbti,
 	List<PreferenceTypeOption> preferenceType
 ) {
 	public record GenderOption(String code, String name) {}
