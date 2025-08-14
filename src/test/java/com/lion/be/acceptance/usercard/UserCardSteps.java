@@ -63,7 +63,7 @@ public class UserCardSteps {
 			.auth().oauth2(accessToken)
 			.log().all()
 			.when()
-			.get("/api/users/card")
+			.get("/api/users/profile")
 			.then()
 			.log().all()
 			.extract();
@@ -123,7 +123,7 @@ public class UserCardSteps {
 		Assertions.assertAll(
 			() -> assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value()),
 			() -> assertThat(response.jsonPath().getLong("userId")).isNotNull(),
-			() -> assertThat(response.jsonPath().getString("name")).isNotEmpty(),
+			() -> assertThat(response.jsonPath().getString("nickname")).isNotEmpty(),
 			() -> assertThat(response.jsonPath().getString("university")).isNotEmpty(),
 			() -> assertThat(response.jsonPath().getBoolean("isUniversityVisible")).isNotNull(),
 			() -> assertThat(response.jsonPath().getString("position")).isNotEmpty(),
@@ -245,7 +245,7 @@ public class UserCardSteps {
 		// 필수 필드들이 모두 있는지 확인
 		Assertions.assertAll(
 			() -> assertThat(firstCard.get("userId")).isNotNull(),
-			() -> assertThat(firstCard.get("name")).isNotNull(),
+			() -> assertThat(firstCard.get("nickname")).isNotNull(),
 			() -> assertThat(firstCard.get("university")).isNotNull(),
 			() -> assertThat(firstCard.get("isUniversityVisible")).isNotNull(),
 			() -> assertThat(firstCard.get("position")).isNotNull(),

@@ -18,14 +18,14 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/users/card")
+@RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserCardController {
 
 	private final UserCardReadService userCardReadService;
 
-	@GetMapping
-	public ResponseEntity<UserCardResponse> getUserCards(
+	@GetMapping("/profile")
+	public ResponseEntity<UserCardResponse> getMyCards(
 		@AuthenticationPrincipal UserPrincipal userPrincipal
 		){
 		UserCardResponse cards = userCardReadService.getMyCards(
@@ -34,7 +34,7 @@ public class UserCardController {
 		return ResponseEntity.ok(cards);
 	}
 
-	@GetMapping("/list")
+	@GetMapping("/card/list")
 	public ResponseEntity<List<UserCardResponse>> getCards(
 		@AuthenticationPrincipal UserPrincipal userPrincipal,
 		@RequestParam(defaultValue = "10") int size,

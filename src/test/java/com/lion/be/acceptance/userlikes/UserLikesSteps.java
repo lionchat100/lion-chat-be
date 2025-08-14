@@ -114,7 +114,7 @@ public class UserLikesSteps {
 			Map<String, Object> firstUser = likedUsers.get(0);
 
 			assertThat(firstUser.get("userId")).isNotNull();
-			assertThat(firstUser.get("name")).isNotNull();
+			assertThat(firstUser.get("nickname")).isNotNull();
 			assertThat(firstUser.get("university")).isNotNull();
 			assertThat(firstUser.get("position")).isNotNull();
 			assertThat(firstUser.get("imageUrls")).isNotNull();
@@ -130,7 +130,7 @@ public class UserLikesSteps {
 
 		for (Map<String, Object> card : cards) {
 			assertThat(card.get("userId")).isNotNull();
-			assertThat((String) card.get("name")).isNotEmpty();
+			assertThat((String) card.get("nickname")).isNotEmpty();
 			assertThat(card.get("university")).isNotNull();
 			assertThat(card.get("isUniversityVisible")).isNotNull();
 			assertThat((String) card.get("position")).isNotEmpty();

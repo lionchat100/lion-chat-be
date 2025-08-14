@@ -8,5 +8,5 @@ import lombok.Getter;
 public class LikeCreatedEvent {
 	private final Long fromUserId;
 	private final Long toUserId;
-	private final String fromUserName;
+	private final String fromUserNickname;
 }
