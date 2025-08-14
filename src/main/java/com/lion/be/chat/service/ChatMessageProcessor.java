@@ -33,7 +33,7 @@ public class ChatMessageProcessor implements MessageProcessor {
         messagePublisher.publishMessage(savedMessage);
         log.info("채팅 메시지 발행 완료: {}", savedMessage);
 
-        messagePersistence.updateMessageStatus(savedMessage.getId(), MessageStatus.SENT);
+        messagePersistence.updateMessageStatus(savedMessage.getId(), MessageStatus.DELIVERED);
     }
 
     /**
