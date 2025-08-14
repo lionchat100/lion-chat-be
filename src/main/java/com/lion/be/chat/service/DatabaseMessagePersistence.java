@@ -13,7 +13,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.ZonedDateTime;
@@ -130,10 +132,17 @@ public class DatabaseMessagePersistence implements MessagePersistence {
     }
 
     @Override
-    public List<ChatMessageResponse> findMessagesByIdAndLastId(Long roomId, Long lastId, Pageable pageable) {
+    public List<ChatMessageResponse> findMessagesByIdAndLastId(Long roomId, Long lastId) {
         chatRoomRepository.findById(roomId).ifPresent(ChatRoom::markAsRead);
 
-        Page<ChatMessage> messages = chatMessageRepository.findMessagesByIdAndLastId(roomId, lastId, pageable);
+        int pageSize = 30;
+        Pageable pageable = PageRequest.of(
+                lastId.intValue() / pageSize,
+                pageSize,
+                Sort.by("createdAt").descending()
+        );
+
+        Page<ChatMessage> messages = chatMessageRepository.findMessagesByIdAndLastId(roomId, pageable);
         boolean isEnd = messages.hasNext();
         Set<Long> senderIds = messages.stream()
                 .map(ChatMessage::getSenderId)

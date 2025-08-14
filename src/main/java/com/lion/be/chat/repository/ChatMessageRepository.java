@@ -29,6 +29,6 @@ public interface ChatMessageRepository extends MongoRepository<ChatMessage, Obje
      * @param pageable 페이징 정보
      * @return 메시지 목록
      */
-    @Query("{ 'chatRoomId': ?0, '$expr': { '$cond': { 'if': { '$eq': [?1, 0] }, 'then': true, 'else': { '$gt': ['$id', ?1] } } } }")
-    Page<ChatMessage> findMessagesByIdAndLastId(Long roomId, Long lastId, Pageable pageable);
+    @Query("{ 'chatRoomId': ?0 }")
+    Page<ChatMessage> findMessagesByIdAndLastId(Long roomId, Pageable pageable);
 }

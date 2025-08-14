@@ -50,7 +50,7 @@ public interface MessagePersistence {
      * @param pageable 페이징 정보
      * @return 메시지 목록
      */
-    List<ChatMessageResponse> findMessagesByIdAndLastId(Long roomId, Long lastId, Pageable pageable);
+    List<ChatMessageResponse> findMessagesByIdAndLastId(Long roomId, Long lastId);
 
 }
 
