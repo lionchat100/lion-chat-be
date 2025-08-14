@@ -16,7 +16,7 @@ public interface FeedCommentJpaRepository extends JpaRepository<FeedComment, Lon
             + ") " +
             "FROM FeedComment c " +
             "JOIN c.user u " +
-            "WHERE c.feed.id = :feedId AND c.isDeleted = false")
+            "WHERE c.feed.id = :feedId AND c.isDeleted = false AND u.role != 'BANNED'")
     Slice<FeedCommentResponse> fetchAllByFeedId(@Param("feedId") Long feedId, Pageable pageable);
 
     @Modifying

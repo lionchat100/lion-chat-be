@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.repository.query.Param;
 
-public interface FeedRepository extends JpaRepository<Feed, Long> {
+public interface FeedRepository extends JpaRepository<Feed, Long>, FeedRepositoryCustom {
     //첫 전체 조회
     @Query("""
             SELECT new com.lion.be.feed.domain.dto.FeedResponse(
@@ -21,7 +21,7 @@ public interface FeedRepository extends JpaRepository<Feed, Long> {
                 u.name, u.id, u.imageUrl
             )
             FROM Feed f JOIN f.user u
-            WHERE f.isDeleted = false
+            WHERE f.isDeleted = false and u.role != 'BANNED'
             """)
     Slice<FeedResponse> fetchRecentFeedsFirst(Pageable pageable);
 
@@ -36,7 +36,7 @@ public interface FeedRepository extends JpaRepository<Feed, Long> {
                 u.name, u.id, u.imageUrl
             )
             FROM Feed f JOIN f.user u
-            WHERE f.isDeleted = false AND f.id < :lastId
+            WHERE f.isDeleted = false AND f.id < :lastId and u.role != 'BANNED'
             """)
     Slice<FeedResponse> fetchRecentFeedsAfter(Long lastId, Pageable pageable);
 
@@ -48,7 +48,7 @@ public interface FeedRepository extends JpaRepository<Feed, Long> {
                 u.name, u.id, u.imageUrl
             )
             FROM Feed f JOIN f.user u
-            WHERE f.isDeleted = false
+            WHERE f.isDeleted = false and u.role != 'BANNED'
             ORDER BY f.likeCount DESC, f.id DESC
             """)
     Slice<FeedResponse> fetchHotFeedsFirst(Pageable pageable);
@@ -61,7 +61,7 @@ public interface FeedRepository extends JpaRepository<Feed, Long> {
                 u.name, u.id, u.imageUrl
             )
             FROM Feed f JOIN f.user u
-            WHERE f.isDeleted = false
+            WHERE f.isDeleted = false and u.role != 'BANNED'
             AND (f.likeCount < :lastLikeCount OR (f.likeCount = :lastLikeCount AND f.id < :lastId))
             ORDER BY f.likeCount DESC, f.id DESC
             """)
