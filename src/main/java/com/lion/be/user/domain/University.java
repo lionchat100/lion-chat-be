@@ -1,5 +1,8 @@
 package com.lion.be.user.domain;
 
+import java.util.Arrays;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 import lombok.Getter;
@@ -65,5 +68,25 @@ public enum University {
 	@JsonValue
 	public String getKoreanName() {
 		return koreanName;
+	}
+
+	@JsonCreator
+	public static University fromValue(String value) {
+		if (value == null || value.trim().isEmpty()) {
+			throw new IllegalArgumentException("University value cannot be null or empty");
+		}
+
+		// 한국어 이름으로 매칭
+		return Arrays.stream(values())
+			.filter(university -> university.getKoreanName().equals(value))
+			.findFirst()
+			.orElseGet(() -> {
+				// 영어 이름으로도 시도
+				try {
+					return valueOf(value.toUpperCase());
+				} catch (IllegalArgumentException e) {
+					throw new IllegalArgumentException("Invalid university: " + value);
+				}
+			});
 	}
 }

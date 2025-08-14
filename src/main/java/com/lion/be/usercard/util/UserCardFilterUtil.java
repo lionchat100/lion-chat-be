@@ -226,10 +226,10 @@ public class UserCardFilterUtil {
 	}
 
 	/**
-	 * 벡터 기반 클러스터 맵 생성 (애플리케이션 시작 시 1회 실행)
+	 * 벡터 기반 클러스터 맵 생성 (AI 포지션 추가로 10차원으로 확장)
 	 *
 	 * 동작 과정:
-	 * 1. 모든 MBTI × Position 조합(80가지)의 9차원 벡터 계산
+	 * 1. 모든 MBTI × Position 조합(96가지)의 10차원 벡터 계산
 	 * 2. 사전 정의된 클러스터 중심점과 코사인 유사도 계산
 	 * 3. 가장 유사한 클러스터에 배정
 	 *
@@ -239,22 +239,22 @@ public class UserCardFilterUtil {
 		Map<String, Integer> clusterMap = new HashMap<>();
 		UserVectorizer vectorizer = new UserVectorizer(); // 임시 인스턴스
 
-		// 1단계: 모든 조합의 9차원 벡터 계산
+		// 1단계: 모든 조합의 10차원 벡터 계산 (AI 포지션 추가로 차원 확장)
 		Map<String, double[]> vectorMap = new HashMap<>();
 		for (Mbti mbti : Mbti.values()) {
 			for (Position position : Position.values()) {
 				String key = mbti.name() + "_" + position.name();
 
-				// UserVectorizer의 기존 벡터화 로직 활용
-				double[] vector = new double[9];
+				// UserVectorizer의 기존 벡터화 로직 활용 (10차원으로 확장)
+				double[] vector = new double[10]; // 9차원 → 10차원
 
 				// MBTI 4차원 추가
 				double[] mbtiBinary = vectorizer.getMbtiBinary(mbti);
 				System.arraycopy(mbtiBinary, 0, vector, 0, 4);
 
-				// Position 5차원 추가
+				// Position 6차원 추가 (AI 포지션 추가)
 				double[] positionVector = vectorizer.getPositionVector(position);
-				System.arraycopy(positionVector, 0, vector, 4, 5);
+				System.arraycopy(positionVector, 0, vector, 4, 6); // 5 → 6으로 변경
 
 				vectorMap.put(key, vector);
 			}
@@ -304,17 +304,17 @@ public class UserCardFilterUtil {
 	}
 
 	/**
-	 * 클러스터 중심점 정의 (클러스터 구성 변경 시 이 메서드만 수정)
+	 * 클러스터 중심점 정의 (AI 포지션 추가로 10차원으로 확장)
 	 *
-	 * 9차원 벡터 구조: [E/I, S/N, T/F, J/P, BACKEND, FRONTEND, UX_UI, PM, FULLSTACK]
+	 * 10차원 벡터 구조: [E/I, S/N, T/F, J/P, BACKEND, FRONTEND, UX_UI, PM, FULLSTACK, AI]
 	 *
 	 * 각 클러스터는 특정 성향의 개발자 그룹을 대표:
-	 * - 클러스터 0: 분석적 백엔드 개발자 (NT + BACKEND/FULLSTACK)
+	 * - 클러스터 0: 분석적 백엔드 개발자 (NT + BACKEND/FULLSTACK/AI)
 	 * - 클러스터 1: 창의적 프론트엔드 개발자 (NF + FRONTEND/UX)
 	 * - 클러스터 2: 실용적 개발자 (ST + BACKEND/FRONTEND)
 	 * - 클러스터 3: 소통형 개발자 (SF + 협업 중심)
 	 * - 클러스터 4: PM 특화 (모든 MBTI + PM)
-	 * - 클러스터 5: 풀스택 특화 (E + FULLSTACK)
+	 * - 클러스터 5: 풀스택/AI 특화 (E + FULLSTACK/AI)
 	 *
 	 * @return 클러스터 ID → 중심점 벡터 맵
 	 */
@@ -322,46 +322,46 @@ public class UserCardFilterUtil {
 		Map<Integer, double[]> centroids = new HashMap<>();
 
 		/**
-		 * 클러스터 0: NT 계열 + 백엔드/풀스택 (분석적 개발자)
-		 * [E/I, S/N, T/F, J/P, BACKEND, FRONTEND, UX_UI, PM, FULLSTACK]
-		 * [0,   0,   1,   0.5,  0.9,     0.3,      0.1,   0.2, 0.8]
+		 * 클러스터 0: NT 계열 + 백엔드/풀스택/AI (분석적 개발자)
+		 * [E/I, S/N, T/F, J/P, BACKEND, FRONTEND, UX_UI, PM, FULLSTACK, AI]
+		 * [0,   0,   1,   0.5,  0.9,     0.3,      0.1,   0.2, 0.8,       0.9]
 		 */
-		centroids.put(0, new double[]{0, 0, 1, 0.5, 0.9, 0.3, 0.1, 0.2, 0.8});
+		centroids.put(0, new double[]{0, 0, 1, 0.5, 0.9, 0.3, 0.1, 0.2, 0.8, 0.9});
 
 		/**
 		 * 클러스터 1: NF 계열 + 프론트엔드/UX (창의적 개발자)
-		 * [E/I, S/N, T/F, J/P, BACKEND, FRONTEND, UX_UI, PM, FULLSTACK]
-		 * [0.5, 0,   0,   0,   0.3,     0.8,      0.8,   0.3, 0.6]
+		 * [E/I, S/N, T/F, J/P, BACKEND, FRONTEND, UX_UI, PM, FULLSTACK, AI]
+		 * [0.5, 0,   0,   0,   0.3,     0.8,      0.8,   0.3, 0.6,       0.4]
 		 */
-		centroids.put(1, new double[]{0.5, 0, 0, 0, 0.3, 0.8, 0.8, 0.3, 0.6});
+		centroids.put(1, new double[]{0.5, 0, 0, 0, 0.3, 0.8, 0.8, 0.3, 0.6, 0.4});
 
 		/**
 		 * 클러스터 2: ST 계열 + 백엔드/프론트 (실용적 개발자)
-		 * [E/I, S/N, T/F, J/P, BACKEND, FRONTEND, UX_UI, PM, FULLSTACK]
-		 * [0.5, 1,   1,   1,   0.7,     0.7,      0.2,   0.2, 0.7]
+		 * [E/I, S/N, T/F, J/P, BACKEND, FRONTEND, UX_UI, PM, FULLSTACK, AI]
+		 * [0.5, 1,   1,   1,   0.7,     0.7,      0.2,   0.2, 0.7,       0.6]
 		 */
-		centroids.put(2, new double[]{0.5, 1, 1, 1, 0.7, 0.7, 0.2, 0.2, 0.7});
+		centroids.put(2, new double[]{0.5, 1, 1, 1, 0.7, 0.7, 0.2, 0.2, 0.7, 0.6});
 
 		/**
 		 * 클러스터 3: SF 계열 + 협업 중심 (소통형 개발자)
-		 * [E/I, S/N, T/F, J/P, BACKEND, FRONTEND, UX_UI, PM, FULLSTACK]
-		 * [1,   1,   0,   1,   0.3,     0.6,      0.6,   0.4, 0.5]
+		 * [E/I, S/N, T/F, J/P, BACKEND, FRONTEND, UX_UI, PM, FULLSTACK, AI]
+		 * [1,   1,   0,   1,   0.3,     0.6,      0.6,   0.4, 0.5,       0.3]
 		 */
-		centroids.put(3, new double[]{1, 1, 0, 1, 0.3, 0.6, 0.6, 0.4, 0.5});
+		centroids.put(3, new double[]{1, 1, 0, 1, 0.3, 0.6, 0.6, 0.4, 0.5, 0.3});
 
 		/**
 		 * 클러스터 4: PM 특화 (모든 MBTI + PM)
-		 * [E/I, S/N, T/F, J/P, BACKEND, FRONTEND, UX_UI, PM, FULLSTACK]
-		 * [0.5, 0.5, 0.5, 1,   0.2,     0.3,      0.4,   1.0, 0.3]
+		 * [E/I, S/N, T/F, J/P, BACKEND, FRONTEND, UX_UI, PM, FULLSTACK, AI]
+		 * [0.5, 0.5, 0.5, 1,   0.2,     0.3,      0.4,   1.0, 0.3,       0.4]
 		 */
-		centroids.put(4, new double[]{0.5, 0.5, 0.5, 1, 0.2, 0.3, 0.4, 1.0, 0.3});
+		centroids.put(4, new double[]{0.5, 0.5, 0.5, 1, 0.2, 0.3, 0.4, 1.0, 0.3, 0.4});
 
 		/**
-		 * 클러스터 5: 풀스택 특화 (E 계열 + FULLSTACK)
-		 * [E/I, S/N, T/F, J/P, BACKEND, FRONTEND, UX_UI, PM, FULLSTACK]
-		 * [1,   0.5, 0.5, 0.5, 0.8,     0.7,      0.4,   0.3, 1.0]
+		 * 클러스터 5: 풀스택/AI 특화 (E 계열 + FULLSTACK/AI)
+		 * [E/I, S/N, T/F, J/P, BACKEND, FRONTEND, UX_UI, PM, FULLSTACK, AI]
+		 * [1,   0.5, 0.5, 0.5, 0.8,     0.7,      0.4,   0.3, 1.0,       0.9]
 		 */
-		centroids.put(5, new double[]{1, 0.5, 0.5, 0.5, 0.8, 0.7, 0.4, 0.3, 1.0});
+		centroids.put(5, new double[]{1, 0.5, 0.5, 0.5, 0.8, 0.7, 0.4, 0.3, 1.0, 0.9});
 
 		return centroids;
 	}
