@@ -1,11 +1,10 @@
 package com.lion.be.global.aop;
 
 import com.lion.be.auth.domain.UserPrincipal;
-import com.lion.be.chat.domain.dto.ChatMessageRequest;
+import com.lion.be.chat.message.domain.dto.ChatMessageRequest;
 import com.lion.be.global.exception.CustomException;
 import com.lion.be.global.exception.ErrorCode;
 import com.lion.be.global.service.RateLimitingService;
-import com.lion.be.user.service.UserReadService;
 import io.github.bucket4j.Bucket;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;

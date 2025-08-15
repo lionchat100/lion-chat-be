@@ -1,8 +1,8 @@
 package com.lion.be.controller;
 
 import com.lion.be.auth.domain.UserPrincipal;
-import com.lion.be.chat.domain.dto.ChatMessageRequest;
-import com.lion.be.chat.service.MessageProcessor;
+import com.lion.be.chat.message.domain.dto.ChatMessageRequest;
+import com.lion.be.chat.message.service.MessageProcessor;
 import com.lion.be.global.aop.CheckRateLimitChat;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
