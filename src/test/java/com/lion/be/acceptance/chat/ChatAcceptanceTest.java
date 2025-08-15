@@ -134,7 +134,7 @@ public class ChatAcceptanceTest extends AcceptanceTest {
             채팅방에_메시지를_전송한다(사용자1_토큰, chatRoomId, "반갑습니다.", spec);
 
             // when
-            var response = 채팅방의_초기_메시지_목록을_조회한다(사용자1_토큰, chatRoomId, spec);
+            var response = 채팅방의_초기_메시지_목록을_조회한다(사용자1_토큰, chatRoomId, 0L, spec);
 
             // then
             메시지_목록_조회_응답을_검증한다(response, 3, "반갑습니다.");

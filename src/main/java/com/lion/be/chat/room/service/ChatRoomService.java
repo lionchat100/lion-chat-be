@@ -27,7 +27,6 @@ public class ChatRoomService {
     private final UserRepository userRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomUserRepository chatRoomUserRepository;
-    private final ChatRoomQueryDslRepository chatRoomQueryDslRepository;
 
     @Transactional
     public Long findOrCreateChatRoom(Long senderId, Long receiverId) {
@@ -103,6 +102,6 @@ public class ChatRoomService {
      * @return 채팅방 리스트
      */
     public List<ChatRoomResponse> getChatRooms(Long userId) {
-        return chatRoomQueryDslRepository.findChatRoomResponsesByUserIdQueryDsl(userId);
+        return chatRoomRepository.findChatRoomListByUserId(userId);
     }
 }
