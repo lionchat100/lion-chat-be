@@ -59,22 +59,6 @@ public class ChatController {
     }
 
     /**
-     * 채팅방의 초기 메시지 목록을 조회합니다.
-     *
-     * @param roomId 채팅방 ID
-     * @return 최근 메시지 목록
-     */
-    @PreAuthorize("@chatRoomUserRepository.existsById_ChatRoomIdAndId_UserId(#roomId, #userPrincipal.id)")
-    @GetMapping("/messages")
-    public ResponseEntity<List<ChatMessageResponse>> getInitialMessages(
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @RequestParam Long roomId
-    ) {
-        List<ChatMessageResponse> messages = messagePersistence.findMessagesByIdAndLastId(roomId, 0L);
-        return ResponseEntity.ok(messages);
-    }
-
-    /**
      * 채팅방의 이전 메시지 내역을 조회합니다.
      *
      * @param roomId 채팅방 ID
@@ -86,7 +70,7 @@ public class ChatController {
     public ResponseEntity<List<ChatMessageResponse>> getMessageHistory(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestParam Long roomId,
-            @RequestParam Long lastId
+            @RequestParam(defaultValue = "0") Long lastId
     ) {
         List<ChatMessageResponse> messages = messagePersistence.findMessagesByIdAndLastId(roomId, lastId);
         return ResponseEntity.ok(messages);
