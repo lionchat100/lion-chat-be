@@ -1,8 +1,8 @@
 package com.lion.be.chat.room.repository;
 
-import com.lion.be.chat.room.domain.dto.ChatRoomResponse;
 import com.lion.be.chat.domain.entity.QChatRoom;
 import com.lion.be.chat.domain.entity.QChatRoomUser;
+import com.lion.be.chat.room.domain.dto.ChatRoomResponse;
 import com.lion.be.user.domain.entity.QUser;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
