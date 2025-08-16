@@ -35,19 +35,13 @@ public class ChatController {
      * @param lastId 마지막으로 조회한 메시지 ID
      * @return 이전 메시지 목록
      */
-    //@PreAuthorize("@chatRoomUserRepository.existsById_ChatRoomIdAndId_UserId(#roomId, #userPrincipal.id)")
+    @PreAuthorize("@chatRoomUserRepository.existsById_ChatRoomIdAndId_UserId(#roomId, #userPrincipal.id)")
     @GetMapping(value = "/messages")
     public ResponseEntity<List<ChatMessageResponse>> getMessageHistory(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestParam Long roomId,
             @RequestParam(required = false) String lastId
     ) {
-        //PreAuthorize 대체 로직
-        if(!chatRoomService.checkUserExistsInChatRoom(roomId, userPrincipal.getId())) {
-            log.info("사용자가 채팅방에 존재하지 않습니다. roomId: {}, userId: {}", roomId, userPrincipal.getId());
-            throw new CustomException(ErrorCode.USER_UNAUTHORIZED);
-        }
-
         List<ChatMessageResponse> messages = messageService.findMessagesByIdAndLastId(roomId, lastId);
         return ResponseEntity.ok(messages);
     }

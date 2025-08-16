@@ -59,8 +59,8 @@ public class MessageService {
         chatRoomUser.markAsRead();
         chatRoomUserRepository.save(chatRoomUser);
     }
-    
-    @Transactional //더티체킹 사용 시 필요
+
+    @Transactional
     public void updateReadStatus(String messageId, Long userId) {
         log.info("채팅 읽음, messageId: {}", messageId);
 
