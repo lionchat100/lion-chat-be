@@ -2,6 +2,7 @@ package com.lion.be.chat.room.repository;
 
 import com.lion.be.chat.room.domain.entity.ChatRoomUser;
 import com.lion.be.chat.room.domain.entity.ChatRoomUserId;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,14 +13,17 @@ import java.util.Set;
 
 @Repository
 public interface ChatRoomUserRepository extends JpaRepository<ChatRoomUser, ChatRoomUserId> {
-    @Query("SELECT cru FROM ChatRoomUser cru WHERE cru.id.chatRoomId = :chatRoomId")
+    @EntityGraph(attributePaths = {"user"}) //User에 대한 Fetch join을 통해 User 엔티티의 값을 N+1 없이 활용
+    @Query("SELECT DISTINCT cru FROM ChatRoomUser cru WHERE cru.id.chatRoomId = :chatRoomId")
     Set<ChatRoomUser> findById_ChatRoomId(@Param("chatRoomId") Long chatRoomId);
 
+    //Banned 유저 포함 시 실패하도록 한 채팅방 유저 조회
     @Query("""
             SELECT cru.chatRoom.id
             FROM ChatRoomUser cru
             WHERE cru.user.id IN (:userId1, :userId2)
             AND cru.chatRoom.isDeleted = false
+            AND cru.user.role <> 'BANNED'
             GROUP BY cru.chatRoom.id
             HAVING COUNT(DISTINCT cru.user.id) = 2
             """)

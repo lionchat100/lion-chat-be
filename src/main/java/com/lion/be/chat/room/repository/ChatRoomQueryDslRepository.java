@@ -3,6 +3,7 @@ package com.lion.be.chat.room.repository;
 import com.lion.be.chat.room.domain.dto.ChatRoomResponse;
 import com.lion.be.chat.room.domain.entity.QChatRoom;
 import com.lion.be.chat.room.domain.entity.QChatRoomUser;
+import com.lion.be.user.domain.Role;
 import com.lion.be.user.domain.entity.QUser;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -39,6 +40,7 @@ public class ChatRoomQueryDslRepository {
                 .where(
                         currentUserRoom.user.id.eq(userId)
                                 .and(otherUserRoom.user.id.ne(userId))
+                                .and(otherUserRoom.user.role.ne(Role.BANNED)) //상대방이 Banned 상태가 아니어야 함
                                 .and(chatRoom.isDeleted.isFalse())
                 )
                 .orderBy(chatRoom.recentMessageDt.desc().nullsLast())
