@@ -10,16 +10,15 @@ import com.lion.be.chat.room.domain.entity.ChatRoom;
 import com.lion.be.chat.room.domain.entity.ChatRoomUser;
 import com.lion.be.chat.room.repository.ChatRoomRepository;
 import com.lion.be.chat.room.repository.ChatRoomUserRepository;
+import com.lion.be.global.aop.ElapsedTime;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.repository.persistence.jpa.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -38,6 +37,7 @@ public class MessageService {
     private final MessageMapper mapper;
     private final MessageBroker messageBroker;
 
+    @Transactional
     public void sendMessage(ChatMessageRequest request, Long senderId) {
         log.info("메시지 요청 들어옴: {}, senderId: {}", request, senderId);
 
@@ -55,7 +55,8 @@ public class MessageService {
         chatRoom.updateRecentMessage(message.getContent(), message.getCreatedAt());
         log.info("채팅방 마지막 내용, 시간 업데이트됨: {}번 방", chatRoom.getId());
     }
-
+    
+    @Transactional //더티체킹 사용 시 필요
     public void updateReadStatus(String messageId, Long userId) {
         log.info("채팅 읽음, messageId: {}", messageId);
 
@@ -72,15 +73,22 @@ public class MessageService {
         log.info("채팅방 읽음상태 업데이트됨: {}번 방, userId: {}", message.getChatRoomId(), userId);
     }
 
-    public List<ChatMessageResponse> findMessagesByIdAndLastId(Long roomId, Long lastId) {
-        int pageSize = 30;
-        Pageable pageable = PageRequest.of(
-                lastId.intValue() / pageSize,
-                pageSize,
-                Sort.by("createdAt").descending()
-        );
+    public List<ChatMessageResponse> findMessagesByIdAndLastId(Long roomId, String lastId) {
+        //ObjectId를 사용하도록 변경
+        Pageable pageable =  PageRequest.of(0,
+                30,
+                Sort.by(Sort.Direction.DESC, "_id"));
 
-        Page<ChatMessage> messages = chatMessageRepository.findMessagesByIdAndLastId(roomId, pageable);
+        // lastId가 null이거나 유효하지 않은 경우 null로 처리
+        ObjectId lastObjectId = lastId != null && ObjectId.isValid(lastId) ? new ObjectId(lastId) : null;
+
+        Slice<ChatMessage> messages;
+        if(lastObjectId == null) {
+            messages = chatMessageRepository.findMessagesByIdAndLastId(roomId, pageable);
+        }else{
+            messages = chatMessageRepository.findMessagesByIdAndLastId(roomId, lastObjectId, pageable);
+        }
+
         boolean isEnd = messages.hasNext();
         Set<Long> senderIds = messages.stream()
                 .map(ChatMessage::getSenderId)
