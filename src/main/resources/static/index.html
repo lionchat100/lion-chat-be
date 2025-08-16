@@ -191,6 +191,8 @@
             chatRoomListForm.classList.add("d-none");
             chatRoom.classList.remove("d-none");
 
+            messagesArea.replaceChildren();
+
             const res = await fetch("/api/chatrooms/init", {
                 method: "POST",
                 headers: {
