@@ -13,7 +13,7 @@ import java.util.Set;
 
 @Repository
 public interface ChatRoomUserRepository extends JpaRepository<ChatRoomUser, ChatRoomUserId> {
-    @EntityGraph(attributePaths = {"user"}) //User에 대한 Fetch join을 통해 User 엔티티의 값을 N+1 없이 활용
+    @EntityGraph(attributePaths = {"user", "chatRoom"}) //User에 대한 Fetch join을 통해 User 엔티티의 값을 N+1 없이 활용
     @Query("SELECT DISTINCT cru FROM ChatRoomUser cru WHERE cru.id.chatRoomId = :chatRoomId")
     Set<ChatRoomUser> findById_ChatRoomId(@Param("chatRoomId") Long chatRoomId);
 

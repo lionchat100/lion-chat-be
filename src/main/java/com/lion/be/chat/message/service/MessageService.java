@@ -37,7 +37,6 @@ public class MessageService {
     private final MessageMapper mapper;
     private final MessageBroker messageBroker;
 
-    @Transactional
     public void sendMessage(ChatMessageRequest request, Long senderId) {
         log.info("메시지 요청 들어옴: {}, senderId: {}", request, senderId);
 
@@ -53,6 +52,7 @@ public class MessageService {
 
         ChatRoom chatRoom = chatRoomRepository.findById(message.getChatRoomId()).get();
         chatRoom.updateRecentMessage(message.getContent(), message.getCreatedAt());
+        chatRoomRepository.save(chatRoom);
         log.info("채팅방 마지막 내용, 시간 업데이트됨: {}번 방", chatRoom.getId());
 
         ChatRoomUser chatRoomUser = chatRoomUserRepository.findById_ChatRoomIdAndId_UserId(message.getChatRoomId(), senderId);
@@ -60,7 +60,6 @@ public class MessageService {
         chatRoomUserRepository.save(chatRoomUser);
     }
 
-    @Transactional
     public void updateReadStatus(String messageId, Long userId) {
         log.info("채팅 읽음, messageId: {}", messageId);
 
