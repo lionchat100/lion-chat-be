@@ -219,7 +219,7 @@
 
             const chats = await result.json();
             if (chats.length > 0) {
-                lastId = chats[0].id;
+                lastId = chats[0].messageId;
             }
             chats.forEach((message) => {
                 displayMessage(message);
@@ -286,8 +286,10 @@
 
         const chats = await result.json();
         if (chats.length > 0) {
-            lastId = chats.at(-1).id;
+            lastId = chats.at(-1).messageId;
         }
+
+        console.log(lastId);
 
         chats.reverse();
 
