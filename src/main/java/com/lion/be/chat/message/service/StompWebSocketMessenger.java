@@ -1,8 +1,6 @@
 package com.lion.be.chat.message.service;
 
-import com.lion.be.chat.room.domain.MessageStatus;
 import com.lion.be.chat.message.domain.dto.ChatMessageResponse;
-import com.lion.be.chat.message.domain.entity.ChatMessage;
 import com.lion.be.chat.message.repository.MessageMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,10 +12,9 @@ import java.util.List;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class WebSocketMessageDelivery implements MessageDelivery {
+public class StompWebSocketMessenger implements WebSocketMessenger {
 
     private final SimpMessagingTemplate messagingTemplate;
-    private final MessagePersistence messagePersistence;
     private final MessageMapper adapter;
 
     @Override
@@ -32,19 +29,5 @@ public class WebSocketMessageDelivery implements MessageDelivery {
                     userId, message.messageId(), e.getMessage());
             return false;
         }
-    }
-
-    @Override
-    public void deliverPendingMessages(Long userId) {
-        List<ChatMessage> pendingMessages = messagePersistence.getPendingMessages(userId);
-
-        for (ChatMessage message : pendingMessages) {
-            ChatMessageResponse response = adapter.toResponse(message, false);
-            if (deliverToClient(userId, response)) {
-                messagePersistence.updateMessageStatus(message.getId(), MessageStatus.DELIVERED);
-            }
-        }
-
-        log.info("Pending 메시지 {} 건 전송 완료: userId={}", pendingMessages.size(), userId);
     }
 }

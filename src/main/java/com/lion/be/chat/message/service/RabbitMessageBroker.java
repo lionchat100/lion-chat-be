@@ -1,5 +1,6 @@
 package com.lion.be.chat.message.service;
 
+import com.lion.be.chat.message.repository.ChatMessageRepository;
 import com.lion.be.chat.room.domain.MessageStatus;
 import com.lion.be.chat.message.domain.dto.ChatMessageResponse;
 import com.lion.be.chat.message.domain.entity.ChatMessage;
@@ -14,11 +15,11 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class RabbitMessagePublisher implements MessagePublisher {
+public class RabbitMessageBroker implements MessageBroker {
 
     private final RabbitTemplate rabbitTemplate;
-    private final MessageMapper adapter;
-    private final MessagePersistence messagePersistence;
+    private final MessageMapper mapper;
+    private final ChatMessageRepository chatMessageRepository;
 
     @PostConstruct
     @Override
@@ -31,8 +32,9 @@ public class RabbitMessagePublisher implements MessagePublisher {
 
                 log.warn("메시지 라우팅 실패: {}", response);
 
-                ChatMessage chatMessage = adapter.fromResponse(response);
-                messagePersistence.updateMessageStatus(chatMessage.getId(), MessageStatus.PENDING);
+                ChatMessage chatMessage = mapper.fromResponse(response);
+                chatMessage.updateMessageStatus(MessageStatus.PENDING);
+                chatMessageRepository.save(chatMessage);
 
             } catch (Exception e) {
                 log.error("실패한 메시지 처리 중 오류", e);
@@ -52,7 +54,7 @@ public class RabbitMessagePublisher implements MessagePublisher {
     public void publishMessage(ChatMessage message) {
         String routingKey = "chat.message." + message.getChatRoomId();
 
-        ChatMessageResponse response = adapter.toResponse(message, false);
+        ChatMessageResponse response = mapper.toResponse(message, false);
 
         rabbitTemplate.convertAndSend(
                 RabbitMQConfig.CHAT_EXCHANGE_NAME,

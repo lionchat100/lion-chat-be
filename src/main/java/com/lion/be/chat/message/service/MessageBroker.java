@@ -2,7 +2,7 @@ package com.lion.be.chat.message.service;
 
 import com.lion.be.chat.message.domain.entity.ChatMessage;
 
-public interface MessagePublisher {
+public interface MessageBroker {
 
     /**
      * 채팅 메시지를 외부 메시지 브로커 등으로 발행합니다.

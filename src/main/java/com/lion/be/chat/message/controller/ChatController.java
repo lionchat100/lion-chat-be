@@ -2,7 +2,7 @@ package com.lion.be.chat.message.controller;
 
 import com.lion.be.auth.domain.UserPrincipal;
 import com.lion.be.chat.message.domain.dto.ChatMessageResponse;
-import com.lion.be.chat.message.service.MessagePersistence;
+import com.lion.be.chat.message.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +21,7 @@ import java.util.List;
 @Slf4j
 public class ChatController {
 
-    private final MessagePersistence messagePersistence;
+    private final MessageService messageService;
 
     /**
      * 채팅방의 이전 메시지 내역을 조회합니다.
@@ -37,7 +37,7 @@ public class ChatController {
             @RequestParam Long roomId,
             @RequestParam(defaultValue = "0") Long lastId
     ) {
-        List<ChatMessageResponse> messages = messagePersistence.findMessagesByIdAndLastId(roomId, lastId);
+        List<ChatMessageResponse> messages = messageService.findMessagesByIdAndLastId(roomId, lastId);
         return ResponseEntity.ok(messages);
     }
 }

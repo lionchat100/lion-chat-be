@@ -14,23 +14,20 @@ import java.util.Set;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class ChatMessageListener {
+public class MessageConsumer {
 
     private final ChatRoomUserRepository chatRoomUserRepository;
-    private final MessageDelivery messageDelivery;
-    private final MessagePersistence messagePersistence;
+    private final WebSocketMessenger webSocketMessenger;
 
     @RabbitListener(queues = RabbitMQConfig.CHAT_QUEUE_NAME)
     public void handleMessage(ChatMessageResponse message) {
         log.info("메시지 수신: {}", message);
         Long senderId = message.senderId();
-        log.warn("여기에요!!!");
         Set<ChatRoomUser> chatRoomUsers = chatRoomUserRepository.findById_ChatRoomId(message.chatRoomId());
-        log.warn("여기라구요!!!");
         ChatRoomUser receiver = chatRoomUsers.stream()
                 .filter(user -> !user.getId().getUserId().equals(senderId))
                 .findFirst()
                 .orElse(null);
-        messageDelivery.deliverToClient(receiver.getId().getUserId(), message);
+        webSocketMessenger.deliverToClient(receiver.getId().getUserId(), message);
     }
 }
