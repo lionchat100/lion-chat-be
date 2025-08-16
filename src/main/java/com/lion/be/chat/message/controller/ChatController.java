@@ -31,7 +31,7 @@ public class ChatController {
      * @return 이전 메시지 목록
      */
     @PreAuthorize("@chatRoomUserRepository.existsById_ChatRoomIdAndId_UserId(#roomId, #userPrincipal.id)")
-    @GetMapping(value = "/messages", params = {"roomId", "lastId"})
+    @GetMapping("/messages")
     public ResponseEntity<List<ChatMessageResponse>> getMessageHistory(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestParam Long roomId,
