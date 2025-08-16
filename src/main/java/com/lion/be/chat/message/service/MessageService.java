@@ -54,6 +54,10 @@ public class MessageService {
         ChatRoom chatRoom = chatRoomRepository.findById(message.getChatRoomId()).get();
         chatRoom.updateRecentMessage(message.getContent(), message.getCreatedAt());
         log.info("채팅방 마지막 내용, 시간 업데이트됨: {}번 방", chatRoom.getId());
+
+        ChatRoomUser chatRoomUser = chatRoomUserRepository.findById_ChatRoomIdAndId_UserId(message.getChatRoomId(), senderId);
+        chatRoomUser.markAsRead();
+        chatRoomUserRepository.save(chatRoomUser);
     }
     
     @Transactional //더티체킹 사용 시 필요
