@@ -46,7 +46,7 @@ public class ChatRoomService {
             ChatRoomUser user2ChatRoomUser = ChatRoomUser.create(chatRoom, user2);
             chatRoomUserRepository.save(user1ChatRoomUser);
             chatRoomUserRepository.save(user2ChatRoomUser);
-
+            chatRoomRepository.save(chatRoom);
             log.info("새 채팅방을 생성합니다. ChatRoomId: {}", chatRoom.getId());
 
             return chatRoom.getId();

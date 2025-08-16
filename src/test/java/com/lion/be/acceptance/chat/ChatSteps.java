@@ -105,9 +105,9 @@ public class ChatSteps {
         Assertions.assertAll(
                 () -> assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value()),
                 () -> assertThat(chatRooms).hasSize(expectedSize),
-                () -> assertThat(chatRooms.get(0).get("name").toString()).isEqualTo(expectedFirstName),
-                () -> assertThat(chatRooms.get(0).get("chatRoomId")).isNotNull(),
-                () -> assertThat(chatRooms.get(0)).containsKey("lastContent")
+                () -> assertThat(chatRooms.get(1).get("name").toString()).isEqualTo(expectedFirstName),
+                () -> assertThat(chatRooms.get(1).get("chatRoomId")).isNotNull(),
+                () -> assertThat(chatRooms.get(1)).containsKey("lastContent")
         );
     }
 
