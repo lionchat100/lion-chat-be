@@ -1,6 +1,8 @@
 package com.lion.be.chat.message.domain.entity;
 
+import com.lion.be.chat.message.domain.dto.ChatMessageResponse;
 import com.lion.be.chat.room.domain.MessageStatus;
+import com.lion.be.user.domain.entity.User;
 import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,32 +34,12 @@ public class ChatMessage {
     private MessageStatus status;
 
     public ChatMessage(
-            ObjectId id,
             Long senderId,
             String senderName,
             Long chatRoomId,
             ZonedDateTime createdAt,
             String content,
-            Boolean isRead,
-            MessageStatus status
-    ) {
-        this.id = id;
-        this.senderId = senderId;
-        this.senderName = senderName;
-        this.chatRoomId = chatRoomId;
-        this.createdAt = createdAt;
-        this.content = content;
-        this.isRead = isRead;
-        this.status = status;
-    }
-
-    public ChatMessage(
-            Long senderId,
-            String senderName,
-            Long chatRoomId,
-            ZonedDateTime createdAt,
-            String content,
-            Boolean isRead,
+            boolean isRead,
             MessageStatus status
     ) {
         this.senderId = senderId;
@@ -69,13 +51,11 @@ public class ChatMessage {
         this.status = status;
     }
 
-    public void markAsRead(ObjectId messageId) {
-        this.id= messageId;
+    public void markAsRead() {
         this.isRead = true;
-        updateStatus(MessageStatus.DELIVERED);
     }
 
-    public void updateStatus(MessageStatus status) {
+    public void updateMessageStatus(MessageStatus status) {
         this.status = status;
     }
 }

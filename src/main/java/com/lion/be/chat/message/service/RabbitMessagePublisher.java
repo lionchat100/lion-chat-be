@@ -3,7 +3,7 @@ package com.lion.be.chat.message.service;
 import com.lion.be.chat.room.domain.MessageStatus;
 import com.lion.be.chat.message.domain.dto.ChatMessageResponse;
 import com.lion.be.chat.message.domain.entity.ChatMessage;
-import com.lion.be.chat.message.repository.MessageEntityAdapter;
+import com.lion.be.chat.message.repository.MessageMapper;
 import com.lion.be.global.config.RabbitMQConfig;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 public class RabbitMessagePublisher implements MessagePublisher {
 
     private final RabbitTemplate rabbitTemplate;
-    private final MessageEntityAdapter adapter;
+    private final MessageMapper adapter;
     private final MessagePersistence messagePersistence;
 
     @PostConstruct

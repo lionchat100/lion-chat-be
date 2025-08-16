@@ -1,9 +1,9 @@
 package com.lion.be.chat.message.repository;
 
-import com.lion.be.chat.room.domain.MessageStatus;
 import com.lion.be.chat.message.domain.dto.ChatMessageRequest;
 import com.lion.be.chat.message.domain.dto.ChatMessageResponse;
 import com.lion.be.chat.message.domain.entity.ChatMessage;
+import com.lion.be.chat.room.domain.MessageStatus;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,7 @@ import java.time.ZonedDateTime;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class MessageEntityAdapter {
+public class MessageMapper {
 
     private final UserRepository userRepository;
     private final UserRepository userRoomRepository;
@@ -31,15 +31,16 @@ public class MessageEntityAdapter {
                 ZonedDateTime.now(),
                 request.content(),
                 false,
-                MessageStatus.DELIVERED
+                MessageStatus.PENDING
         );
     }
 
-    public ChatMessage fromResponse(ChatMessageResponse response) {
+    public ChatMessage fromResponse(
+            ChatMessageResponse response
+    ) {
         return new ChatMessage(
-                new ObjectId(response.messageId()),
                 response.senderId(),
-                userRoomRepository.findById(response.senderId()).getName(),
+                userRepository.findById(response.senderId()).getName(),
                 response.chatRoomId(),
                 response.createdAt(),
                 response.content(),

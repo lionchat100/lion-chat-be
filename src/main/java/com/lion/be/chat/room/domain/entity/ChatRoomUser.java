@@ -11,7 +11,7 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @Entity
 @Getter
@@ -35,25 +35,23 @@ public class ChatRoomUser {
     @MapsId("userId")
     private User user;
 
-    private Boolean isRead;
+    private Boolean isRead = false;
 
-    private LocalDateTime regDt;
+    private ZonedDateTime regDt;
 
-    public ChatRoomUser(
-            ChatRoom chatRoom,
-            User user,
-            Boolean isRead
-    ) {
+    private ChatRoomUser(ChatRoom chatRoom, User user) {
         this.id = new ChatRoomUserId(chatRoom.getId(), user.getId());
         this.chatRoom = chatRoom;
         this.user = user;
-        this.isRead = isRead;
-        this.regDt = LocalDateTime.now();
+        this.isRead = true; // 새로 생성 시 읽음 상태로 설정
+        this.regDt = ZonedDateTime.now();
     }
 
-    public ChatRoomUser(Boolean isRead) {
-        this.isRead = isRead;
-        this.regDt = LocalDateTime.now();
+    public static ChatRoomUser create(ChatRoom chatRoom, User user) {
+        return new ChatRoomUser(chatRoom, user);
     }
 
+    public void markAsRead() {
+        this.isRead = true;
+    }
 }

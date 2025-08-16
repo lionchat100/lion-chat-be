@@ -1,13 +1,13 @@
 package com.lion.be.chat.message.service;
 
-import com.lion.be.chat.room.domain.MessageStatus;
 import com.lion.be.chat.message.domain.dto.ChatMessageResponse;
 import com.lion.be.chat.message.domain.entity.ChatMessage;
-import com.lion.be.chat.room.domain.entity.ChatRoom;
 import com.lion.be.chat.message.repository.ChatMessageRepository;
+import com.lion.be.chat.room.domain.MessageStatus;
+import com.lion.be.chat.room.domain.entity.ChatRoomUser;
 import com.lion.be.chat.room.repository.ChatRoomRepository;
+import com.lion.be.chat.room.repository.ChatRoomUserRepository;
 import com.lion.be.user.domain.entity.User;
-import com.lion.be.user.repository.UserRepository;
 import com.lion.be.user.repository.persistence.jpa.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,9 +29,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DatabaseMessagePersistence implements MessagePersistence {
 
-    private final UserRepository userRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
+    private final ChatRoomUserRepository chatRoomUserRepository;
     private final UserJpaRepository userJpaRepository;
 
     /**
@@ -53,7 +53,11 @@ public class DatabaseMessagePersistence implements MessagePersistence {
                 .ifPresentOrElse(
                         room -> {
                             room.updateRecentMessage(message.getContent(), ZonedDateTime.now());
-                            room.markAsRead();
+                            Set<ChatRoomUser> chatRoomUsers = chatRoomUserRepository.findById_ChatRoomId(room.getId());
+                            ChatRoomUser receiverChatRoomUser = chatRoomUsers.stream()
+                                    .filter(cru -> !cru.getUser().getId().equals(message.getSenderId()))
+                                    .findFirst().get();
+                            receiverChatRoomUser.markAsRead();
                             chatRoomRepository.save(room);
                         }, () -> log.warn("채팅방을 찾을 수 없습니다. ChatRoomId: {}", message.getChatRoomId())
                 );
@@ -76,7 +80,7 @@ public class DatabaseMessagePersistence implements MessagePersistence {
     public void updateMessageStatus(ObjectId messageId, MessageStatus status) {
         chatMessageRepository.findById(messageId).ifPresentOrElse(
                 entity -> {
-                    entity.updateStatus(status);
+                    entity.updateMessageStatus(status);
                     log.debug("메시지 상태 업데이트: messageId={}, status={}", messageId, status);
                 },
                 () -> log.warn("메시지를 찾을 수 없습니다. MessageId: {}", messageId)
@@ -99,13 +103,13 @@ public class DatabaseMessagePersistence implements MessagePersistence {
     @Override
     public void markAsRead(String messageId, Long userId) {
         chatMessageRepository.findById(new ObjectId(messageId)).ifPresentOrElse(
-                entity -> {
-                    if (!entity.getSenderId().equals(userId)) {
-                        ChatMessage updatedMessage = new ChatMessage();
-                        updatedMessage.markAsRead(
-                                entity.getId()
-                        );
-                        chatMessageRepository.save(updatedMessage);
+                message -> {
+                    if (!message.getSenderId().equals(userId)) {
+                        Set<ChatRoomUser> chatRoomUsers = chatRoomUserRepository.findById_ChatRoomId(message.getChatRoomId());
+                        ChatRoomUser receiverChatRoomUser = chatRoomUsers.stream()
+                                .filter(cru -> !cru.getUser().getId().equals(message.getSenderId()))
+                                .findFirst().get();
+                        receiverChatRoomUser.markAsRead();
                         log.info("메시지 읽음 처리 완료: messageId={}, userId={}", messageId, userId);
                     } else {
                         log.debug("발신자는 자신의 메시지를 읽음 처리할 수 없습니다: messageId={}, userId={}", messageId, userId);
@@ -133,8 +137,6 @@ public class DatabaseMessagePersistence implements MessagePersistence {
 
     @Override
     public List<ChatMessageResponse> findMessagesByIdAndLastId(Long roomId, Long lastId) {
-        chatRoomRepository.findById(roomId).ifPresent(ChatRoom::markAsRead);
-
         int pageSize = 30;
         Pageable pageable = PageRequest.of(
                 lastId.intValue() / pageSize,

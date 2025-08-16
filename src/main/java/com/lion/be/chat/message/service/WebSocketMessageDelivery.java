@@ -3,7 +3,7 @@ package com.lion.be.chat.message.service;
 import com.lion.be.chat.room.domain.MessageStatus;
 import com.lion.be.chat.message.domain.dto.ChatMessageResponse;
 import com.lion.be.chat.message.domain.entity.ChatMessage;
-import com.lion.be.chat.message.repository.MessageEntityAdapter;
+import com.lion.be.chat.message.repository.MessageMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -18,7 +18,7 @@ public class WebSocketMessageDelivery implements MessageDelivery {
 
     private final SimpMessagingTemplate messagingTemplate;
     private final MessagePersistence messagePersistence;
-    private final MessageEntityAdapter adapter;
+    private final MessageMapper adapter;
 
     @Override
     public boolean deliverToClient(Long userId, ChatMessageResponse message) {

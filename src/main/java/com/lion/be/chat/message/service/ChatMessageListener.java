@@ -24,7 +24,9 @@ public class ChatMessageListener {
     public void handleMessage(ChatMessageResponse message) {
         log.info("메시지 수신: {}", message);
         Long senderId = message.senderId();
+        log.warn("여기에요!!!");
         Set<ChatRoomUser> chatRoomUsers = chatRoomUserRepository.findById_ChatRoomId(message.chatRoomId());
+        log.warn("여기라구요!!!");
         ChatRoomUser receiver = chatRoomUsers.stream()
                 .filter(user -> !user.getId().getUserId().equals(senderId))
                 .findFirst()

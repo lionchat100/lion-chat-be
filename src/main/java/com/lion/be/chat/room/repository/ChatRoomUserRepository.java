@@ -1,6 +1,7 @@
 package com.lion.be.chat.room.repository;
 
 import com.lion.be.chat.room.domain.entity.ChatRoomUser;
+import com.lion.be.chat.room.domain.entity.ChatRoomUserId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -10,18 +11,18 @@ import java.util.Optional;
 import java.util.Set;
 
 @Repository
-public interface ChatRoomUserRepository extends JpaRepository<ChatRoomUser, Long> {
+public interface ChatRoomUserRepository extends JpaRepository<ChatRoomUser, ChatRoomUserId> {
     @Query("SELECT cru FROM ChatRoomUser cru WHERE cru.id.chatRoomId = :chatRoomId")
     Set<ChatRoomUser> findById_ChatRoomId(@Param("chatRoomId") Long chatRoomId);
 
     @Query("""
-        SELECT cru.chatRoom.id
-        FROM ChatRoomUser cru
-        WHERE cru.user.id IN (:userId1, :userId2)
-        AND cru.chatRoom.isDeleted = false
-        GROUP BY cru.chatRoom.id
-        HAVING COUNT(DISTINCT cru.user.id) = 2
-        """)
+            SELECT cru.chatRoom.id
+            FROM ChatRoomUser cru
+            WHERE cru.user.id IN (:userId1, :userId2)
+            AND cru.chatRoom.isDeleted = false
+            GROUP BY cru.chatRoom.id
+            HAVING COUNT(DISTINCT cru.user.id) = 2
+            """)
     Optional<Long> findChatRoomIdByTwoUserIds(@Param("userId1") Long userId1, @Param("userId2") Long userId2);
 
     @Query("SELECT cru FROM ChatRoomUser cru WHERE cru.id.chatRoomId = :chatRoomId AND cru.id.userId = :userId")

@@ -3,6 +3,7 @@ package com.lion.be.chat.room.service;
 import com.lion.be.chat.room.domain.dto.ChatRoomResponse;
 import com.lion.be.chat.room.domain.entity.ChatRoom;
 import com.lion.be.chat.room.domain.entity.ChatRoomUser;
+import com.lion.be.chat.room.repository.ChatRoomJpaRepository;
 import com.lion.be.chat.room.repository.ChatRoomQueryDslRepository;
 import com.lion.be.chat.room.repository.ChatRoomRepository;
 import com.lion.be.chat.room.repository.ChatRoomUserRepository;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -36,20 +38,12 @@ public class ChatRoomService {
             log.info("기존 채팅방이 존재합니다. ChatRoomId: {}", chatRoomId.get());
             return chatRoomId.get();
         } else {
-            ChatRoom chatRoom = chatRoomRepository.save(new ChatRoom(
-                    null,
-                    false,
-                    LocalDateTime.now(),
-                    new ArrayList<>(),
-                    null,
-                    null,
-                    false
-            ));
+            ChatRoom chatRoom = chatRoomRepository.save(new ChatRoom());
 
             User user1 = userRepository.findById(senderId);
             User user2 = userRepository.findById(receiverId);
-            ChatRoomUser user1ChatRoomUser = new ChatRoomUser(chatRoom, user1, true);
-            ChatRoomUser user2ChatRoomUser = new ChatRoomUser(chatRoom, user2, true);
+            ChatRoomUser user1ChatRoomUser = ChatRoomUser.create(chatRoom, user1);
+            ChatRoomUser user2ChatRoomUser = ChatRoomUser.create(chatRoom, user2);
             chatRoomUserRepository.save(user1ChatRoomUser);
             chatRoomUserRepository.save(user2ChatRoomUser);
 
