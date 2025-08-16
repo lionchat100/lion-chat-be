@@ -4,7 +4,7 @@ import com.lion.be.feed_comment.domain.entity.FeedComment;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.lion.be.chat.domain.entity.ChatRoomUser;
+import com.lion.be.chat.room.domain.entity.ChatRoomUser;
 import com.lion.be.feed.domain.entity.Feed;
 import com.lion.be.global.entity.BaseEntity;
 import com.lion.be.global.exception.CustomException;

@@ -58,19 +58,6 @@ public class ChatSteps {
     }
 
     public static ExtractableResponse<Response> 채팅방의_초기_메시지_목록을_조회한다(
-            String accessToken, Long chatRoomId, RequestSpecification spec) {
-        return RestAssured
-                .given().log().all()
-                .spec(spec)
-                .auth().oauth2(accessToken)
-                .queryParam("roomId", chatRoomId)
-                .when()
-                .get("/api/chatrooms/chats/messages")
-                .then().log().all()
-                .extract();
-    }
-
-    public static ExtractableResponse<Response> 채팅방의_초기_메시지_목록을_조회한다(
             String accessToken, Long chatRoomId, Long lastId, RequestSpecification spec) {
         return RestAssured
                 .given().log().all()
@@ -118,9 +105,9 @@ public class ChatSteps {
         Assertions.assertAll(
                 () -> assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value()),
                 () -> assertThat(chatRooms).hasSize(expectedSize),
-                () -> assertThat(chatRooms.get(0).get("name").toString()).isEqualTo(expectedFirstName),
-                () -> assertThat(chatRooms.get(0).get("chatRoomId")).isNotNull(),
-                () -> assertThat(chatRooms.get(0)).containsKey("lastContent")
+                () -> assertThat(chatRooms.get(1).get("name").toString()).isEqualTo(expectedFirstName),
+                () -> assertThat(chatRooms.get(1).get("chatRoomId")).isNotNull(),
+                () -> assertThat(chatRooms.get(1)).containsKey("lastContent")
         );
     }
 
