@@ -38,4 +38,8 @@ public class ChatRoom {
         this.recentMessageContent = content;
         this.recentMessageDt = dt;
     }
+
+    public void addUser(ChatRoomUser chatRoomUser) {
+        chatRoomUsers.add(chatRoomUser);
+    }
 }
