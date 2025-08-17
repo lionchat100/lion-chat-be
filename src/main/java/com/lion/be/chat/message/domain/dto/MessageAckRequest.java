@@ -1,7 +1,9 @@
 package com.lion.be.chat.message.domain.dto;
 
+import jakarta.validation.constraints.NotBlank;
+
 public record MessageAckRequest(
-        String messageId,
-        Long userId
+        @NotBlank String messageId,
+        @NotBlank Long userId
 ) {
 }
