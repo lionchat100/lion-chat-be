@@ -20,11 +20,11 @@ public class LikeEventListener {
 	@Async
 	public void handleLikeCreated(LikeCreatedEvent event) {
 		LikeNotification notification = new LikeNotification(
-			event.getFromUserId(),
-			event.getFromUserNickname(),
+			event.fromUserId(),
+			event.fromUserNickname(),
 			"님이 회원님을 좋아합니다"
 		);
 
-		notificationWriteService.sendToUser(event.getToUserId(), notification);
+		notificationWriteService.sendToUser(event.toUserId(), notification);
 	}
 }

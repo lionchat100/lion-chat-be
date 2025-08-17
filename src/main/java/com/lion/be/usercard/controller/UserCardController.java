@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lion.be.auth.domain.UserPrincipal;
+import com.lion.be.user.domain.Position;
 import com.lion.be.usercard.controller.dto.UserCardResponse;
 import com.lion.be.usercard.service.UserCardReadService;
 
@@ -48,6 +49,19 @@ public class UserCardController {
 			userPrincipal.getId(),
 			size,
 			excludeUserIds
+		);
+		return ResponseEntity.ok(cards);
+	}
+
+	@GetMapping("/cards/category")
+	public ResponseEntity<List<UserCardResponse>> getCardsByCategory(
+		@AuthenticationPrincipal UserPrincipal userPrincipal,
+		@RequestParam(defaultValue = "10") int size,
+		@RequestParam(required = false) List<Long> excludeUserIds,
+		@RequestParam(required = false) Position position
+	){
+		List<UserCardResponse> cards = userCardReadService.getCardsByPosition(
+			userPrincipal.getId(), size, excludeUserIds, position
 		);
 		return ResponseEntity.ok(cards);
 	}

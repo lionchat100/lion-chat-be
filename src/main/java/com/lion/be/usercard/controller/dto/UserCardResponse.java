@@ -19,7 +19,7 @@ public record UserCardResponse (
 	String bio,
 	@JsonProperty("focusType")
 	PreferenceType preferenceType,
-	boolean isLikedByMe
+	boolean isLikedByMe // 로그인된 유저기준으로 카드를 좋아했는지 안했는지 체크하는 값
 ) {
 	/**
 	 * User 엔티티에서 변환하는 정적 메서드
