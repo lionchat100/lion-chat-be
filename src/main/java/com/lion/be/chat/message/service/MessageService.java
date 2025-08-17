@@ -9,6 +9,8 @@ import com.lion.be.chat.room.domain.entity.ChatRoom;
 import com.lion.be.chat.room.domain.entity.ChatRoomUser;
 import com.lion.be.chat.room.repository.ChatRoomRepository;
 import com.lion.be.chat.room.repository.ChatRoomUserRepository;
+import com.lion.be.global.exception.CustomException;
+import com.lion.be.global.exception.ErrorCode;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.repository.persistence.jpa.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +39,8 @@ public class MessageService {
     private final MessageBroker messageBroker;
 
     public void sendMessage(ChatMessageRequest request, Long senderId) {
+        chatRoomRepository.findById(request.chatRoomId())
+                .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
         log.info("메시지 요청 들어옴: {}, senderId: {}", request, senderId);
 
         ChatMessage message = ChatMessageRequest.fromRequest(request, userRepository.findById(senderId).get());
@@ -76,6 +80,8 @@ public class MessageService {
     }
 
     public List<ChatMessageResponse> findMessagesByIdAndLastId(Long roomId, Long lastId) {
+        chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
         int pageSize = 30;
         Pageable pageable = PageRequest.of(
                 lastId.intValue() / pageSize,
