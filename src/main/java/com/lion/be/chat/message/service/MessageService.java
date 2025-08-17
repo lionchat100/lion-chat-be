@@ -78,7 +78,7 @@ public class MessageService {
         log.info("채팅방 읽음상태 업데이트됨: {}번 방, userId: {}", message.getChatRoomId(), userId);
     }
 
-    public List<ChatMessageResponse> findMessagesByIdAndLastId(Long roomId, Long lastId) {
+    public List<ChatMessageResponse> findMessagesByIdAndLastId(Long roomId, Long lastId, Long userId) {
         int pageSize = 30;
         Pageable pageable = PageRequest.of(
                 lastId.intValue() / pageSize,
@@ -88,9 +88,20 @@ public class MessageService {
 
         Page<ChatMessage> messages = chatMessageRepository.findMessagesByIdAndLastId(roomId, pageable);
         boolean isEnd = messages.hasNext();
+
+        List<ObjectId> unreadMessageIds = messages.getContent().stream()
+                .filter(message -> !message.getSenderId().equals(userId))
+                .map(ChatMessage::getId)
+                .collect(Collectors.toList());
+
+        if (!unreadMessageIds.isEmpty()) {
+            chatMessageRepository.markMessagesAsRead(unreadMessageIds);
+        }
+
         Set<Long> senderIds = messages.stream()
                 .map(ChatMessage::getSenderId)
                 .collect(Collectors.toSet());
+
         Map<Long, User> users = userRepository.findByIdIn(senderIds).stream()
                 .collect(Collectors.toMap(User::getId, user -> user));
 
