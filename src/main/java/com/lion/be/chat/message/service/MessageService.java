@@ -81,7 +81,7 @@ public class MessageService {
         log.info("채팅방 읽음상태 업데이트됨: {}번 방, userId: {}", message.getChatRoomId(), userId);
     }
 
-    public List<ChatMessageResponse> findMessagesByIdAndLastId(Long roomId, Long lastId) {
+    public List<ChatMessageResponse> findMessagesByIdAndLastId(Long roomId, Long lastId, Long userId) {
         chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
         int pageSize = 30;
