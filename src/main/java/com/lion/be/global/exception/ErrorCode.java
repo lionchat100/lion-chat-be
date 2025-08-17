@@ -31,6 +31,8 @@ public enum ErrorCode {
 
     CHAT_ROOM_CREATION_FAILED(HttpStatus.BAD_REQUEST, "채팅방 생성에 실패했습니다."),
     CHAT_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "채팅방을 찾을 수 없습니다."),
+    MESSAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "메시지를 찾을 수 없습니다."),
+
     USER_CAN_NOT_LIKE_HIMSELF(HttpStatus.BAD_REQUEST, "자기 자신에게 좋아요를 누를수 없습니다."),
 
     IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "이미지를 찾을 수 없습니다."),

@@ -39,11 +39,13 @@ public class MessageService {
     private final MessageBroker messageBroker;
 
     public void sendMessage(ChatMessageRequest request, Long senderId) {
-        chatRoomRepository.findById(request.chatRoomId())
+        ChatRoom chatRoom = chatRoomRepository.findById(request.chatRoomId())
                 .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
         log.info("메시지 요청 들어옴: {}, senderId: {}", request, senderId);
 
-        ChatMessage message = ChatMessageRequest.fromRequest(request, userRepository.findById(senderId).get());
+        User sender = userRepository.findById(senderId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        ChatMessage message = ChatMessageRequest.fromRequest(request, sender);
         message.updateMessageStatus(MessageStatus.PENDING);
         chatMessageRepository.save(message);
         log.info("메시지 저장됨: {}", message);
@@ -53,7 +55,6 @@ public class MessageService {
         chatMessageRepository.save(message);
         log.info("메시지 발행 완료: {}", message);
 
-        ChatRoom chatRoom = chatRoomRepository.findById(message.getChatRoomId()).get();
         chatRoom.updateRecentMessage(message.getContent(), message.getCreatedAt());
         chatRoomRepository.save(chatRoom);
         log.info("채팅방 마지막 내용, 시간 업데이트됨: {}번 방", chatRoom.getId());
@@ -66,14 +67,15 @@ public class MessageService {
     public void updateReadStatus(String messageId, Long userId) {
         log.info("채팅 읽음, messageId: {}", messageId);
 
-        ChatMessage message = chatMessageRepository.findById(new ObjectId(messageId)).get();
+        ChatMessage message = chatMessageRepository.findById(new ObjectId(messageId))
+                .orElseThrow(() -> new CustomException(ErrorCode.MESSAGE_NOT_FOUND));
         message.updateMessageStatus(MessageStatus.DELIVERED);
         chatMessageRepository.save(message);
         log.info("메시지 읽음상태 업데이트됨: {}", messageId);
 
         ChatRoomUser receiverChatRoomUser = chatRoomUserRepository.findById_ChatRoomId(message.getChatRoomId()).stream()
                 .filter(cru -> !cru.getUser().getId().equals(userId))
-                .findFirst().get();
+                .findFirst().orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
         receiverChatRoomUser.markAsRead();
         chatRoomUserRepository.save(receiverChatRoomUser);
         log.info("채팅방 읽음상태 업데이트됨: {}번 방, userId: {}", message.getChatRoomId(), userId);
