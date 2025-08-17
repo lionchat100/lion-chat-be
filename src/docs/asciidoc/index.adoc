@@ -429,7 +429,7 @@ operation::duplicate_prevention[snippets='http-request,http-response']
 
 operation::random_supplement[snippets='http-request,http-response']
 
-==== 백엔드 개발자 클러스터 추천
+==== 백엔드 개발자 클러스터 추천 ( 전체조회용 )
 
 백엔드 개발자의 추천 패턴을 확인할 수 있습니다.
 
