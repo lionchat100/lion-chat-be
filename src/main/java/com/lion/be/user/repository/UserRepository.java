@@ -1,5 +1,6 @@
 package com.lion.be.user.repository;
 
+import com.lion.be.user.domain.Position;
 import com.lion.be.user.domain.entity.User;
 
 import java.util.List;
@@ -14,15 +15,6 @@ public interface UserRepository {
     User save(User user);
 
     Optional<User> fetchById(Long userId);
-    /**
-     * 완료된 사용자 조회 (페이징, 제외 목록 적용)
-     */
-    List<User> fetchCompletedUsersExcluding(
-        Long currentUserId,
-        List<Long> excludeUserIds,
-        int size
-    );
-
     /**
      * 동일 클러스터 내 사용자 조회
      */
@@ -42,15 +34,22 @@ public interface UserRepository {
         List<Long> excludeUserIds
     );
 
-    /**
-     * 완료된 모든 사용자 조회 (페이징 없음)
-     */
-    List<User> fetchAllCompletedUsersExcluding(
-        Long currentUserId,
-        List<Long> excludeUserIds
-    );
-
   	boolean existsByNickname(String nickname);
 
     void deleteAll();
+
+	/**
+	 * 랜덤 유저 조회 (포지션 필터리)
+	 * @param userId
+	 * @param filterPosition
+	 * @param remainingSize
+	 * @param extendedExcludeIds
+	 * @return
+	 */
+	List<User> fetchRandomUsersByPositionExcluding(
+		Long userId,
+		Position filterPosition,
+		int remainingSize,
+		List<Long> extendedExcludeIds
+	);
 }
