@@ -1,5 +1,6 @@
 package com.lion.be.user.repository;
 
+import com.lion.be.user.domain.Position;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.repository.persistence.jpa.UserJpaRepository;
 import com.lion.be.user.repository.persistence.querydsl.UserQueryDslRepository;
@@ -41,21 +42,6 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public List<User> fetchCompletedUsersExcluding(
-        Long currentUserId,
-        List<Long> excludeUserIds,
-        int size
-    ) {
-        Pageable pageable = PageRequest.of(0, size);
-
-        return userQueryDslRepository.findCompletedUsersExcluding(
-            currentUserId,
-            excludeUserIds != null ? excludeUserIds : List.of(),
-            pageable
-        );
-    }
-
-    @Override
     public List<User> fetchUsersByClusterExcluding(
         Integer clusterId,
         Long currentUserId,
@@ -86,17 +72,6 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public List<User> fetchAllCompletedUsersExcluding(
-        Long currentUserId,
-        List<Long> excludeUserIds
-    ) {
-        return userQueryDslRepository.findAllCompletedUsersExcluding(
-            currentUserId,
-            excludeUserIds != null ? excludeUserIds : List.of()
-        );
-    }
-  
-    @Override
     public boolean existsByNickname(
       String nickname
     ) {
@@ -108,4 +83,15 @@ public class UserRepositoryImpl implements UserRepository {
         userJpaRepository.deleteAll();
     }
 
+	@Override
+	public List<User> fetchRandomUsersByPositionExcluding(Long userId, Position filterPosition, int remainingSize, List<Long> extendedExcludeIds) {
+		Pageable pageable = PageRequest.of(0, remainingSize);
+
+		return userQueryDslRepository.findRandomUsersByPositionExcluding(
+			userId,
+			filterPosition,
+			extendedExcludeIds != null ? extendedExcludeIds : List.of(),
+			pageable
+		);
+	}
 }

@@ -429,17 +429,24 @@ operation::duplicate_prevention[snippets='http-request,http-response']
 
 operation::random_supplement[snippets='http-request,http-response']
 
-==== 백엔드 개발자 클러스터 추천
+==== 백엔드 개발자 클러스터 추천 ( 전체조회용 )
 
 백엔드 개발자의 추천 패턴을 확인할 수 있습니다.
 
 operation::backend_cluster_recommendation[snippets='http-request,http-response']
+
 
 === 본인 카드 조회 (qr용)
 
 유저 id를 통해 유저 프로필카드를 볼 수 있습니다.
 
 operation::my_profile_card[snippets='http-request,http-response']
+
+=== 클러스터에서 필터를 통해 포지션 중심으로 추천받습니다. ( 필터로 선택된 포지션 외의 포지션은 검색 X)
+
+포지션 별 추천 패턴을 확인할수 있습니다 (BACKEND,PM,FULLSTACK..)
+
+operation::category_backend_filter[snippets='http-request,http-response']
 
 === 추천 시스템 특징
 

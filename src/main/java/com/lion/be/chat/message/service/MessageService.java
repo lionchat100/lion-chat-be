@@ -93,9 +93,20 @@ public class MessageService {
 
         Page<ChatMessage> messages = chatMessageRepository.findMessagesByIdAndLastId(roomId, pageable);
         boolean isEnd = messages.hasNext();
+
+        List<ObjectId> unreadMessageIds = messages.getContent().stream()
+                .filter(message -> !message.getSenderId().equals(userId))
+                .map(ChatMessage::getId)
+                .collect(Collectors.toList());
+
+        if (!unreadMessageIds.isEmpty()) {
+            chatMessageRepository.markMessagesAsRead(unreadMessageIds);
+        }
+
         Set<Long> senderIds = messages.stream()
                 .map(ChatMessage::getSenderId)
                 .collect(Collectors.toSet());
+
         Map<Long, User> users = userRepository.findByIdIn(senderIds).stream()
                 .collect(Collectors.toMap(User::getId, user -> user));
 

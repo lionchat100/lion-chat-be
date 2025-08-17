@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import com.lion.be.user.domain.OnboardingStatus;
+import com.lion.be.user.domain.Position;
 import com.lion.be.user.domain.Role;
 import com.lion.be.user.domain.entity.User;
 import com.querydsl.core.BooleanBuilder;
@@ -21,26 +22,6 @@ import lombok.RequiredArgsConstructor;
 public class UserQueryDslRepository {
 
 	private final JPAQueryFactory jpaQueryFactory;
-
-	/**
-	 * 완료된 사용자 조회 (페이징, 제외 목록 적용)
-	 */
-	public List<User> findCompletedUsersExcluding(
-		Long currentUserId,
-		List<Long> excludeUserIds,
-		Pageable pageable
-	) {
-		BooleanBuilder whereClause = buildBaseConditions(currentUserId, excludeUserIds);
-
-		return jpaQueryFactory
-			.selectFrom(user)
-			.leftJoin(user.userPhotos, userPhoto).fetchJoin()
-			.where(whereClause)
-			.orderBy(user.createdAt.desc())
-			.offset(pageable.getOffset())
-			.limit(pageable.getPageSize())
-			.fetch();
-	}
 
 	/**
 	 * 동일 클러스터 내 사용자 조회
@@ -102,23 +83,6 @@ public class UserQueryDslRepository {
 	}
 
 	/**
-	 * 완료된 모든 사용자 조회 (페이징 없음)
-	 */
-	public List<User> findAllCompletedUsersExcluding(
-		Long currentUserId,
-		List<Long> excludeUserIds
-	) {
-		BooleanBuilder whereClause = buildBaseConditions(currentUserId, excludeUserIds);
-
-		return jpaQueryFactory
-			.selectFrom(user)
-			.leftJoin(user.userPhotos, userPhoto).fetchJoin()
-			.where(whereClause)
-			.orderBy(user.createdAt.desc())
-			.fetch();
-	}
-
-	/**
 	 * 기본 조건 생성 (온보딩 완료 + 제외 목록)
 	 * 어드민 유저는제외
 	 */
@@ -137,5 +101,37 @@ public class UserQueryDslRepository {
 		}
 
 		return whereClause;
+	}
+
+	/**
+	 * 포지션별 랜덤 사용자 조회 (제외 목록 적용)
+	 *
+	 * 특정 포지션의 사용자들 중에서 랜덤하게 조회
+	 * 클러스터 기반 추천에서 부족한 사용자를 보완할 때 사용
+	 *
+	 * @param userId 현재 사용자 ID (제외 대상)
+	 * @param filterPosition 필터링할 포지션 (BACKEND, FRONTEND 등)
+	 * @param excludeUserIds 제외할 사용자 ID 목록
+	 * @param pageable 페이징 정보
+	 * @return 조건에 맞는 사용자 목록
+	 */
+	public List<User> findRandomUsersByPositionExcluding(Long userId, Position filterPosition, List<Long> excludeUserIds, Pageable pageable) {
+		BooleanBuilder whereClause = buildBaseConditions(userId, excludeUserIds);
+
+		// 포지션 조건 추가
+		whereClause.and(user.position.eq(filterPosition));
+
+		if (pageable.getPageSize() <= 0) {
+			return List.of();
+		}
+
+		return jpaQueryFactory
+			.selectFrom(user)
+			.leftJoin(user.userPhotos, userPhoto).fetchJoin()
+			.where(whereClause)
+			.orderBy(user.id.desc()) // 랜덤 효과
+			.offset(pageable.getOffset())
+			.limit(pageable.getPageSize())
+			.fetch();
 	}
 }
