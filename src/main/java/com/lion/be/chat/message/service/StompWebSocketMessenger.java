@@ -15,13 +15,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StompWebSocketMessenger implements WebSocketMessenger {
 
+    private static final String CHAT_ROOM_PREFIX = "/topic/chatroom/";
+
     private final SimpMessagingTemplate messagingTemplate;
     private final MessageMapper adapter;
 
     @Override
     public boolean deliverToClient(@NotNull Long userId, ChatMessageResponse message) {
         try {
-            String destination = "/topic/chatroom/" + message.chatRoomId();
+            String destination = CHAT_ROOM_PREFIX + message.chatRoomId();
             messagingTemplate.convertAndSend(destination, message);
             log.info("WebSocket 메시지 전송 성공: userId={}, messageId={}", userId, message.messageId());
             return true;
