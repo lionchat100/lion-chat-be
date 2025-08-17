@@ -2,6 +2,7 @@ package com.lion.be.chat.message.service;
 
 import com.lion.be.chat.message.domain.dto.ChatMessageResponse;
 import com.lion.be.chat.message.repository.MessageMapper;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -18,7 +19,7 @@ public class StompWebSocketMessenger implements WebSocketMessenger {
     private final MessageMapper adapter;
 
     @Override
-    public boolean deliverToClient(Long userId, ChatMessageResponse message) {
+    public boolean deliverToClient(@NotNull Long userId, ChatMessageResponse message) {
         try {
             String destination = "/topic/chatroom/" + message.chatRoomId();
             messagingTemplate.convertAndSend(destination, message);

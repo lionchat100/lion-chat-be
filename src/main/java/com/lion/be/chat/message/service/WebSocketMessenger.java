@@ -1,6 +1,7 @@
 package com.lion.be.chat.message.service;
 
 import com.lion.be.chat.message.domain.dto.ChatMessageResponse;
+import jakarta.validation.constraints.NotNull;
 
 public interface WebSocketMessenger {
 
@@ -11,6 +12,6 @@ public interface WebSocketMessenger {
      * @param message 전송할 채팅 메시지 응답 DTO
      * @return 메시지 전송 성공 시 true, 실패 시 false 반환
      */
-    boolean deliverToClient(Long userId, ChatMessageResponse message);
+    boolean deliverToClient(@NotNull Long userId, ChatMessageResponse message);
 
 }
