@@ -4,7 +4,6 @@ import com.lion.be.chat.message.domain.dto.ChatMessageRequest;
 import com.lion.be.chat.message.domain.dto.ChatMessageResponse;
 import com.lion.be.chat.message.domain.entity.ChatMessage;
 import com.lion.be.chat.message.repository.ChatMessageRepository;
-import com.lion.be.chat.message.repository.MessageMapper;
 import com.lion.be.chat.room.domain.MessageStatus;
 import com.lion.be.chat.room.domain.entity.ChatRoom;
 import com.lion.be.chat.room.domain.entity.ChatRoomUser;
@@ -20,7 +19,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -36,13 +34,12 @@ public class MessageService {
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomUserRepository chatRoomUserRepository;
-    private final MessageMapper mapper;
     private final MessageBroker messageBroker;
 
     public void sendMessage(ChatMessageRequest request, Long senderId) {
         log.info("메시지 요청 들어옴: {}, senderId: {}", request, senderId);
 
-        ChatMessage message = mapper.fromRequest(request, senderId);
+        ChatMessage message = ChatMessageRequest.fromRequest(request, userRepository.findById(senderId).get());
         message.updateMessageStatus(MessageStatus.PENDING);
         chatMessageRepository.save(message);
         log.info("메시지 저장됨: {}", message);

@@ -1,11 +1,12 @@
 package com.lion.be.chat.message.service;
 
-import com.lion.be.chat.message.repository.ChatMessageRepository;
-import com.lion.be.chat.room.domain.MessageStatus;
 import com.lion.be.chat.message.domain.dto.ChatMessageResponse;
 import com.lion.be.chat.message.domain.entity.ChatMessage;
-import com.lion.be.chat.message.repository.MessageMapper;
+import com.lion.be.chat.message.repository.ChatMessageRepository;
+import com.lion.be.chat.room.domain.MessageStatus;
 import com.lion.be.global.config.RabbitMQConfig;
+import com.lion.be.user.domain.entity.User;
+import com.lion.be.user.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,8 +18,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class RabbitMessageBroker implements MessageBroker {
 
+    private final UserRepository userRepository;
     private final RabbitTemplate rabbitTemplate;
-    private final MessageMapper mapper;
     private final ChatMessageRepository chatMessageRepository;
 
     @PostConstruct
@@ -32,7 +33,7 @@ public class RabbitMessageBroker implements MessageBroker {
 
                 log.warn("메시지 라우팅 실패: {}", response);
 
-                ChatMessage chatMessage = mapper.fromResponse(response);
+                ChatMessage chatMessage = ChatMessageResponse.fromResponse(response, userRepository.findById(response.senderId()));
                 chatMessage.updateMessageStatus(MessageStatus.PENDING);
                 chatMessageRepository.save(chatMessage);
 
@@ -53,8 +54,9 @@ public class RabbitMessageBroker implements MessageBroker {
     @Override
     public void publishMessage(ChatMessage message) {
         String routingKey = "chat.message." + message.getChatRoomId();
+        User sender = userRepository.findById(message.getSenderId());
 
-        ChatMessageResponse response = mapper.toResponse(message, false);
+        ChatMessageResponse response = ChatMessageResponse.toResponse(message, sender, false);
 
         rabbitTemplate.convertAndSend(
                 RabbitMQConfig.CHAT_EXCHANGE_NAME,
