@@ -37,7 +37,7 @@ public class ChatController {
             @RequestParam Long roomId,
             @RequestParam(defaultValue = "0") Long lastId
     ) {
-        List<ChatMessageResponse> messages = messageService.findMessagesByIdAndLastId(roomId, lastId);
+        List<ChatMessageResponse> messages = messageService.findMessagesByIdAndLastId(roomId, lastId, userPrincipal.getId());
         return ResponseEntity.ok(messages);
     }
 }

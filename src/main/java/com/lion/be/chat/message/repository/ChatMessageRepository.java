@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
+import org.springframework.data.mongodb.repository.Update;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -31,4 +32,8 @@ public interface ChatMessageRepository extends MongoRepository<ChatMessage, Obje
      */
     @Query("{ 'chatRoomId': ?0 }")
     Page<ChatMessage> findMessagesByIdAndLastId(Long roomId, Pageable pageable);
+
+    @Query("{ '_id': { $in: ?0 } }")
+    @Update("{ $set: { 'isRead': true } }")
+    void markMessagesAsRead(List<ObjectId> messageIds);
 }
