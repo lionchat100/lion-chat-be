@@ -39,7 +39,6 @@ public class MessageService {
     private final MessageMapper mapper;
     private final MessageBroker messageBroker;
 
-    @Transactional
     public void sendMessage(ChatMessageRequest request, Long senderId) {
         log.info("메시지 요청 들어옴: {}, senderId: {}", request, senderId);
 
@@ -79,7 +78,6 @@ public class MessageService {
         log.info("채팅방 읽음상태 업데이트됨: {}번 방, userId: {}", message.getChatRoomId(), userId);
     }
 
-    @Transactional
     public List<ChatMessageResponse> findMessagesByIdAndLastId(Long roomId, Long lastId) {
         int pageSize = 30;
         Pageable pageable = PageRequest.of(
