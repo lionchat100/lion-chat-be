@@ -20,6 +20,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,7 @@ public class MessageService {
     private final MessageMapper mapper;
     private final MessageBroker messageBroker;
 
+    @Transactional
     public void sendMessage(ChatMessageRequest request, Long senderId) {
         log.info("메시지 요청 들어옴: {}, senderId: {}", request, senderId);
 
@@ -53,6 +55,7 @@ public class MessageService {
 
         ChatRoom chatRoom = chatRoomRepository.findById(message.getChatRoomId()).get();
         chatRoom.updateRecentMessage(message.getContent(), message.getCreatedAt());
+        chatRoomRepository.save(chatRoom);
         log.info("채팅방 마지막 내용, 시간 업데이트됨: {}번 방", chatRoom.getId());
 
         ChatRoomUser chatRoomUser = chatRoomUserRepository.findById_ChatRoomIdAndId_UserId(message.getChatRoomId(), senderId);
@@ -76,6 +79,7 @@ public class MessageService {
         log.info("채팅방 읽음상태 업데이트됨: {}번 방, userId: {}", message.getChatRoomId(), userId);
     }
 
+    @Transactional
     public List<ChatMessageResponse> findMessagesByIdAndLastId(Long roomId, Long lastId) {
         int pageSize = 30;
         Pageable pageable = PageRequest.of(
