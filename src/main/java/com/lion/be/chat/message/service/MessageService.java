@@ -4,13 +4,13 @@ import com.lion.be.chat.message.domain.dto.ChatMessageRequest;
 import com.lion.be.chat.message.domain.dto.ChatMessageResponse;
 import com.lion.be.chat.message.domain.entity.ChatMessage;
 import com.lion.be.chat.message.repository.ChatMessageRepository;
-import com.lion.be.chat.message.repository.MessageMapper;
 import com.lion.be.chat.room.domain.MessageStatus;
 import com.lion.be.chat.room.domain.entity.ChatRoom;
 import com.lion.be.chat.room.domain.entity.ChatRoomUser;
 import com.lion.be.chat.room.repository.ChatRoomRepository;
 import com.lion.be.chat.room.repository.ChatRoomUserRepository;
-import com.lion.be.global.aop.ElapsedTime;
+import com.lion.be.global.exception.CustomException;
+import com.lion.be.global.exception.ErrorCode;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.repository.persistence.jpa.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -34,13 +33,16 @@ public class MessageService {
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomUserRepository chatRoomUserRepository;
-    private final MessageMapper mapper;
     private final MessageBroker messageBroker;
 
     public void sendMessage(ChatMessageRequest request, Long senderId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(request.chatRoomId())
+                .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
         log.info("메시지 요청 들어옴: {}, senderId: {}", request, senderId);
 
-        ChatMessage message = mapper.fromRequest(request, senderId);
+        User sender = userRepository.findById(senderId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        ChatMessage message = ChatMessageRequest.fromRequest(request, sender);
         message.updateMessageStatus(MessageStatus.PENDING);
         chatMessageRepository.save(message);
         log.info("메시지 저장됨: {}", message);
@@ -50,7 +52,6 @@ public class MessageService {
         chatMessageRepository.save(message);
         log.info("메시지 발행 완료: {}", message);
 
-        ChatRoom chatRoom = chatRoomRepository.findById(message.getChatRoomId()).get();
         chatRoom.updateRecentMessage(message.getContent(), message.getCreatedAt());
         chatRoomRepository.save(chatRoom);
         log.info("채팅방 마지막 내용, 시간 업데이트됨: {}번 방", chatRoom.getId());
@@ -63,39 +64,46 @@ public class MessageService {
     public void updateReadStatus(String messageId, Long userId) {
         log.info("채팅 읽음, messageId: {}", messageId);
 
-        ChatMessage message = chatMessageRepository.findById(new ObjectId(messageId)).get();
+        ChatMessage message = chatMessageRepository.findById(new ObjectId(messageId))
+                .orElseThrow(() -> new CustomException(ErrorCode.MESSAGE_NOT_FOUND));
         message.updateMessageStatus(MessageStatus.DELIVERED);
         chatMessageRepository.save(message);
         log.info("메시지 읽음상태 업데이트됨: {}", messageId);
 
         ChatRoomUser receiverChatRoomUser = chatRoomUserRepository.findById_ChatRoomId(message.getChatRoomId()).stream()
                 .filter(cru -> !cru.getUser().getId().equals(userId))
-                .findFirst().get();
+                .findFirst().orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
         receiverChatRoomUser.markAsRead();
         chatRoomUserRepository.save(receiverChatRoomUser);
         log.info("채팅방 읽음상태 업데이트됨: {}번 방, userId: {}", message.getChatRoomId(), userId);
     }
 
-    public List<ChatMessageResponse> findMessagesByIdAndLastId(Long roomId, String lastId) {
-        //ObjectId를 사용하도록 변경
-        Pageable pageable =  PageRequest.of(0,
-                30,
-                Sort.by(Sort.Direction.DESC, "_id"));
+    public List<ChatMessageResponse> findMessagesByIdAndLastId(Long roomId, Long lastId, Long userId) {
+        chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
+        int pageSize = 30;
+        Pageable pageable = PageRequest.of(
+                lastId.intValue() / pageSize,
+                pageSize,
+                Sort.by("createdAt").descending()
+        );
 
-        // lastId가 null이거나 유효하지 않은 경우 null로 처리
-        ObjectId lastObjectId = lastId != null && ObjectId.isValid(lastId) ? new ObjectId(lastId) : null;
+        Page<ChatMessage> messages = chatMessageRepository.findMessagesByIdAndLastId(roomId, pageable);
+        boolean isEnd = messages.hasNext();
 
-        Slice<ChatMessage> messages;
-        if(lastObjectId == null) {
-            messages = chatMessageRepository.findMessagesByIdAndLastId(roomId, pageable);
-        }else{
-            messages = chatMessageRepository.findMessagesByIdAndLastId(roomId, lastObjectId, pageable);
+        List<ObjectId> unreadMessageIds = messages.getContent().stream()
+                .filter(message -> !message.getSenderId().equals(userId))
+                .map(ChatMessage::getId)
+                .collect(Collectors.toList());
+
+        if (!unreadMessageIds.isEmpty()) {
+            chatMessageRepository.markMessagesAsRead(unreadMessageIds);
         }
 
-        boolean isEnd = messages.hasNext();
         Set<Long> senderIds = messages.stream()
                 .map(ChatMessage::getSenderId)
                 .collect(Collectors.toSet());
+
         Map<Long, User> users = userRepository.findByIdIn(senderIds).stream()
                 .collect(Collectors.toMap(User::getId, user -> user));
 

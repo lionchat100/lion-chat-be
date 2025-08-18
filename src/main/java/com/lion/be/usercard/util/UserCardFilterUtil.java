@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
@@ -188,6 +189,44 @@ public class UserCardFilterUtil {
 		}
 
 		return similarity;
+	}
+
+	public List<User> getRecommendedUsersByPosition(Long userId, int size, List<Long> excludeUserIds, Position filterPosition) {
+		if (size <= 0) {
+			log.warn("잘못된 size 값: {}", size);
+			return new ArrayList<>();
+		}
+
+		User targetUser = userRepository.fetchById(userId)
+			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+		// 1단계: 클러스터 기반 추천 (더 많이 가져와서 필터링 여유 확보)
+		List<User> clusterBasedUsers = getClusterBasedRecommendations(targetUser, excludeUserIds, size * 3);
+
+		// 2단계: 포지션 필터링
+		List<User> filteredUsers = clusterBasedUsers.stream()
+			.filter(user -> user.getPosition() == filterPosition)
+			.limit(size)
+			.collect(Collectors.toCollection(ArrayList::new));
+
+		log.debug("클러스터 {} + 포지션 {} 필터링 결과: {}명",
+			targetUser.getClusterId(), filterPosition, filteredUsers.size());
+
+		// 3단계: 부족하면 해당 포지션의 랜덤 사용자로 보완
+		if (filteredUsers.size() < size) {
+			int remainingSize = size - filteredUsers.size();
+
+			List<Long> extendedExcludeIds = new ArrayList<>(excludeUserIds != null ? excludeUserIds : List.of());
+			filteredUsers.forEach(user -> extendedExcludeIds.add(user.getId()));
+
+			List<User> randomUsersByPosition = userRepository.fetchRandomUsersByPositionExcluding(
+				userId, filterPosition, remainingSize, extendedExcludeIds);
+
+			log.debug("포지션 {} 랜덤 보완 결과: {}명", filterPosition, randomUsersByPosition.size());
+			filteredUsers.addAll(randomUsersByPosition);
+		}
+
+		return filteredUsers;
 	}
 
 	/**

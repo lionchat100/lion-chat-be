@@ -35,7 +35,7 @@ public class ChatRoomService {
     @Transactional
     public Long findOrCreateChatRoom(Long senderId, Long receiverId) {
 
-        Optional<Long> chatRoomId = findChatRoom(senderId, receiverId);
+        Optional<Long> chatRoomId = chatRoomUserRepository.findChatRoomIdByTwoUserIds(senderId, receiverId);
         if (chatRoomId.isPresent()) {
             log.info("기존 채팅방이 존재합니다. ChatRoomId: {}", chatRoomId.get());
             return chatRoomId.get();
@@ -54,23 +54,14 @@ public class ChatRoomService {
             ChatRoomUser user2ChatRoomUser = ChatRoomUser.create(chatRoom, user2);
             chatRoomUserRepository.save(user1ChatRoomUser);
             chatRoomUserRepository.save(user2ChatRoomUser);
+
+            chatRoom.addUser(user1ChatRoomUser);
+            chatRoom.addUser(user2ChatRoomUser);
             chatRoomRepository.save(chatRoom);
             log.info("새 채팅방을 생성합니다. ChatRoomId: {}", chatRoom.getId());
 
             return chatRoom.getId();
         }
-    }
-
-    /**
-     * 채팅방이 존재하는지 검사합니다.
-     *
-     * @param user1
-     * @param user2
-     * @return chatRoomId
-     */
-    private Optional<Long> findChatRoom(Long user1, Long user2) {
-        Optional<Long> existingChatRoomId = chatRoomUserRepository.findChatRoomIdByTwoUserIds(user1, user2);
-        return existingChatRoomId;
     }
 
     /**

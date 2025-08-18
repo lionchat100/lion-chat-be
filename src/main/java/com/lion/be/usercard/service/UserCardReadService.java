@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.lion.be.global.exception.CustomException;
 import com.lion.be.global.exception.ErrorCode;
+import com.lion.be.user.domain.Position;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.repository.UserRepositoryImpl;
 import com.lion.be.usercard.controller.dto.UserCardResponse;
@@ -50,5 +51,18 @@ public class UserCardReadService {
 		return userRepositoryImpl.fetchById(id)
 			.map(user -> UserCardResponse.from(user, false))
 			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+	}
+
+	public List<UserCardResponse> getCardsByPosition(Long userId, int size, List<Long> excludeUserIds, Position position) {
+		List<User> users = userCardFilterUtil.getRecommendedUsersByPosition(userId, size, excludeUserIds, position);
+
+		List<Long> viewedUserIds = users.stream().map(User::getId).toList();
+		userViewHistoryService.recordViewedUsers(userId, viewedUserIds);
+
+		Set<Long> likedUserIds = userLikesReadService.getLikedUserIds(userId, viewedUserIds);
+
+		return users.stream()
+			.map(user -> UserCardResponse.from(user, likedUserIds.contains(user.getId())))
+			.toList();
 	}
 }

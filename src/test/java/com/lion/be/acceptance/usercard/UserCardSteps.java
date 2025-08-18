@@ -259,6 +259,33 @@ public class UserCardSteps {
 		System.out.println("첫 번째 카드 정보: " + firstCard);
 	}
 
+	public static ExtractableResponse<Response> 포지션별_카드를_조회한다(
+		RequestSpecification spec, String accessToken, int size, String position) {
+		return RestAssured
+			.given()
+			.contentType(MediaType.APPLICATION_JSON_VALUE)
+			.spec(spec)
+			.auth().oauth2(accessToken)
+			.param("size", size)
+			.param("position", position)
+			.log().all()
+			.when()
+			.get("/api/users/cards/category") // 새로운 엔드포인트
+			.then()
+			.log().all()
+			.extract();
+	}
+
+	public static void 포지션_필터링_결과를_검증한다(ExtractableResponse<Response> response, String expectedPosition) {
+		List<Map<String, Object>> cards = response.jsonPath().getList("$");
+		assertThat(cards).isNotEmpty();
+
+		for (Map<String, Object> card : cards) {
+			assertThat(card.get("position")).isEqualTo(expectedPosition);
+		}
+
+		System.out.println("포지션 " + expectedPosition + " 필터링 검증 완료");
+	}
 	// === 유틸리티 메서드들 ===
 
 	private static RequestSpecification 기본_스펙() {

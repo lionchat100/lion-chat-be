@@ -191,4 +191,22 @@ class UserCardAcceptanceTest extends AcceptanceTest {
 			카드_리스트_조회_성공을_검증한다(response);
 		}
 	}
+
+	@Nested
+	@DisplayName("카테고리별 카드 조회")
+	class CategoryCardTest {
+
+		@DisplayName("BACKEND 포지션으로 카드를 조회하면, BACKEND 사용자들만 추천받는다")
+		@Test
+		void when_filter_by_backend_position_then_returns_only_backend_users() {
+			api_문서_타이틀("category_backend_filter", spec);
+
+			String accessToken = 김프론트_로그인();
+
+			ExtractableResponse<Response> response = 포지션별_카드를_조회한다(spec, accessToken, 10, "BACKEND");
+
+			카드_리스트_조회_성공을_검증한다(response);
+			포지션_필터링_결과를_검증한다(response, "백엔드");
+		}
+	}
 }

@@ -1,12 +1,11 @@
 package com.lion.be.chat.message.domain.entity;
 
-import com.lion.be.chat.message.domain.dto.ChatMessageResponse;
 import com.lion.be.chat.room.domain.MessageStatus;
-import com.lion.be.user.domain.entity.User;
-import jakarta.persistence.Id;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.ZonedDateTime;
