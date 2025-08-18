@@ -16,11 +16,15 @@ import com.lion.be.user.repository.persistence.jpa.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -59,6 +63,13 @@ public class MessageService {
         ChatRoomUser chatRoomUser = chatRoomUserRepository.findById_ChatRoomIdAndId_UserId(message.getChatRoomId(), senderId);
         chatRoomUser.markAsRead();
         chatRoomUserRepository.save(chatRoomUser);
+
+        ChatRoomUser receiverChatRoomUser = chatRoomUser.getChatRoom().getChatRoomUsers().stream()
+                .filter(user -> !Objects.equals(user.getId().getUserId(), senderId))
+                .findFirst()
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        receiverChatRoomUser.markAsUnRead();
+        chatRoomUserRepository.save(receiverChatRoomUser);
     }
 
     public void updateReadStatus(String messageId, Long userId) {
