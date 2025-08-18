@@ -179,4 +179,12 @@ public class User extends BaseEntity {
 	public void updateRole(Role role) {
 		this.role = role;
 	}
+
+	public void updateBio(String bio) {
+		this.bio = bio;
+	}
+
+	public void updatePreferenceType(PreferenceType preferenceType) {
+		this.preferenceType = preferenceType;
+	}
 }
