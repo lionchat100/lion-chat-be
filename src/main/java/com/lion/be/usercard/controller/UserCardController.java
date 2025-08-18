@@ -35,7 +35,7 @@ public class UserCardController {
 		return ResponseEntity.ok(cards);
 	}
 
-	@GetMapping("/card/list")
+	@GetMapping("/cards/list")
 	public ResponseEntity<List<UserCardResponse>> getCards(
 		@AuthenticationPrincipal UserPrincipal userPrincipal,
 		@RequestParam(defaultValue = "10") int size,

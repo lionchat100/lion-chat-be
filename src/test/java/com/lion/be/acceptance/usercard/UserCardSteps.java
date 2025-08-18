@@ -79,7 +79,7 @@ public class UserCardSteps {
 			.param("size", size)
 			.log().all()
 			.when()
-			.get("/api/users/card/list")
+			.get("/api/users/cards/list")
 			.then()
 			.log().all()
 			.extract();
@@ -96,7 +96,7 @@ public class UserCardSteps {
 			.param("excludeUserIds", excludeUserIds)
 			.log().all()
 			.when()
-			.get("/api/users/card/list")
+			.get("/api/users/cards/list")
 			.then()
 			.log().all()
 			.extract();
@@ -111,7 +111,7 @@ public class UserCardSteps {
 			.param("size", size)
 			.log().all()
 			.when()
-			.get("/api/users/card/list")
+			.get("/api/users/cards/list")
 			.then()
 			.log().all()
 			.extract();
