@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -64,10 +63,9 @@ public class MessageService {
         chatRoomUser.markAsRead();
         chatRoomUserRepository.save(chatRoomUser);
 
-        ChatRoomUser receiverChatRoomUser = chatRoomUser.getChatRoom().getChatRoomUsers().stream()
-                .filter(user -> !Objects.equals(user.getId().getUserId(), senderId))
-                .findFirst()
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        ChatRoomUser receiverChatRoomUser = chatRoomUserRepository.findById_ChatRoomId(message.getChatRoomId()).stream()
+                .filter(cru -> !cru.getUser().getId().equals(senderId))
+                .findFirst().orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
         receiverChatRoomUser.markAsUnRead();
         chatRoomUserRepository.save(receiverChatRoomUser);
     }
@@ -117,6 +115,10 @@ public class MessageService {
 
         Map<Long, User> users = userRepository.findByIdIn(senderIds).stream()
                 .collect(Collectors.toMap(User::getId, user -> user));
+
+        ChatRoomUser chatRoomUser = chatRoomUserRepository.findById_ChatRoomIdAndId_UserId(roomId, userId);
+        chatRoomUser.markAsRead();
+        chatRoomUserRepository.save(chatRoomUser);
 
         return messages.map(message -> {
             User sender = users.get(message.getSenderId());
