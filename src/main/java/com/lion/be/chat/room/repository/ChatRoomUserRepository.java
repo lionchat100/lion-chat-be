@@ -23,7 +23,6 @@ public interface ChatRoomUserRepository extends JpaRepository<ChatRoomUser, Chat
             FROM ChatRoomUser cru
             WHERE cru.user.id IN (:userId1, :userId2)
             AND cru.chatRoom.isDeleted = false
-            AND cru.user.role <> 'BANNED'
             GROUP BY cru.chatRoom.id
             HAVING COUNT(DISTINCT cru.user.id) = 2
             """)
