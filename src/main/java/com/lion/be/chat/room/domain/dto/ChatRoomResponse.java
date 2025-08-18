@@ -4,10 +4,10 @@ import java.time.ZonedDateTime;
 
 public record ChatRoomResponse(
         Long chatRoomId,
-        String name,
+        String nickname, // sender nickname
         String lastContent,
         ZonedDateTime lastSendAt,
-        String imageUrl,
+        String imageUrl, // sender image url
         boolean isRead
 ) {
 }

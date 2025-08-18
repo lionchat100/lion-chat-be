@@ -27,7 +27,7 @@ public class ChatRoomQueryDslRepository {
         return queryFactory
                 .select(Projections.constructor(ChatRoomResponse.class,
                         chatRoom.id,
-                        otherUser.name,
+                        otherUser.nickname,
                         chatRoom.recentMessageContent,
                         chatRoom.recentMessageDt,
                         otherUser.imageUrl,
@@ -40,7 +40,6 @@ public class ChatRoomQueryDslRepository {
                 .where(
                         currentUserRoom.user.id.eq(userId)
                                 .and(otherUserRoom.user.id.ne(userId))
-                                .and(otherUserRoom.user.role.ne(Role.BANNED)) //상대방이 Banned 상태가 아니어야 함
                                 .and(chatRoom.isDeleted.isFalse())
                 )
                 .orderBy(chatRoom.recentMessageDt.desc().nullsLast())
