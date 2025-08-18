@@ -4,6 +4,7 @@ import com.lion.be.global.exception.CustomException;
 import com.lion.be.global.exception.ErrorCode;
 import com.lion.be.image.domain.entity.Image;
 import com.lion.be.image.repository.ImageRepository;
+import com.lion.be.user.domain.entity.UserPhoto;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,11 +14,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ImageUploadService {
@@ -95,23 +99,38 @@ public class ImageUploadService {
         return s3Client.utilities().getUrl(builder -> builder.bucket(bucket).key(key)).toExternalForm();
     }
 
-    @Transactional
-    public void deleteImage(Long imageId,  Long userId) {
-        Image image = imageRepository.fetchById(imageId);
+	@Transactional
+	public void deleteImage(Long imageId, Long userId) {
+		Image image = imageRepository.fetchById(imageId);
+		performImageDeletion(image, userId);
+	}
+
+	// 실제 삭제 로직을 private 메서드로 분리
+	private void performImageDeletion(Image image, Long userId) {
 		if (!image.getUploaderId().equals(userId)) {
 			throw new CustomException(ErrorCode.IMAGE_DELETE_ACCESS_DENIED);
 		}
-        deleteFromS3(image.getStoredFileName());
-        imageRepository.deleteById(image.getId());
-    }
+		deleteFromS3(image.getStoredFileName());
+		imageRepository.deleteById(image.getId());
+	}
 
-    private void deleteFromS3(String key) {
-        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
-                .bucket(bucket)
-                .key(key)
-                .build();
+	@Transactional
+	public void deleteUserPhotos(List<UserPhoto> userPhotos, Long userId) {
+		for (UserPhoto photo : userPhotos) {
+			try {
+				performImageDeletion(photo.getImage(), userId);
+			} catch (Exception e) {
+				log.warn("Failed to delete image: {}", photo.getImage().getId(), e);
+			}
+		}
+	}
 
-        s3Client.deleteObject(deleteObjectRequest);
-    }
+	private void deleteFromS3(String key) {
+		DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+			.bucket(bucket)
+			.key(key)
+			.build();
 
+		s3Client.deleteObject(deleteObjectRequest);
+	}
 }
