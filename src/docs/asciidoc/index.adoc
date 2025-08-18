@@ -258,7 +258,8 @@ operation::delete_feed_comment_success[snippets='http-request,http-response']
 === 피드 댓글 전체 조회
 
 특정 피드에 작성된 모든 댓글을 커서 페이지네이션으로 조회합니다.
-(마지막 댓글 id에 대한 추적이 필요합니다.)
+마지막 댓글 id에 대한 추적이 필요합니다.
+다음 받아올 피드 댓글이 있는지 아는 방법은 last 필드가 false인지 true인지로 판단합니다.
 
 * **요청 헤더**: `Authorization` 헤더에 Bearer 토큰이 필요합니다.
 * **페이지네이션**: `lastId`와 `size` 쿼리 파라미터를 사용하여 페이징을 제어할 수 있습니다. (예: `?lastId=0&size=10`)
@@ -334,7 +335,8 @@ operation::save_feed_success[snippets='http-request,http-response']
 === 피드 최신순 조회
 
 모든 피드를 최신순, 페이지네이션으로 조회합니다. (기본 30 page, size 쿼리 파라미터로 임의 조절 가능)
-(가장 마지막 피드의 id에 대한 추적이 필요합니다.)
+가장 마지막 피드의 id에 대한 추적이 필요합니다.
+다음 받아올 피드가 있는지 아는 방법은 last 필드가 false인지 true인지로 판단합니다.
 
 * **요청 헤더**: `Authorization` 헤더에 Bearer 토큰이 필요합니다.
 * **페이지네이션**: `lastId, size` 쿼리 파라미터를 사용하여 페이징을 제어할 수 있습니다. (예: `?lastId=10&size=10`)
@@ -347,7 +349,8 @@ operation::fetch_all_recent_feed_success[snippets='http-request,http-response']
 === 피드 좋아요순 조회
 
 모든 피드를 좋아요순, 페이지네이션으로 조회합니다.
-(가장 마지막 피드의 id와 가장 마지막 피드의 좋아요 수에 대한 추적이 필요합니다.)
+가장 마지막 피드의 id와 가장 마지막 피드의 좋아요 수에 대한 추적이 필요합니다.
+다음 받아올 피드가 있는지 아는 방법은 last 필드가 false인지 true인지로 판단합니다.
 
 * **요청 헤더**: `Authorization` 헤더에 Bearer 토큰이 필요합니다.
 * **페이지네이션**: `lastlLikeCount,lastId, size` 쿼리 파라미터를 사용하여 페이징을 제어할 수 있습니다. (예: `?lastLikeCount=10&lastId=10&size=10`)
@@ -360,7 +363,8 @@ operation::fetch_all_hot_feed_success[snippets='http-request,http-response']
 === 내가 작성한 피드 조회
 
 내가 작성한 피드를 최신순으로, 커서 페이지네이션으로 조회합니다.
-(가장 마지막 피드의 id에 대한 추적이 필요합니다.)
+가장 마지막 피드의 id에 대한 추적이 필요합니다.
+다음 받아올 피드가 있는지 아는 방법은 last 필드가 false인지 true인지로 판단합니다.
 
 * **요청 헤더**: `Authorization` 헤더에 Bearer 토큰이 필요합니다.
 * **페이지네이션**: `lastId, size` 쿼리 파라미터를 사용하여 페이징을 제어할 수 있습니다. (예: `?&lastId=10&size=10`)
