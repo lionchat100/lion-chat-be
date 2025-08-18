@@ -52,7 +52,7 @@ public class MessageService {
 
         try {
             String destination = "/topic/chatroom/" + message.getChatRoomId();
-            ChatMessageResponse response = ChatMessageResponse.toResponse(message, sender, false);
+            ChatMessageResponse response = ChatMessageResponse.toResponse(message, sender, sender.getImageUrl(), false);
             messagingTemplate.convertAndSend(destination, response);
 
             message.updateMessageStatus(MessageStatus.PUBLISHED);
