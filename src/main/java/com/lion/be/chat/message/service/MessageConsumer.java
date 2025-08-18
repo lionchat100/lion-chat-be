@@ -22,7 +22,7 @@ public class MessageConsumer {
     @RabbitListener(queues = RabbitMQConfig.CHAT_QUEUE_NAME)
     public void handleMessage(ChatMessageResponse message) {
         log.info("메시지 수신: {}", message);
-        Long senderId = message.senderId();
+        Long senderId = message.id();
         Set<ChatRoomUser> chatRoomUsers = chatRoomUserRepository.findById_ChatRoomId(message.chatRoomId());
         ChatRoomUser receiver = chatRoomUsers.stream()
                 .filter(user -> !user.getId().getUserId().equals(senderId))

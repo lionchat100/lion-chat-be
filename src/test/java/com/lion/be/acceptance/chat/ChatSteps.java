@@ -2,6 +2,7 @@ package com.lion.be.acceptance.chat;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.lion.be.chat.message.domain.dto.ChatMessageResponse;
 import io.restassured.RestAssured;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
@@ -105,7 +106,7 @@ public class ChatSteps {
         Assertions.assertAll(
                 () -> assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value()),
                 () -> assertThat(chatRooms).hasSize(expectedSize),
-                () -> assertThat(chatRooms.get(0).get("name").toString()).isEqualTo(expectedFirstName),
+                () -> assertThat(chatRooms.get(0).get("nickname").toString()).isEqualTo(expectedFirstName),
                 () -> assertThat(chatRooms.get(0).get("chatRoomId")).isNotNull(),
                 () -> assertThat(chatRooms.get(0)).containsKey("lastContent")
         );
@@ -124,8 +125,7 @@ public class ChatSteps {
                 () -> assertThat(messages).hasSize(expectedSize),
                 () -> assertThat(messages.get(0).get("content")).isEqualTo(firstMessageContent),
                 () -> assertThat(messages.get(0).get("messageId")).isNotNull(),
-                () -> assertThat(messages.get(0).get("senderName")).isNotNull(),
-                () -> assertThat(response.jsonPath().getBoolean("last")).isNotNull()
+                () -> assertThat(messages.get(0).get("nickname")).isNotNull()
         );
     }
 

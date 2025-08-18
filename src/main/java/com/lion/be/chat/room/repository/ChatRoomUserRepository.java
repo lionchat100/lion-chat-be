@@ -17,7 +17,6 @@ public interface ChatRoomUserRepository extends JpaRepository<ChatRoomUser, Chat
     @Query("SELECT DISTINCT cru FROM ChatRoomUser cru WHERE cru.id.chatRoomId = :chatRoomId")
     Set<ChatRoomUser> findById_ChatRoomId(@Param("chatRoomId") Long chatRoomId);
 
-    //Banned 유저 포함 시 실패하도록 한 채팅방 유저 조회
     @Query("""
             SELECT cru.chatRoom.id
             FROM ChatRoomUser cru
