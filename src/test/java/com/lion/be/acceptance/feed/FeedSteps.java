@@ -270,7 +270,7 @@ public class FeedSteps {
                         assertThat(feed.get("isLiked")).isEqualTo(expectedIsLiked.get(i));
 
                         Map<String, Object> user = feedResponse.get("writer");
-                        assertThat(user).containsKeys("nickname", "userId", "imageUrl");
+                        assertThat(user).containsKeys("nickname", "id", "imageUrl");
                     }
                 },
 

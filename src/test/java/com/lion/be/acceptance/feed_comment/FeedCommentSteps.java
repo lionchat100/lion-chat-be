@@ -173,7 +173,7 @@ public class FeedCommentSteps {
 
                     Map<String, Object> userResponse = (Map<String, Object>) firstComment.get(
                             "writer");
-                    assertThat(userResponse).containsKeys("userId", "nickname", "imageUrl");
+                    assertThat(userResponse).containsKeys("id", "nickname", "imageUrl");
                 },
 
                 () -> {
