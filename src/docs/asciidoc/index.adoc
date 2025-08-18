@@ -115,6 +115,19 @@ operation::check_nickname_duplicate[snippets='http-request,http-response']
 
 operation::onboarding_complete_success[snippets='http-request,http-response']
 
+[[update]]
+== 사용자 프로필 수정
+
+온보딩 완료된 유저가 프로필을 수정한다.
+
+=== 이미지 포함 bio, 선호 타입 수정
+
+operation::profile_update_success[snippets='http-request,http-response']
+
+=== 이미지 제외 bio, 선호 타입 수정
+
+operation::profile_update_without_image[snippets='http-request,http-response']
+
 [[test-endpoints]]
 == 테스트용 엔드포인트
 

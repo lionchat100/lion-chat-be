@@ -58,6 +58,18 @@ public class UserSteps {
 			.extract();
 	}
 
+	public static void 닉네임_사용가능_응답을_검증한다(ExtractableResponse<Response> response) {
+		Assertions.assertAll(
+			() -> assertThat(response.as(Boolean.class)).isTrue()
+		);
+	}
+
+	public static void 닉네임_중복_응답을_검증한다(ExtractableResponse<Response> response) {
+		Assertions.assertAll(
+			() -> assertThat(response.as(Boolean.class)).isFalse()
+		);
+	}
+
 
 	public static ExtractableResponse<Response> 회원_email를_가져온다(RequestSpecification spec, String accessToken) {
 		return RestAssured
@@ -132,18 +144,34 @@ public class UserSteps {
         );
     }
 
-	public static void 닉네임_사용가능_응답을_검증한다(ExtractableResponse<Response> response) {
-		Assertions.assertAll(
-			() -> assertThat(response.as(Boolean.class)).isTrue()
-		);
+	public static ExtractableResponse<Response> 본인_프로필을_수정한다(
+		Map<String, Object> userProfileUpdateRequest,
+		String accessToken,
+		RequestSpecification spec
+	){
+		return RestAssured
+			.given()
+			.contentType(MediaType.APPLICATION_JSON_VALUE)
+			.spec(spec)
+			.auth().oauth2(accessToken)
+			.log().all()
+			.body(userProfileUpdateRequest)
+			.when()
+			.patch("/api/users/update")
+			.then()
+			.log().all()
+			.extract();
 	}
 
-	public static void 닉네임_중복_응답을_검증한다(ExtractableResponse<Response> response) {
+	public static void 프로필_수정_완료_응답을_검증한다(ExtractableResponse<Response> response) {
 		Assertions.assertAll(
-			() -> assertThat(response.as(Boolean.class)).isFalse()
+			() -> 상태코드를_검증한다(response, HttpStatus.OK),
+			() -> assertThat(response.jsonPath().getString("message"))
+				.isEqualTo("수정이 완료되었습니다."),
+			() -> assertThat(response.jsonPath().getLong("userId"))
+				.isNotNull()
 		);
 	}
-
 
     public static void 상태코드가_200이다(ExtractableResponse<Response> response) {
         Assertions.assertAll(

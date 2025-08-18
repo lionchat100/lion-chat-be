@@ -7,6 +7,7 @@ import static com.lion.be.acceptance.user.UserSteps.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -156,6 +157,61 @@ class UserAcceptanceTest extends AcceptanceTest {
 
 			// then
 			상태코드가_401이다(response);
+		}
+	}
+
+	@Nested
+	@DisplayName("프로필 수정 인수테스트")
+	class ProfileUpdateTest {
+
+		@DisplayName("사용자가 프로필을 수정하면, 상태코드 200과 완료 메시지를 반환한다.")
+		@Test
+		void when_user_update_profile_then_response_200() throws IOException {
+			api_문서_타이틀("profile_update_success", spec);
+
+			// given
+			String accessToken = 토킷_완전_온보딩();
+
+			// given
+			ExtractableResponse<Response> imageResponse = 이미지를_업로드한다(accessToken, spec);
+			이미지_업로드_성공을_검증한다(imageResponse);
+			Long newImageId = imageResponse.jsonPath().getLong("imageId");
+
+			// given
+			Map<String, Object> updateRequest = Map.of(
+				"bio", "수정된 자기소개입니다",
+				"imageId", newImageId,
+				"preferenceType", "PREFERENCE_FOCUSED"
+			);
+
+			// when
+			var updateResponse = 본인_프로필을_수정한다(updateRequest, accessToken, spec);
+
+			// then
+			상태코드가_200이다(updateResponse);
+			프로필_수정_완료_응답을_검증한다(updateResponse);
+		}
+
+		@DisplayName("이미지 없이 bio와 preferenceType만 수정하면, 상태코드 200을 반환한다.")
+		@Test
+		void when_user_update_profile_without_image_then_response_200() throws IOException {
+			api_문서_타이틀("profile_update_without_image", spec);
+
+			// given - 온보딩 완료된 사용자
+			String accessToken = 토킷_완전_온보딩();
+
+			// given - 이미지 제외한 수정 요청
+			Map<String, Object> updateRequest = Map.of(
+				"bio", "이미지 없이 수정된 bio",
+				"preferenceType", "PREFERENCE_FOCUSED"
+			);
+
+			// when
+			var updateResponse = 본인_프로필을_수정한다(updateRequest, accessToken, spec);
+
+			// then - 수정 성공 검증
+			상태코드가_200이다(updateResponse);
+			프로필_수정_완료_응답을_검증한다(updateResponse);
 		}
 	}
 }
