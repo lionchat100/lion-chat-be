@@ -107,6 +107,7 @@ dependencies {
     implementation 'com.bucket4j:bucket4j-redis:8.7.0'
 
     implementation 'org.springframework.boot:spring-boot-starter-reactor-netty'
+    implementation 'org.springframework.boot:spring-boot-starter-activemq'
 }
 
 ext {
