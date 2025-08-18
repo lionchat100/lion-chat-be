@@ -96,4 +96,67 @@ class UserAcceptanceTest extends AcceptanceTest {
             상태코드가_401이다(labelsResponse);
         }
     }
+
+	@Nested
+	@DisplayName("닉네임 중복 체크 인수테스트")
+	class NicknameDuplicationCheckTest {
+
+		@DisplayName("사용 가능한 닉네임을 체크하면, 상태코드 200과 true를 반환한다.")
+		@Test
+		void when_check_available_nickname_then_response_200_with_true() {
+			api_문서_타이틀("check_nickname_available", spec);
+
+			// given
+			var loginResponse = 비회원이_로그인한다(spec);
+			String accessToken = loginResponse.jsonPath().getString("accessToken");
+			String availableNickname = "사용가능한닉네임123";
+
+			// when
+			var response = 닉네임_중복을_체크한다(spec, accessToken, availableNickname);
+
+			// then
+			상태코드가_200이다(response);
+			닉네임_사용가능_응답을_검증한다(response);
+		}
+
+		@DisplayName("이미 사용 중인 닉네임을 체크하면, 상태코드 200과 false를 반환한다.")
+		@Test
+		void when_check_duplicate_nickname_then_response_200_with_false() throws IOException {
+			api_문서_타이틀("check_nickname_duplicate", spec);
+
+			토킷_완전_온보딩();
+			// given - 사용자 2 로그인
+			var user1LoginResponse = 비회원이_로그인한다(spec);
+			String user1Token = user1LoginResponse.jsonPath().getString("accessToken");
+
+			// when - 사용자 1의 실제 닉네임으로 중복 체크
+			String actualNickname = "토킷개발자";
+
+			var response = 닉네임_중복을_체크한다(spec, user1Token, actualNickname);
+
+			// then
+			상태코드가_200이다(response);
+			닉네임_중복_응답을_검증한다(response);
+		}
+
+		@DisplayName("인증되지 않은 사용자가 닉네임을 체크하면, 상태코드 401을 반환한다.")
+		@Test
+		void when_unauthenticated_user_check_nickname_then_response_401() {
+			// when
+			var response = RestAssured
+				.given()
+				.contentType(MediaType.APPLICATION_JSON_VALUE)
+				.spec(spec)
+				.log().all()
+				.when()
+				.get("/api/users/check-nickname/{nickname}", "테스트닉네임")
+				.then()
+				.log().all()
+				.extract();
+
+			// then
+			상태코드가_401이다(response);
+		}
+	}
 }
+

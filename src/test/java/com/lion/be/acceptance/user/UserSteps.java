@@ -42,6 +42,23 @@ public class UserSteps {
                 .extract();
     }
 
+	public static ExtractableResponse<Response> 닉네임_중복을_체크한다(
+		RequestSpecification spec,
+		String accessToken,
+		String nickname
+	) {
+		return RestAssured
+			.given()
+			.contentType(MediaType.APPLICATION_JSON_VALUE)
+			.spec(spec)
+			.auth().oauth2(accessToken)
+			.log().all()
+			.when().get("/api/users/check-nickname/{nickname}", nickname)  // nickname 파라미터 전달
+			.then().log().all()
+			.extract();
+	}
+
+
 	public static ExtractableResponse<Response> 회원_email를_가져온다(RequestSpecification spec, String accessToken) {
 		return RestAssured
 			.given()
@@ -114,6 +131,18 @@ public class UserSteps {
             () -> assertThat(response.jsonPath().getString("mbti[0].name")).isNotNull()
         );
     }
+
+	public static void 닉네임_사용가능_응답을_검증한다(ExtractableResponse<Response> response) {
+		Assertions.assertAll(
+			() -> assertThat(response.as(Boolean.class)).isTrue()
+		);
+	}
+
+	public static void 닉네임_중복_응답을_검증한다(ExtractableResponse<Response> response) {
+		Assertions.assertAll(
+			() -> assertThat(response.as(Boolean.class)).isFalse()
+		);
+	}
 
 
     public static void 상태코드가_200이다(ExtractableResponse<Response> response) {
