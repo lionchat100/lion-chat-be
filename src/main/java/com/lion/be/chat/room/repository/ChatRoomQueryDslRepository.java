@@ -3,8 +3,10 @@ package com.lion.be.chat.room.repository;
 import com.lion.be.chat.room.domain.dto.ChatRoomResponse;
 import com.lion.be.chat.room.domain.entity.QChatRoom;
 import com.lion.be.chat.room.domain.entity.QChatRoomUser;
+import com.lion.be.image.domain.entity.QImage;
 import com.lion.be.user.domain.Role;
 import com.lion.be.user.domain.entity.QUser;
+import com.lion.be.user.domain.entity.QUserPhoto;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -23,24 +25,26 @@ public class ChatRoomQueryDslRepository {
         QChatRoomUser currentUserRoom = new QChatRoomUser("currentUserRoom");
         QChatRoomUser otherUserRoom = new QChatRoomUser("otherUserRoom");
         QUser otherUser = QUser.user;
+        QUserPhoto otherUserPhoto = QUserPhoto.userPhoto;
+        QImage otherUserImage = QImage.image;
 
         return queryFactory
                 .select(Projections.constructor(ChatRoomResponse.class,
                         chatRoom.id,
-                        otherUser.name,
+                        otherUser.nickname,
                         chatRoom.recentMessageContent,
                         chatRoom.recentMessageDt,
-                        otherUser.imageUrl,
+                        otherUserImage.imageUrl,
                         currentUserRoom.isRead.coalesce(true)
                 ))
                 .from(chatRoom)
                 .join(chatRoom.chatRoomUsers, currentUserRoom)
                 .join(chatRoom.chatRoomUsers, otherUserRoom)
                 .join(otherUserRoom.user, otherUser)
+                .join(otherUser.userPhotos, otherUserPhoto)
                 .where(
                         currentUserRoom.user.id.eq(userId)
                                 .and(otherUserRoom.user.id.ne(userId))
-                                .and(otherUserRoom.user.role.ne(Role.BANNED)) //상대방이 Banned 상태가 아니어야 함
                                 .and(chatRoom.isDeleted.isFalse())
                 )
                 .orderBy(chatRoom.recentMessageDt.desc().nullsLast())

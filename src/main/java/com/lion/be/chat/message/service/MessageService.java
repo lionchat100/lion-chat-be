@@ -133,7 +133,10 @@ public class MessageService {
 
         return messages.map(message -> {
             User sender = users.get(message.getSenderId());
-            String imageUrl = (sender != null) ? sender.getImageUrl() : null;
+            String imageUrl = null;
+            if (!sender.getUserPhotos().isEmpty()) {
+                imageUrl = sender.getUserPhotos().get(0).getImageUrl();
+            }
             return new ChatMessageResponse(
                     message.getId().toString(),
                     message.getChatRoomId(),
