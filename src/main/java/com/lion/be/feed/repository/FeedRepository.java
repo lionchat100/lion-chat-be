@@ -24,7 +24,7 @@ public interface FeedRepository extends JpaRepository<Feed, Long>, FeedRepositor
             )
             FROM Feed f
             JOIN f.user u
-            LEFT JOIN u.userPhotos up ON up.orderIndex = 0
+            LEFT JOIN u.userPhotos up ON up.orderIndex = 1
             LEFT JOIN up.image img
             WHERE f.isDeleted = false and u.role != 'BANNED'
             """)
@@ -43,7 +43,7 @@ public interface FeedRepository extends JpaRepository<Feed, Long>, FeedRepositor
             )
             FROM Feed f
             JOIN f.user u
-            LEFT JOIN u.userPhotos up ON up.orderIndex = 0
+            LEFT JOIN u.userPhotos up ON up.orderIndex = 1
             LEFT JOIN up.image img
             WHERE f.isDeleted = false AND f.id < :lastId and u.role != 'BANNED'
             """)
@@ -59,7 +59,7 @@ public interface FeedRepository extends JpaRepository<Feed, Long>, FeedRepositor
             )
             FROM Feed f
             JOIN f.user u
-            LEFT JOIN u.userPhotos up ON up.orderIndex = 0
+            LEFT JOIN u.userPhotos up ON up.orderIndex = 1
             LEFT JOIN up.image img
             WHERE f.isDeleted = false and u.role != 'BANNED'
             ORDER BY f.likeCount DESC, f.id DESC
@@ -76,7 +76,7 @@ public interface FeedRepository extends JpaRepository<Feed, Long>, FeedRepositor
             )
             FROM Feed f
             JOIN f.user u
-            LEFT JOIN u.userPhotos up ON up.orderIndex = 0
+            LEFT JOIN u.userPhotos up ON up.orderIndex = 1
             LEFT JOIN up.image img
             WHERE f.isDeleted = false and u.role != 'BANNED'
             AND (f.likeCount < :lastLikeCount OR (f.likeCount = :lastLikeCount AND f.id < :lastId))
@@ -112,7 +112,7 @@ public interface FeedRepository extends JpaRepository<Feed, Long>, FeedRepositor
             )
             FROM Feed f
             JOIN f.user u
-            LEFT JOIN u.userPhotos up ON up.orderIndex = 0
+            LEFT JOIN u.userPhotos up ON up.orderIndex = 1
             LEFT JOIN up.image img
             WHERE f.isDeleted = false AND u.id = :currentUserId
             """)
@@ -127,7 +127,7 @@ public interface FeedRepository extends JpaRepository<Feed, Long>, FeedRepositor
             )
             FROM Feed f
             JOIN f.user u
-            LEFT JOIN u.userPhotos up ON up.orderIndex = 0
+            LEFT JOIN u.userPhotos up ON up.orderIndex = 1
             LEFT JOIN up.image img
             WHERE f.isDeleted = false AND u.id = :currentUserId AND f.id < :lastId
             """)
