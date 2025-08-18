@@ -1,11 +1,20 @@
 package com.lion.be.feed.repository;
 
+import com.lion.be.feed.domain.dto.FeedResponse;
+import com.lion.be.feed.domain.entity.Feed;
 import com.lion.be.feed.domain.entity.QFeed;
+import com.lion.be.image.domain.entity.QImage;
+import com.lion.be.user.domain.Role;
+import com.lion.be.user.domain.entity.QUser;
+import com.lion.be.user.domain.entity.QUserPhoto;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 
 import java.util.List;
 
@@ -74,5 +83,53 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
                 .set(feed.commentCount, commentCountCase.otherwise(feed.commentCount)) // 기존 좋아요 수를 유지
                 .where(feed.id.in(feedIds))
                 .execute();
+    }
+
+//    @Override
+    public Slice<FeedResponse> fetchRecentFeedsFirst(Pageable pageable) {
+        QFeed feed = QFeed.feed;
+        QUser user = QUser.user;
+        QUserPhoto userPhoto = QUserPhoto.userPhoto;
+        QImage image = QImage.image;
+
+
+        List<Long> targetIds = queryFactory
+                .select(feed.id)
+                .from(feed)
+                .where(feed.isDeleted.eq(false),
+                        feed.user.role.ne(Role.BANNED))
+                .fetch();
+
+//        List<FeedResponse> feeds = queryFactory
+//                .select(Projections.constructor(FeedResponse.class,
+//                        )
+//                )
+
+        return null;
+    }
+
+//    @Override
+    public Slice<FeedResponse> fetchRecentFeedsAfter(Long lastId, Pageable pageable) {
+        return null;
+    }
+
+//    @Override
+    public Slice<FeedResponse> fetchHotFeedsFirst(Pageable pageable) {
+        return null;
+    }
+
+//    @Override
+    public Slice<FeedResponse> fetchHotFeedsAfter(Long lastLikeCount, Long lastId, Pageable pageable) {
+        return null;
+    }
+
+//    @Override
+    public Slice<FeedResponse> fetchFeedsByUserIdFirst(Pageable pageable) {
+        return null;
+    }
+
+//    @Override
+    public Slice<FeedResponse> fetchFeedsByUserIdAfter(Long lastId, Pageable pageable) {
+        return null;
     }
 }

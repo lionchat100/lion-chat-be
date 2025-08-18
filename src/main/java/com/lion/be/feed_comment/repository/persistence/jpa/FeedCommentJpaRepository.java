@@ -18,7 +18,7 @@ public interface FeedCommentJpaRepository extends JpaRepository<FeedComment, Lon
             + ") " +
             "FROM FeedComment c " +
             "JOIN c.user u "+
-            "LEFT JOIN u.userPhotos up ON up.orderIndex = 0 "+
+            "LEFT JOIN u.userPhotos up ON up.orderIndex = 1 "+
             "LEFT JOIN up.image img "+
             "WHERE c.feed.id = :feedId "
             + "AND c.isDeleted = false "
@@ -43,7 +43,7 @@ public interface FeedCommentJpaRepository extends JpaRepository<FeedComment, Lon
             + ") " +
             "FROM FeedComment c " +
             "JOIN c.user u "+
-            "LEFT JOIN u.userPhotos up ON up.orderIndex = 0 "+
+            "LEFT JOIN u.userPhotos up ON up.orderIndex = 1 "+
             "LEFT JOIN up.image img "+
             "WHERE c.id = :commentId "
             + "AND c.isDeleted = false "
@@ -65,7 +65,7 @@ public interface FeedCommentJpaRepository extends JpaRepository<FeedComment, Lon
             )
             FROM FeedComment c
             JOIN c.user u
-            LEFT JOIN u.userPhotos up ON up.orderIndex = 0
+            LEFT JOIN u.userPhotos up ON up.orderIndex = 1
             LEFT JOIN up.image img
             WHERE c.feed.id = :feedId and c.isDeleted = false and u.role != 'BANNED'
             """)
@@ -78,7 +78,7 @@ public interface FeedCommentJpaRepository extends JpaRepository<FeedComment, Lon
             )
             FROM FeedComment c
             JOIN c.user u
-            LEFT JOIN u.userPhotos up ON up.orderIndex = 0
+            LEFT JOIN u.userPhotos up ON up.orderIndex = 1
             LEFT JOIN up.image img
             WHERE c.feed.id = :feedId and c.isDeleted = false and u.role != 'BANNED' and c.id > :lastId
             """)
