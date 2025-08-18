@@ -359,23 +359,25 @@ public class FeedAcceptanceTest extends AcceptanceTest {
     void when_call_my_feeds_then_return_my_feeds() throws IOException {
         // given
         api_문서_타이틀("fetch_my_feeds_success", spec);
-		String accessToken = 토킷_완전_온보딩();;
+		String accessToken1 = 토킷_완전_온보딩();
+        String accessToken2 = 원준_완전_온보딩();
 
         List<String> feedTitles = List.of("내 피드 1", "내 피드 2", "내 피드 3");
         List<String> feedContents = List.of("내용 1", "내용 2", "내용 3");
 
-        for (int i = 0; i < feedTitles.size(); i++) {
-            피드의_제한을_조심하며_작성한다(accessToken, spec, feedTitles.get(i), feedContents.get(i));
+        피드를_작성한다(accessToken2, spec, feedTitles.get(0), feedContents.get(0));
+        for (int i = 1; i < feedTitles.size(); i++) {
+            피드의_제한을_조심하며_작성한다(accessToken1, spec, feedTitles.get(i), feedContents.get(i));
         }
 
-        List<String> expectedTitles = List.of("내 피드 3", "내 피드 2", "내 피드 1");
-        List<String> expectedContents = List.of("내용 3", "내용 2", "내용 1");
+        List<String> expectedTitles = List.of("내 피드 3", "내 피드 2");
+        List<String> expectedContents = List.of("내용 3", "내용 2");
 
         // when
-        ExtractableResponse<Response> response = 내_피드를_조회한다(accessToken, spec,null,null);
+        ExtractableResponse<Response> response = 내_피드를_조회한다(accessToken1, spec,null,null);
 
         // then
-        피드_전체_조회_응답을_검증한다(response, 3, expectedTitles, expectedContents, List.of(false, false, false));
+        피드_전체_조회_응답을_검증한다(response, 2, expectedTitles, expectedContents, List.of(false, false));
     }
 
     @Test
@@ -383,6 +385,7 @@ public class FeedAcceptanceTest extends AcceptanceTest {
     void when_write_feeds_twice_in_3seconds_then_429() throws IOException {
         //given
 		String accessToken = 토킷_완전_온보딩();
+        String accessToken2 = 원준_완전_온보딩();
 
         List<String> feedTitles = List.of("내 피드 1", "내 피드 2");
         List<String> feedContents = List.of("내용 1", "내용 2");
@@ -395,6 +398,7 @@ public class FeedAcceptanceTest extends AcceptanceTest {
         //then
         다회_요청제한을_검증한다(response);
     }
+
 
     @Test
     @DisplayName("같은 유저가 10초 내에 글을 5번 쓰면 실패한다.")
