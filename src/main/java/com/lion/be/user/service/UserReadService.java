@@ -116,4 +116,7 @@ public class UserReadService {
         return new UserIdResponse(user.getId());
     }
 
+	public boolean existsByNickname(String nickname) {
+		return userRepository.existsByNickname(nickname);
+	}
 }
