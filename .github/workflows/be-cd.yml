@@ -59,6 +59,6 @@ jobs:
       - name: Auto Scaling Group 인스턴스 새로고침 시작
         run: |
           aws autoscaling start-instance-refresh \
-            --auto-scaling-group-name lionchat-be-asg \
+            --auto-scaling-group-name tokit-asg \
             --strategy "Rolling" \
-            --preferences "MinHealthyPercentage=50"```
+            --preferences "MinHealthyPercentage=50"
