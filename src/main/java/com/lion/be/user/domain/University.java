@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum University {
+	PROFESSIONAL("현직자"),
+	JOBLESS("취업준비생"),
 	CATHOLIC("가톨릭대학교"),
 	KANGNAM("강남대학교"),
 	KYUNGPOOK("경북대학교"),
