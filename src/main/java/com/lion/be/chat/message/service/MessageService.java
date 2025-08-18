@@ -13,6 +13,10 @@ import com.lion.be.global.exception.CustomException;
 import com.lion.be.global.exception.ErrorCode;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.repository.persistence.jpa.UserJpaRepository;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -20,12 +24,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,38 +36,49 @@ public class MessageService {
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomUserRepository chatRoomUserRepository;
-    private final MessageBroker messageBroker;
+    private final SimpMessagingTemplate messagingTemplate;
 
     public void sendMessage(ChatMessageRequest request, Long senderId) {
         ChatRoom chatRoom = chatRoomRepository.findById(request.chatRoomId())
                 .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
-        log.info("메시지 요청 들어옴: {}, senderId: {}", request, senderId);
 
         User sender = userRepository.findById(senderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         ChatMessage message = ChatMessageRequest.fromRequest(request, sender);
+
         message.updateMessageStatus(MessageStatus.PENDING);
         chatMessageRepository.save(message);
-        log.info("메시지 저장됨: {}", message);
+        log.info("메시지 PENDING 상태로 저장됨: {}", message);
 
-        message.updateMessageStatus(MessageStatus.PUBLISHED);
-        messageBroker.publishMessage(message);
-        chatMessageRepository.save(message);
-        log.info("메시지 발행 완료: {}", message);
+        try {
+            String destination = "/topic/chatroom/" + message.getChatRoomId();
+            ChatMessageResponse response = ChatMessageResponse.toResponse(message, sender, sender.getImageUrl(), false);
+            messagingTemplate.convertAndSend(destination, response);
 
-        chatRoom.updateRecentMessage(message.getContent(), message.getCreatedAt());
-        chatRoomRepository.save(chatRoom);
-        log.info("채팅방 마지막 내용, 시간 업데이트됨: {}번 방", chatRoom.getId());
+            message.updateMessageStatus(MessageStatus.PUBLISHED);
+            chatMessageRepository.save(message);
+            log.info("메시지 발행 성공. 상태를 PUBLISHED로 변경합니다.");
 
-        ChatRoomUser chatRoomUser = chatRoomUserRepository.findById_ChatRoomIdAndId_UserId(message.getChatRoomId(), senderId);
-        chatRoomUser.markAsRead();
-        chatRoomUserRepository.save(chatRoomUser);
+            chatRoom.updateRecentMessage(message.getContent(), message.getCreatedAt());
+            chatRoomRepository.save(chatRoom);
+            log.info("채팅방 마지막 내용, 시간 업데이트됨: {}번 방", chatRoom.getId());
 
-        ChatRoomUser receiverChatRoomUser = chatRoomUserRepository.findById_ChatRoomId(message.getChatRoomId()).stream()
-                .filter(cru -> !cru.getUser().getId().equals(senderId))
-                .findFirst().orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
-        receiverChatRoomUser.markAsUnRead();
-        chatRoomUserRepository.save(receiverChatRoomUser);
+            ChatRoomUser chatRoomUser = chatRoomUserRepository.findById_ChatRoomIdAndId_UserId(message.getChatRoomId(),
+                    senderId);
+            chatRoomUser.markAsRead();
+            chatRoomUserRepository.save(chatRoomUser);
+
+            ChatRoomUser receiverChatRoomUser = chatRoomUserRepository.findById_ChatRoomId(message.getChatRoomId())
+                    .stream()
+                    .filter(cru -> !cru.getUser().getId().equals(senderId))
+                    .findFirst().orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
+            receiverChatRoomUser.markAsUnRead();
+            chatRoomUserRepository.save(receiverChatRoomUser);
+
+        } catch (Exception e) {
+            log.error("메시지 발행에 실패했습니다. 메시지는 PENDING 상태로 유지됩니다. MessageId: {}, Error: {}",
+                    message.getId(), e.getMessage());
+        }
     }
 
     public void updateReadStatus(String messageId, Long userId) {
@@ -138,4 +149,5 @@ public class MessageService {
             );
         }).getContent();
     }
+
 }
