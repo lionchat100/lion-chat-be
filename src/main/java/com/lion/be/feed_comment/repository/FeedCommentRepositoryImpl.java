@@ -1,17 +1,27 @@
 package com.lion.be.feed_comment.repository;
 
+import com.lion.be.feed.domain.entity.QFeed;
 import com.lion.be.feed_comment.domain.dto.FeedCommentResponse;
 import com.lion.be.feed_comment.domain.dto.FeedCommentSaveResponse;
 import com.lion.be.feed_comment.domain.entity.FeedComment;
 import com.lion.be.feed_comment.domain.entity.QFeedComment;
 import com.lion.be.feed_comment.repository.persistence.jpa.FeedCommentJpaRepository;
+import com.lion.be.global.aop.ElapsedTime;
+import com.lion.be.image.domain.entity.QImage;
+import com.lion.be.user.domain.Role;
+import com.lion.be.user.domain.entity.QUser;
+import com.lion.be.user.domain.entity.QUserPhoto;
+import com.querydsl.core.Query;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -61,15 +71,77 @@ public class FeedCommentRepositoryImpl implements FeedCommentRepository {
                 .orElseThrow(() -> new RuntimeException("TODO"));
     }
 
+    @ElapsedTime
     @Override
     public Slice<FeedCommentResponse> fetchAllByFeedIdFirst(Long feedId, Pageable pageable) {
-        return feedCommentJpaRepository.findAllByFeedIdFirst(feedId, pageable);
+        int size = pageable.getPageSize();
+        int limit = size + 1;
+        QUser user = QUser.user;
+        QFeedComment comment = QFeedComment.feedComment;
+        QUserPhoto userPhoto = QUserPhoto.userPhoto;
+        QImage image = QImage.image;
+
+        List<Long> targetIds =
+                queryFactory.select(comment.id)
+                        .from(comment)
+                        .join(user).on(comment.user.id.eq(user.id),user.role.ne(Role.BANNED))
+                        .where(comment.isDeleted.eq(false), comment.feed.id.eq(feedId))
+                        .limit(limit)
+                        .fetch();
+
+        return getFeedCommentResponses(pageable, size, user, comment, userPhoto, image, targetIds);
     }
 
+    @ElapsedTime
     @Override
     public Slice<FeedCommentResponse> fetchAllByFeedIdAfter(Long feedId, Long lastId, Pageable pageable) {
-        return feedCommentJpaRepository.findAllByFeedIdAfter(feedId, lastId, pageable);
+        int size = pageable.getPageSize();
+        int limit = size + 1;
+        QUser user = QUser.user;
+        QFeedComment comment = QFeedComment.feedComment;
+        QUserPhoto userPhoto = QUserPhoto.userPhoto;
+        QImage image = QImage.image;
+
+        List<Long> targetIds =
+                queryFactory.select(comment.id)
+                        .from(comment)
+                        .join(user).on(comment.user.id.eq(user.id), user.role.ne(Role.BANNED))
+                        .where(comment.isDeleted.eq(false), comment.feed.id.eq(feedId), comment.id.gt(lastId))
+                        .limit(limit)
+                        .fetch();
+
+        return getFeedCommentResponses(pageable, size, user, comment, userPhoto, image, targetIds);
     }
+
+    @NotNull
+    private Slice<FeedCommentResponse> getFeedCommentResponses(Pageable pageable, int size, QUser user, QFeedComment comment, QUserPhoto userPhoto, QImage image, List<Long> targetIds) {
+        List<FeedCommentResponse> contents =
+                queryFactory.select(Projections.constructor(FeedCommentResponse.class,
+                        comment.id,
+                        comment.feed.id,
+                        comment.content,
+                        comment.createdAt,
+                        user.id,
+                        user.nickname,
+                        image.imageUrl,
+                        comment.likeCount
+                        ))
+                        .from(comment)
+                        .join(user).on(comment.user.id.eq(user.id))
+                        .leftJoin(userPhoto).on(user.id.eq(userPhoto.user.id), userPhoto.orderIndex.eq(1))
+                        .leftJoin(image).on(userPhoto.image.id.eq(image.id))
+                        .where(comment.id.in(targetIds))
+                        .fetch();
+
+        boolean hasNext = false;
+        if(contents.size() > size){
+            hasNext = true;
+            contents.remove(size);
+        }
+
+        return new SliceImpl<>(contents, pageable, hasNext);
+    }
+
 
     @Override
     public void batchUpdateFeedCommentLikeCount(List<Long> commentIds, List<Long> likeCounts) {
