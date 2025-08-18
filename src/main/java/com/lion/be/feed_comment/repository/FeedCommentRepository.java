@@ -26,4 +26,7 @@ public interface FeedCommentRepository {
 
     void batchUpdateFeedCommentLikeCount(List<Long> commentIds, List<Long> likeCounts);
 
+    Slice<FeedCommentResponse> fetchAllByFeedIdFirst(Long feedId, Pageable pageable);
+
+    Slice<FeedCommentResponse> fetchAllByFeedIdAfter(Long feedId, Long lastId, Pageable pageable);
 }

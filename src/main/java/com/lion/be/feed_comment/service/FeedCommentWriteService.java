@@ -72,7 +72,7 @@ public class FeedCommentWriteService {
         User user = userReadService.fetchById(requestedUserId);
 
         // 댓글 작성자와 요청한 사용자가 일치하는지 확인
-        Long writerId = feedComment.feedCommentUserResponse().userId();
+        Long writerId = feedComment.writer().userId();
         if(!requestedUserId.equals(writerId) && !user.getRole().equals(Role.ADMIN)) {
             throw new CustomException(ErrorCode.USER_UNAUTHORIZED);
         }

@@ -1,5 +1,8 @@
 package com.lion.be.feed.repository;
 
+import com.lion.be.feed.domain.dto.FeedResponse;
+import org.springframework.data.domain.Slice;
+
 import java.util.List;
 
 public interface FeedRepositoryCustom {

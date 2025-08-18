@@ -62,6 +62,16 @@ public class FeedCommentRepositoryImpl implements FeedCommentRepository {
     }
 
     @Override
+    public Slice<FeedCommentResponse> fetchAllByFeedIdFirst(Long feedId, Pageable pageable) {
+        return feedCommentJpaRepository.findAllByFeedIdFirst(feedId, pageable);
+    }
+
+    @Override
+    public Slice<FeedCommentResponse> fetchAllByFeedIdAfter(Long feedId, Long lastId, Pageable pageable) {
+        return feedCommentJpaRepository.findAllByFeedIdAfter(feedId, lastId, pageable);
+    }
+
+    @Override
     public void batchUpdateFeedCommentLikeCount(List<Long> commentIds, List<Long> likeCounts) {
         // 배치 업데이트 로직 구현
         QFeedComment feedComment = QFeedComment.feedComment;

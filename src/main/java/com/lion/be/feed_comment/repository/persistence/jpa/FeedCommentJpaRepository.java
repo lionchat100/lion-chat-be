@@ -2,6 +2,7 @@ package com.lion.be.feed_comment.repository.persistence.jpa;
 
 import com.lion.be.feed_comment.domain.dto.FeedCommentResponse;
 import com.lion.be.feed_comment.domain.entity.FeedComment;
+import com.lion.be.global.aop.ElapsedTime;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,11 +12,14 @@ import org.springframework.data.repository.query.Param;
 
 public interface FeedCommentJpaRepository extends JpaRepository<FeedComment, Long> {
 
+    @ElapsedTime
     @Query("SELECT NEW com.lion.be.feed_comment.domain.dto.FeedCommentResponse(" +
-            "c.id, c.feed.id, c.content, c.createdAt, c.updatedAt, u.id, u.name, u.imageUrl, c.likeCount" // c.likeCount 추가
+            "c.id, c.feed.id, c.content, c.createdAt, u.id, u.nickname, img.imageUrl, c.likeCount" // c.likeCount 추가
             + ") " +
             "FROM FeedComment c " +
-            "JOIN c.user u " +
+            "JOIN c.user u "+
+            "LEFT JOIN u.userPhotos up ON up.orderIndex = 0 "+
+            "LEFT JOIN up.image img "+
             "WHERE c.feed.id = :feedId "
             + "AND c.isDeleted = false "
             + "AND u.role != 'BANNED'")
@@ -33,11 +37,14 @@ public interface FeedCommentJpaRepository extends JpaRepository<FeedComment, Lon
             + "WHERE c.id = :id")
     void updateLikeCount(@Param("id") Long id, @Param("likeCount") long likeCount);
 
+    @ElapsedTime
     @Query("SELECT NEW com.lion.be.feed_comment.domain.dto.FeedCommentResponse(" +
-            "c.id, c.feed.id, c.content, c.createdAt, c.updatedAt, u.id, u.name, u.imageUrl, c.likeCount" // c.likeCount 추가
+            "c.id, c.feed.id, c.content, c.createdAt, u.id, u.nickname, img.imageUrl, c.likeCount" // c.likeCount 추가
             + ") " +
             "FROM FeedComment c " +
-            "JOIN c.user u " +
+            "JOIN c.user u "+
+            "LEFT JOIN u.userPhotos up ON up.orderIndex = 0 "+
+            "LEFT JOIN up.image img "+
             "WHERE c.id = :commentId "
             + "AND c.isDeleted = false "
             + "AND u.role != 'BANNED'")
@@ -50,5 +57,31 @@ public interface FeedCommentJpaRepository extends JpaRepository<FeedComment, Lon
         where c.feed.id = :feedId
     """)
     void softDeleteByFeedId(@Param("feedId") Long feedId);
+
+    @ElapsedTime
+    @Query("""
+            SELECT NEW com.lion.be.feed_comment.domain.dto.FeedCommentResponse(
+            c.id, c.feed.id, c.content, c.createdAt, u.id, u.nickname, img.imageUrl, c.likeCount
+            )
+            FROM FeedComment c
+            JOIN c.user u
+            LEFT JOIN u.userPhotos up ON up.orderIndex = 0
+            LEFT JOIN up.image img
+            WHERE c.feed.id = :feedId and c.isDeleted = false and u.role != 'BANNED'
+            """)
+    Slice<FeedCommentResponse> findAllByFeedIdFirst(@Param("feedId")Long feedId, Pageable pageable);
+
+    @ElapsedTime
+    @Query("""
+            SELECT NEW com.lion.be.feed_comment.domain.dto.FeedCommentResponse(
+            c.id, c.feed.id, c.content, c.createdAt, u.id, u.nickname, img.imageUrl, c.likeCount
+            )
+            FROM FeedComment c
+            JOIN c.user u
+            LEFT JOIN u.userPhotos up ON up.orderIndex = 0
+            LEFT JOIN up.image img
+            WHERE c.feed.id = :feedId and c.isDeleted = false and u.role != 'BANNED' and c.id > :lastId
+            """)
+    Slice<FeedCommentResponse> findAllByFeedIdAfter(@Param("feedId")Long feedId, @Param("lastId")Long lastId, Pageable pageable);
 
 }

@@ -165,15 +165,15 @@ public class FeedCommentSteps {
                 () -> {
                     Map<String, Object> firstComment = content.get(0);
 
-                    assertThat(firstComment).containsKeys("id", "feedId", "feedCommentUserResponse", "content",
-                            "createdAt", "updatedAt", "likeCount", "isLiked");
+                    assertThat(firstComment).containsKeys("id", "feedId", "writer", "content",
+                            "createdAt", "likeCount", "isLiked");
                     assertThat(firstComment.get("content")).isEqualTo("댓글1");
 
-                    assertThat(firstComment.get("feedCommentUserResponse")).isInstanceOf(Map.class);
+                    assertThat(firstComment.get("writer")).isInstanceOf(Map.class);
 
                     Map<String, Object> userResponse = (Map<String, Object>) firstComment.get(
-                            "feedCommentUserResponse");
-                    assertThat(userResponse).containsKeys("userId", "name", "imageUrl");
+                            "writer");
+                    assertThat(userResponse).containsKeys("userId", "nickname", "imageUrl");
                 },
 
                 () -> {
