@@ -61,4 +61,4 @@ jobs:
           aws autoscaling start-instance-refresh \
             --auto-scaling-group-name lionchat-be-asg \
             --strategy "Rolling" \
-            --preferences "MinHealthyPercentage=50"```
+            --preferences "MinHealthyPercentage=50"
