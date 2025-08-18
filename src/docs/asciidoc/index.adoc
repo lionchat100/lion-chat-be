@@ -96,6 +96,16 @@ operation::should_deny_access_when_regular_user_tries_unban[snippets='http-reque
 
 operation::fetch_labels_success[snippets='http-request,http-response']
 
+[[nickname-check]]
+=== 닉네임 체크
+로그인 된 유저가 닉네임을 체크하면 boolean값으로 보내준다.
+
+==== 성공
+operation::check_nickname_available[snippets='http-request,http-response']
+
+==== 실패
+operation::check_nickname_duplicate[snippets='http-request,http-response']
+
 [[onboarding]]
 === 온보딩 완료
 
@@ -442,7 +452,7 @@ operation::backend_cluster_recommendation[snippets='http-request,http-response']
 
 operation::my_profile_card[snippets='http-request,http-response']
 
-=== 클러스터에서 필터를 통해 포지션 중심으로 추천받습니다. ( 필터로 선택된 포지션 외의 포지션은 검색 X)
+=== 클러스터에서 필터를 통해 포지션 중심으로 추천받습니다.
 
 포지션 별 추천 패턴을 확인할수 있습니다 (BACKEND,PM,FULLSTACK..)
 
