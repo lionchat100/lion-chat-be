@@ -4,26 +4,36 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
-import org.springframework.messaging.simp.stomp.StompReactorNettyCodec;
-import org.springframework.messaging.tcp.reactor.ReactorNettyTcpClient;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
 @Configuration
-@Profile("!test") // "test" 프로필이 아닐 때만 이 설정을 사용
+@Profile("!test") // "test" 프로필이 아닐 때만 이 설정을 사용 (운영/개발 환경)
 public class WebSocketProdConfig implements WebSocketMessageBrokerConfigurer {
+
+    // application.yml에 정의된 RabbitMQ 접속 정보
+    @Value("${spring.rabbitmq.host}")
+    private String host;
+
+    @Value("${spring.rabbitmq.username}")
+    private String username;
+
+    @Value("${spring.rabbitmq.password}")
+    private String password;
+
+    // 포트는 STOMP 기본 포트인 61613을 사용합니다.
+    private static final int STOMP_PORT = 61613;
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        // Amazon MQ for RabbitMQ는 STOMP를 직접 지원하지 않으므로,
-        // 스프링의 내장 SimpleBroker를 사용하도록 변경합니다.
-        // 이 코드는 클라이언트와 서버 간의 STOMP 통신을 처리합니다.
-        // 서버와 RabbitMQ 간의 통신은 RabbitTemplate과 @RabbitListener가 AMQP로 담당합니다.
-
-        // "/topic", "/queue"를 목적지로 하는 메시지를 SimpleBroker가 처리
-        registry.enableSimpleBroker("/topic", "/queue");
-
-        // 클라이언트가 메시지를 보낼 때 사용할 접두사
-        registry.setApplicationDestinationPrefixes("/app");
+        // 이 부분이 스케일 아웃을 가능하게 하는 핵심 설정입니다.
+        registry.setApplicationDestinationPrefixes("/app"); // 메시지 발행 prefix
+        registry.enableStompBrokerRelay("/topic", "/queue") // 구독 prefix. 외부 브로커(RabbitMQ) 사용 설정
+                .setRelayHost(host)
+                .setRelayPort(STOMP_PORT)
+                .setClientLogin(username)
+                .setClientPasscode(password)
+                .setSystemLogin(username)
+                .setSystemPasscode(password);
     }
 
 }
