@@ -257,10 +257,11 @@ operation::delete_feed_comment_success[snippets='http-request,http-response']
 [[fetch-all-feed-comments]]
 === 피드 댓글 전체 조회
 
-특정 피드에 작성된 모든 댓글을 페이지네이션으로 조회합니다.
+특정 피드에 작성된 모든 댓글을 커서 페이지네이션으로 조회합니다.
+(마지막 댓글 id에 대한 추적이 필요합니다.)
 
 * **요청 헤더**: `Authorization` 헤더에 Bearer 토큰이 필요합니다.
-* **페이지네이션**: `page`와 `size` 쿼리 파라미터를 사용하여 페이징을 제어할 수 있습니다. (예: `?page=0&size=10`)
+* **페이지네이션**: `lastId`와 `size` 쿼리 파라미터를 사용하여 페이징을 제어할 수 있습니다. (예: `?lastId=0&size=10`)
 
 ==== 성공
 
