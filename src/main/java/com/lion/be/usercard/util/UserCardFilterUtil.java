@@ -33,6 +33,11 @@ import lombok.extern.slf4j.Slf4j;
  * 1. UserVectorizer의 9차원 벡터 로직을 활용한 클러스터 맵 생성
  * 2. MBTI(16) × Position(5) = 80가지 조합을 6개 클러스터로 분류
  * 3. 코사인 유사도 기반 클러스터 중심점 매칭
+ *
+ * 메서드 호출 순서
+ * 1.getRecommendedUsers
+ * 2.getClusterBasedRecommendations (여기서 클러스터 사용자 조회 및 유사도 계산 (calculateSimilarity메서드 사용))
+ *
  */
 @Slf4j
 @Component

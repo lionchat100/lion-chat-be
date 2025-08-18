@@ -12,6 +12,8 @@ import com.lion.be.auth.domain.UserPrincipal;
 import com.lion.be.user.controller.dto.OnboardingLabelsResponse;
 import com.lion.be.user.controller.dto.OnboardingRequest;
 import com.lion.be.user.controller.dto.OnboardingResponse;
+import com.lion.be.user.controller.dto.UserProfileUpdateRequest;
+import com.lion.be.user.controller.dto.UserProfileUpdateResponse;
 import com.lion.be.user.service.UserReadService;
 import com.lion.be.user.service.UserWriteService;
 
@@ -64,6 +66,16 @@ public class UserController {
 		boolean isDuplicate = userReadService.existsByNickname(nickname);
 
 		return ResponseEntity.ok(!isDuplicate);
+	}
+
+	@PatchMapping("/update")
+	public ResponseEntity<UserProfileUpdateResponse> updateUserProfile(
+		@AuthenticationPrincipal UserPrincipal userPrincipal,
+		@Valid @RequestBody UserProfileUpdateRequest userProfileRequest
+	){
+		UserProfileUpdateResponse response = userWriteService.updateUserProfile(userPrincipal, userProfileRequest);
+
+		return ResponseEntity.ok(response);
 	}
 
 }

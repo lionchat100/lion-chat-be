@@ -1,16 +1,21 @@
 package com.lion.be.user.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.lion.be.auth.domain.UserPrincipal;
 import com.lion.be.global.exception.CustomException;
 import com.lion.be.global.exception.ErrorCode;
 import com.lion.be.image.domain.entity.Image;
 import com.lion.be.image.repository.ImageRepository;
+import com.lion.be.image.service.ImageUploadService;
 import com.lion.be.user.controller.dto.OnboardingRequest;
 import com.lion.be.user.controller.dto.OnboardingResponse;
+import com.lion.be.user.controller.dto.UserProfileUpdateRequest;
+import com.lion.be.user.controller.dto.UserProfileUpdateResponse;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.domain.entity.dto.OnboardingData;
 import com.lion.be.user.repository.UserRepository;
@@ -26,6 +31,7 @@ public class UserWriteService {
     private final UserRepository userRepository;
     private final UserCardFilterUtil userCardFilterUtil;
 	private final ImageRepository imageRepository;
+	private final ImageUploadService imageUploadService;
 
 	public void save(User user) {
         userRepository.save(user);
@@ -81,5 +87,33 @@ public class UserWriteService {
 
 	private Integer assignClusterToNewUser(User newUser) {
 		return userCardFilterUtil.assignNewUserToCluster(newUser);
+	}
+
+	public UserProfileUpdateResponse updateUserProfile(UserPrincipal userPrincipal,
+		UserProfileUpdateRequest request) {
+		User user = userRepository.fetchById(userPrincipal.getId())
+			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+		if (request.bio() != null) {
+			user.updateBio(request.bio());
+		}
+
+		if (request.preferenceType() != null) {
+			user.updatePreferenceType(request.preferenceType());
+		}
+
+		if (request.imageIds() != null) {
+			imageUploadService.deleteUserPhotos(new ArrayList<>(user.getUserPhotos()), user.getId());
+
+			user.getUserPhotos().clear();
+
+			List<Image> images = validateAndGetImages(request.imageIds());
+			for (int i = 0; i < images.size(); i++) {
+				user.addProfileImage(images.get(i), i + 1);
+			}
+		}
+
+		userRepository.save(user);
+		return UserProfileUpdateResponse.success(user.getId());
 	}
 }

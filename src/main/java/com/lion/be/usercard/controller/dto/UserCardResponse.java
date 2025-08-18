@@ -3,6 +3,7 @@ package com.lion.be.usercard.controller.dto;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.lion.be.user.domain.Mbti;
 import com.lion.be.user.domain.Position;
 import com.lion.be.user.domain.PreferenceType;
 import com.lion.be.user.domain.University;
@@ -15,6 +16,7 @@ public record UserCardResponse (
 	University university,
 	Boolean isUniversityVisible,
 	Position position,
+	Mbti mbti,
 	List<String> imageUrls,
 	String bio,
 	@JsonProperty("focusType")
@@ -31,6 +33,7 @@ public record UserCardResponse (
 			user.getUniversity(),
 			user.getIsUniversityView(),
 			user.getPosition(),
+			user.getMbti(),
 			user.getUserPhotos().stream()
 				.map(UserPhoto::getImageUrl)
 				.toList(),
