@@ -33,7 +33,7 @@ public class RabbitMessageBroker implements MessageBroker {
 
                 log.warn("메시지 라우팅 실패: {}", response);
 
-                ChatMessage chatMessage = ChatMessageResponse.fromResponse(response, userRepository.findById(response.senderId()));
+                ChatMessage chatMessage = ChatMessageResponse.fromResponse(response, userRepository.findById(response.id()));
                 chatMessage.updateMessageStatus(MessageStatus.PENDING);
                 chatMessageRepository.save(chatMessage);
 
@@ -55,8 +55,14 @@ public class RabbitMessageBroker implements MessageBroker {
     public void publishMessage(ChatMessage message) {
         String routingKey = "chat.message." + message.getChatRoomId();
         User sender = userRepository.findById(message.getSenderId());
+        String imageUrl;
 
-        ChatMessageResponse response = ChatMessageResponse.toResponse(message, sender, false);
+        if (!sender.getUserPhotos().isEmpty()) {
+            imageUrl = sender.getUserPhotos().get(0).getImageUrl();
+        } else {
+            imageUrl = null;
+        }
+        ChatMessageResponse response = ChatMessageResponse.toResponse(message, sender, imageUrl, false);
 
         rabbitTemplate.convertAndSend(
                 RabbitMQConfig.CHAT_EXCHANGE_NAME,

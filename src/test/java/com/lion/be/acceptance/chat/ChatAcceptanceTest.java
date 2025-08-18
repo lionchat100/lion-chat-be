@@ -92,7 +92,7 @@ public class ChatAcceptanceTest extends AcceptanceTest {
             var response = 자신의_채팅방_목록을_조회한다(사용자1_토큰, spec);
 
             // then
-            채팅방_목록_조회_응답을_검증한다(response, 2, "김백엔드");
+            채팅방_목록_조회_응답을_검증한다(response, 2, "백엔드전문가");
         }
 
     }

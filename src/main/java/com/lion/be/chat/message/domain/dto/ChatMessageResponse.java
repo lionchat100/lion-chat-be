@@ -10,17 +10,17 @@ import java.time.ZonedDateTime;
 public record ChatMessageResponse(
         String messageId,
         Long chatRoomId,
-        Long senderId,
-        String senderName,
-        String senderImageUrl,
+        Long id, // sender id
+        String nickname, // sender nickname
+        String imageUrl, // sender image url
         ZonedDateTime createdAt,
         String content,
         boolean isEnd
 ) {
     public static ChatMessage fromResponse(ChatMessageResponse response, User sender) {
         return new ChatMessage(
-                response.senderId(),
-                sender.getName(),
+                response.id(),
+                sender.getNickname(),
                 response.chatRoomId(),
                 response.createdAt(),
                 response.content(),
@@ -29,13 +29,13 @@ public record ChatMessageResponse(
         );
     }
 
-    public static ChatMessageResponse toResponse(ChatMessage message, User sender, boolean isEnd) {
+    public static ChatMessageResponse toResponse(ChatMessage message, User sender, String imageUrl, boolean isEnd) {
         return new ChatMessageResponse(
                 message.getId() != null ? message.getId().toString() : new ObjectId().toString(),
                 message.getChatRoomId(),
                 message.getSenderId(),
-                sender.getName(),
-                sender.getImageUrl() != null ? sender.getImageUrl() : "",
+                sender.getNickname(),
+                imageUrl,
                 message.getCreatedAt(),
                 message.getContent(),
                 isEnd
