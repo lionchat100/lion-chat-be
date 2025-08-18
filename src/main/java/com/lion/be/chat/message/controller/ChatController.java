@@ -3,6 +3,10 @@ package com.lion.be.chat.message.controller;
 import com.lion.be.auth.domain.UserPrincipal;
 import com.lion.be.chat.message.domain.dto.ChatMessageResponse;
 import com.lion.be.chat.message.service.MessageService;
+import com.lion.be.chat.room.service.ChatRoomService;
+import com.lion.be.global.aop.ElapsedTime;
+import com.lion.be.global.exception.CustomException;
+import com.lion.be.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +26,7 @@ import java.util.List;
 public class ChatController {
 
     private final MessageService messageService;
+    private final ChatRoomService chatRoomService;
 
     /**
      * 채팅방의 이전 메시지 내역을 조회합니다.
@@ -31,7 +36,7 @@ public class ChatController {
      * @return 이전 메시지 목록
      */
     @PreAuthorize("@chatRoomUserRepository.existsById_ChatRoomIdAndId_UserId(#roomId, #userPrincipal.id)")
-    @GetMapping("/messages")
+    @GetMapping(value = "/messages")
     public ResponseEntity<List<ChatMessageResponse>> getMessageHistory(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestParam Long roomId,

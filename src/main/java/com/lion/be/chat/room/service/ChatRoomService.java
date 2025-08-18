@@ -7,6 +7,7 @@ import com.lion.be.chat.room.repository.ChatRoomJpaRepository;
 import com.lion.be.chat.room.repository.ChatRoomQueryDslRepository;
 import com.lion.be.chat.room.repository.ChatRoomRepository;
 import com.lion.be.chat.room.repository.ChatRoomUserRepository;
+import com.lion.be.user.domain.Role;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +44,12 @@ public class ChatRoomService {
 
             User user1 = userRepository.findById(senderId);
             User user2 = userRepository.findById(receiverId);
+
+            if(user1.getRole() == Role.BANNED || user2.getRole() == Role.BANNED) {
+                log.warn("블록된 유저가 있는 채팅방은 만들 수 없습니다.");
+                throw new IllegalArgumentException("블록된 유저가 있는 채팅방은 만들 수 없습니다.");
+            }
+
             ChatRoomUser user1ChatRoomUser = ChatRoomUser.create(chatRoom, user1);
             ChatRoomUser user2ChatRoomUser = ChatRoomUser.create(chatRoom, user2);
             chatRoomUserRepository.save(user1ChatRoomUser);
@@ -88,5 +96,21 @@ public class ChatRoomService {
      */
     public List<ChatRoomResponse> getChatRooms(Long userId) {
         return chatRoomRepository.findChatRoomListByUserId(userId);
+    }
+
+    public boolean checkUserExistsInChatRoom(Long chatRoomId, Long userId) {
+        Set<ChatRoomUser> chatRoomUsers = chatRoomUserRepository.findById_ChatRoomId(chatRoomId);
+        if(chatRoomUsers.isEmpty()) {
+            log.info("채팅방에 유저가 없습니다. chatRoomId: {}", chatRoomId);
+            return false;
+        }
+
+        //현재 유저가 채팅방에 존재하는지 확인
+        boolean currentUserExists = chatRoomUsers.stream()
+                .anyMatch(cru -> cru.getUser().getId().equals(userId));
+        //상대 유저가 밴된 유저가 아닌지 확인
+        boolean otherUserExists = chatRoomUsers.stream()
+                .anyMatch(cru -> !cru.getUser().getId().equals(userId) && cru.getUser().getRole() != Role.BANNED);
+        return currentUserExists && otherUserExists;
     }
 }

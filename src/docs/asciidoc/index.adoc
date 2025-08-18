@@ -322,7 +322,8 @@ operation::save_feed_success[snippets='http-request,http-response']
 [[fetch-all-recent-feed]]
 === 피드 최신순 조회
 
-모든 피드를 최신순, 페이지네이션으로 조회합니다. (기본 10 page, 임의 조절 가능)
+모든 피드를 최신순, 페이지네이션으로 조회합니다. (기본 30 page, size 쿼리 파라미터로 임의 조절 가능)
+(가장 마지막 피드의 id에 대한 추적이 필요합니다.)
 
 * **요청 헤더**: `Authorization` 헤더에 Bearer 토큰이 필요합니다.
 * **페이지네이션**: `lastId, size` 쿼리 파라미터를 사용하여 페이징을 제어할 수 있습니다. (예: `?lastId=10&size=10`)
@@ -335,6 +336,7 @@ operation::fetch_all_recent_feed_success[snippets='http-request,http-response']
 === 피드 좋아요순 조회
 
 모든 피드를 좋아요순, 페이지네이션으로 조회합니다.
+(가장 마지막 피드의 id와 가장 마지막 피드의 좋아요 수에 대한 추적이 필요합니다.)
 
 * **요청 헤더**: `Authorization` 헤더에 Bearer 토큰이 필요합니다.
 * **페이지네이션**: `lastlLikeCount,lastId, size` 쿼리 파라미터를 사용하여 페이징을 제어할 수 있습니다. (예: `?lastLikeCount=10&lastId=10&size=10`)
@@ -343,7 +345,21 @@ operation::fetch_all_recent_feed_success[snippets='http-request,http-response']
 
 operation::fetch_all_hot_feed_success[snippets='http-request,http-response']
 
+[[fetch-my-feeds]]
+=== 내가 작성한 피드 조회
+
+내가 작성한 피드를 최신순으로, 커서 페이지네이션으로 조회합니다.
+(가장 마지막 피드의 id에 대한 추적이 필요합니다.)
+
+* **요청 헤더**: `Authorization` 헤더에 Bearer 토큰이 필요합니다.
+* **페이지네이션**: `lastId, size` 쿼리 파라미터를 사용하여 페이징을 제어할 수 있습니다. (예: `?&lastId=10&size=10`)
+
+==== 성공
+
+operation::fetch_my_feeds_success[snippets='http-request,http-response']
+
 [[delete-feed]]
+
 === 피드 삭제
 
 특정 피드 ID를 사용하여 피드를 삭제합니다.
