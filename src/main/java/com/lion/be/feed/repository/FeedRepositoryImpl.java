@@ -109,37 +109,6 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
         return getFeedResponses(pageable, size, user, feed, userPhoto, image, targetFeedIds);
     }
 
-    @NotNull
-    private Slice<FeedResponse> getFeedResponses(Pageable pageable, int size, QUser user, QFeed feed, QUserPhoto userPhoto, QImage image, List<Long> targetFeedIds) {
-        List<FeedResponse> contents =
-                queryFactory.select(
-                        Projections.constructor(FeedResponse.class,
-                                feed.id,
-                                feed.title,
-                                feed.content,
-                                feed.createdAt,
-                                feed.likeCount,
-                                feed.commentCount,
-                                user.nickname,
-                                user.id,
-                                image.imageUrl)
-                ).from(feed)
-                        .join(user).on(feed.user.id.eq(user.id))
-                        .leftJoin(userPhoto).on(user.id.eq(userPhoto.user.id), userPhoto.orderIndex.eq(1))
-                        .leftJoin(image).on(userPhoto.image.id.eq(image.id))
-                        .where(feed.id.in(targetFeedIds))
-                        .orderBy(feed.id.desc())
-                        .fetch();
-
-        boolean hasNext = false;
-        if(contents.size() > size){
-            hasNext = true;
-            contents.remove(size);
-        }
-
-        return new SliceImpl<>(contents, pageable, hasNext);
-    }
-
     @ElapsedTime
     @Override
     public Slice<FeedResponse> fetchRecentFeedsAfter(Long lastId, Pageable pageable) {
@@ -182,39 +151,9 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
                         .limit(limit)
                         .fetch();
 
-        return getMyFeedResponses(pageable, size, user, feed, userPhoto, image, targetFeedIds);
+        return getHotFeedResponses(pageable, size, user, feed, userPhoto, image, targetFeedIds);
     }
 
-    @NotNull
-    private Slice<FeedResponse> getMyFeedResponses(Pageable pageable, int size, QUser user, QFeed feed, QUserPhoto userPhoto, QImage image, List<Long> targetFeedIds) {
-        List<FeedResponse> contents =
-                queryFactory.select(
-                                Projections.constructor(FeedResponse.class,
-                                        feed.id,
-                                        feed.title,
-                                        feed.content,
-                                        feed.createdAt,
-                                        feed.likeCount,
-                                        feed.commentCount,
-                                        user.nickname,
-                                        user.id,
-                                        image.imageUrl)
-                        ).from(feed)
-                        .join(user).on(feed.user.id.eq(user.id))
-                        .leftJoin(userPhoto).on(user.id.eq(userPhoto.user.id), userPhoto.orderIndex.eq(1))
-                        .leftJoin(image).on(userPhoto.image.id.eq(image.id))
-                        .where(feed.id.in(targetFeedIds))
-                        .orderBy(feed.likeCount.desc(),feed.id.desc())
-                        .fetch();
-
-        boolean hasNext = false;
-        if(contents.size() > size){
-            hasNext = true;
-            contents.remove(size);
-        }
-
-        return new SliceImpl<>(contents, pageable, hasNext);
-    }
 
     @ElapsedTime
     @Override
@@ -238,8 +177,9 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
                         .limit(limit)
                         .fetch();
 
-        return getMyFeedResponses(pageable, size, user, feed, userPhoto, image, targetFeedIds);
+        return getHotFeedResponses(pageable, size, user, feed, userPhoto, image, targetFeedIds);
     }
+
 
     @ElapsedTime
     @Override
@@ -283,4 +223,67 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
                         .fetch();
         return getFeedResponses(pageable, size, user, feed, userPhoto, image, targetFeedIds);
     }
+
+    @NotNull
+    private Slice<FeedResponse> getHotFeedResponses(Pageable pageable, int size, QUser user, QFeed feed, QUserPhoto userPhoto, QImage image, List<Long> targetFeedIds) {
+        List<FeedResponse> contents =
+                queryFactory.select(
+                                Projections.constructor(FeedResponse.class,
+                                        feed.id,
+                                        feed.title,
+                                        feed.content,
+                                        feed.createdAt,
+                                        feed.likeCount,
+                                        feed.commentCount,
+                                        user.nickname,
+                                        user.id,
+                                        image.imageUrl)
+                        ).from(feed)
+                        .join(user).on(feed.user.id.eq(user.id))
+                        .leftJoin(userPhoto).on(user.id.eq(userPhoto.user.id), userPhoto.orderIndex.eq(1))
+                        .leftJoin(image).on(userPhoto.image.id.eq(image.id))
+                        .where(feed.id.in(targetFeedIds))
+                        .orderBy(feed.likeCount.desc(),feed.id.desc())
+                        .fetch();
+
+        boolean hasNext = false;
+        if(contents.size() > size){
+            hasNext = true;
+            contents.remove(size);
+        }
+
+        return new SliceImpl<>(contents, pageable, hasNext);
+    }
+
+    @NotNull
+    private Slice<FeedResponse> getFeedResponses(Pageable pageable, int size, QUser user, QFeed feed, QUserPhoto userPhoto, QImage image, List<Long> targetFeedIds) {
+        List<FeedResponse> contents =
+                queryFactory.select(
+                                Projections.constructor(FeedResponse.class,
+                                        feed.id,
+                                        feed.title,
+                                        feed.content,
+                                        feed.createdAt,
+                                        feed.likeCount,
+                                        feed.commentCount,
+                                        user.nickname,
+                                        user.id,
+                                        image.imageUrl)
+                        ).from(feed)
+                        .join(user).on(feed.user.id.eq(user.id))
+                        .leftJoin(userPhoto).on(user.id.eq(userPhoto.user.id), userPhoto.orderIndex.eq(1))
+                        .leftJoin(image).on(userPhoto.image.id.eq(image.id))
+                        .where(feed.id.in(targetFeedIds))
+                        .orderBy(feed.id.desc())
+                        .fetch();
+
+        boolean hasNext = false;
+        if(contents.size() > size){
+            hasNext = true;
+            contents.remove(size);
+        }
+
+        return new SliceImpl<>(contents, pageable, hasNext);
+    }
+
 }
