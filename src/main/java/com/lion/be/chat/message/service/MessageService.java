@@ -118,6 +118,10 @@ public class MessageService {
         Map<Long, User> users = userRepository.findByIdIn(senderIds).stream()
                 .collect(Collectors.toMap(User::getId, user -> user));
 
+        ChatRoomUser chatRoomUser = chatRoomUserRepository.findById_ChatRoomIdAndId_UserId(roomId, userId);
+        chatRoomUser.markAsRead();
+        chatRoomUserRepository.save(chatRoomUser);
+
         return messages.map(message -> {
             User sender = users.get(message.getSenderId());
             String imageUrl = (sender != null) ? sender.getImageUrl() : null;
