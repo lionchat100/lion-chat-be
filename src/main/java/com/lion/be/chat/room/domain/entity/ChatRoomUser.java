@@ -54,4 +54,8 @@ public class ChatRoomUser {
     public void markAsRead() {
         this.isRead = true;
     }
+
+    public void markAsUnRead() {
+        this.isRead = false;
+    }
 }
