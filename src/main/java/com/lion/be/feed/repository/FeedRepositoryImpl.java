@@ -1,11 +1,22 @@
 package com.lion.be.feed.repository;
 
+import com.lion.be.feed.domain.dto.FeedResponse;
 import com.lion.be.feed.domain.entity.QFeed;
-import com.querydsl.core.types.dsl.CaseBuilder;
-import com.querydsl.core.types.dsl.NumberExpression;
+import com.lion.be.global.aop.ElapsedTime;
+import com.lion.be.image.domain.entity.QImage;
+import com.lion.be.user.domain.Role;
+import com.lion.be.user.domain.entity.QUser;
+import com.lion.be.user.domain.entity.QUserPhoto;
+import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.*;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
+
 
 import java.util.List;
 
@@ -75,4 +86,204 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
                 .where(feed.id.in(feedIds))
                 .execute();
     }
+
+    @ElapsedTime
+    @Override
+    public Slice<FeedResponse> fetchRecentFeedsFirst(Pageable pageable) {
+        int size = pageable.getPageSize();
+        int limit = size + 1;
+        QUser user = QUser.user;
+        QFeed feed = QFeed.feed;
+        QUserPhoto userPhoto = QUserPhoto.userPhoto;
+        QImage image = QImage.image;
+
+        List<Long> targetFeedIds =
+                queryFactory.select(feed.id)
+                        .from(feed)
+                        .join(user).on(feed.user.id.eq(user.id), user.role.ne(Role.BANNED))
+                        .where(feed.isDeleted.eq(false))
+                        .orderBy(feed.id.desc())
+                        .limit(limit)
+                        .fetch();
+
+        return getFeedResponses(pageable, size, user, feed, userPhoto, image, targetFeedIds);
+    }
+
+    @ElapsedTime
+    @Override
+    public Slice<FeedResponse> fetchRecentFeedsAfter(Long lastId, Pageable pageable) {
+        int size = pageable.getPageSize();
+        int limit = size + 1;
+        QUser user = QUser.user;
+        QFeed feed = QFeed.feed;
+        QUserPhoto userPhoto = QUserPhoto.userPhoto;
+        QImage image = QImage.image;
+
+        List<Long> targetFeedIds =
+                queryFactory.select(feed.id)
+                        .from(feed)
+                        .join(user).on(feed.user.id.eq(user.id), user.role.ne(Role.BANNED))
+                        .where(feed.isDeleted.eq(false), feed.id.lt(lastId))
+                        .orderBy(feed.id.desc())
+                        .limit(limit)
+                        .fetch();
+
+        return getFeedResponses(pageable, size, user, feed, userPhoto, image, targetFeedIds);
+
+    }
+
+    @ElapsedTime
+    @Override
+    public Slice<FeedResponse> fetchHotFeedsFirst(Pageable pageable) {
+        int size = pageable.getPageSize();
+        int limit = size + 1;
+        QUser user = QUser.user;
+        QFeed feed = QFeed.feed;
+        QUserPhoto userPhoto = QUserPhoto.userPhoto;
+        QImage image = QImage.image;
+
+        List<Long> targetFeedIds =
+                queryFactory.select(feed.id)
+                        .from(feed)
+                        .join(user).on(feed.user.id.eq(user.id), user.role.ne(Role.BANNED))
+                        .where(feed.isDeleted.eq(false))
+                        .orderBy(feed.likeCount.desc(),feed.id.desc())
+                        .limit(limit)
+                        .fetch();
+
+        return getHotFeedResponses(pageable, size, user, feed, userPhoto, image, targetFeedIds);
+    }
+
+
+    @ElapsedTime
+    @Override
+    public Slice<FeedResponse> fetchHotFeedsAfter(Long lastLikeCount, Long lastId, Pageable pageable) {
+        int size = pageable.getPageSize();
+        int limit = size + 1;
+        QUser user = QUser.user;
+        QFeed feed = QFeed.feed;
+        QUserPhoto userPhoto = QUserPhoto.userPhoto;
+        QImage image = QImage.image;
+
+        List<Long> targetFeedIds =
+                queryFactory.select(feed.id)
+                        .from(feed)
+                        .join(user).on(feed.user.id.eq(user.id), user.role.ne(Role.BANNED))
+                        .where(feed.isDeleted.eq(false),
+                                feed.likeCount.lt(lastLikeCount).or(feed.likeCount.eq(lastLikeCount).and(feed.id.lt(lastId))
+                                        )
+                        )
+                        .orderBy(feed.likeCount.desc(),feed.id.desc())
+                        .limit(limit)
+                        .fetch();
+
+        return getHotFeedResponses(pageable, size, user, feed, userPhoto, image, targetFeedIds);
+    }
+
+
+    @ElapsedTime
+    @Override
+    public Slice<FeedResponse> fetchFeedsByUserIdFirst(Long currentUserId, Pageable pageable) {
+        int size = pageable.getPageSize();
+        int limit = size + 1;
+        QUser user = QUser.user;
+        QFeed feed = QFeed.feed;
+        QUserPhoto userPhoto = QUserPhoto.userPhoto;
+        QImage image = QImage.image;
+
+        List<Long> targetFeedIds =
+                queryFactory.select(feed.id)
+                        .from(feed)
+                        .join(user).on(feed.user.id.eq(user.id), user.role.ne(Role.BANNED), user.id.eq(currentUserId))
+                        .where(feed.isDeleted.eq(false))
+                        .orderBy(feed.id.desc())
+                        .limit(limit)
+                        .fetch();
+
+        return getFeedResponses(pageable, size, user, feed, userPhoto, image, targetFeedIds);
+    }
+
+    @ElapsedTime
+    @Override
+    public Slice<FeedResponse> fetchFeedsByUserIdAfter(Long currentUserId, Long lastId, Pageable pageable) {
+        int size = pageable.getPageSize();
+        int limit = size + 1;
+        QUser user = QUser.user;
+        QFeed feed = QFeed.feed;
+        QUserPhoto userPhoto = QUserPhoto.userPhoto;
+        QImage image = QImage.image;
+
+        List<Long> targetFeedIds =
+                queryFactory.select(feed.id)
+                        .from(feed)
+                        .join(user).on(feed.user.id.eq(user.id), user.role.ne(Role.BANNED), user.id.eq(currentUserId))
+                        .where(feed.isDeleted.eq(false), feed.id.lt(lastId))
+                        .orderBy(feed.id.desc())
+                        .limit(limit)
+                        .fetch();
+        return getFeedResponses(pageable, size, user, feed, userPhoto, image, targetFeedIds);
+    }
+
+    @NotNull
+    private Slice<FeedResponse> getHotFeedResponses(Pageable pageable, int size, QUser user, QFeed feed, QUserPhoto userPhoto, QImage image, List<Long> targetFeedIds) {
+        List<FeedResponse> contents =
+                queryFactory.select(
+                                Projections.constructor(FeedResponse.class,
+                                        feed.id,
+                                        feed.title,
+                                        feed.content,
+                                        feed.createdAt,
+                                        feed.likeCount,
+                                        feed.commentCount,
+                                        user.nickname,
+                                        user.id,
+                                        image.imageUrl)
+                        ).from(feed)
+                        .join(user).on(feed.user.id.eq(user.id))
+                        .leftJoin(userPhoto).on(user.id.eq(userPhoto.user.id), userPhoto.orderIndex.eq(1))
+                        .leftJoin(image).on(userPhoto.image.id.eq(image.id))
+                        .where(feed.id.in(targetFeedIds))
+                        .orderBy(feed.likeCount.desc(),feed.id.desc())
+                        .fetch();
+
+        boolean hasNext = false;
+        if(contents.size() > size){
+            hasNext = true;
+            contents.remove(size);
+        }
+
+        return new SliceImpl<>(contents, pageable, hasNext);
+    }
+
+    @NotNull
+    private Slice<FeedResponse> getFeedResponses(Pageable pageable, int size, QUser user, QFeed feed, QUserPhoto userPhoto, QImage image, List<Long> targetFeedIds) {
+        List<FeedResponse> contents =
+                queryFactory.select(
+                                Projections.constructor(FeedResponse.class,
+                                        feed.id,
+                                        feed.title,
+                                        feed.content,
+                                        feed.createdAt,
+                                        feed.likeCount,
+                                        feed.commentCount,
+                                        user.nickname,
+                                        user.id,
+                                        image.imageUrl)
+                        ).from(feed)
+                        .join(user).on(feed.user.id.eq(user.id))
+                        .leftJoin(userPhoto).on(user.id.eq(userPhoto.user.id), userPhoto.orderIndex.eq(1))
+                        .leftJoin(image).on(userPhoto.image.id.eq(image.id))
+                        .where(feed.id.in(targetFeedIds))
+                        .orderBy(feed.id.desc())
+                        .fetch();
+
+        boolean hasNext = false;
+        if(contents.size() > size){
+            hasNext = true;
+            contents.remove(size);
+        }
+
+        return new SliceImpl<>(contents, pageable, hasNext);
+    }
+
 }

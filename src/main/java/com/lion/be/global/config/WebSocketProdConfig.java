@@ -4,26 +4,37 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
-import org.springframework.messaging.simp.stomp.StompReactorNettyCodec;
-import org.springframework.messaging.tcp.reactor.ReactorNettyTcpClient;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
 @Configuration
-@Profile("!test") // "test" 프로필이 아닐 때만 이 설정을 사용
+@Profile("!test")
 public class WebSocketProdConfig implements WebSocketMessageBrokerConfigurer {
+
+    @Value("${mq.stomp.host}")
+    private String host;
+
+    @Value("${mq.stomp.port}")
+    private int port;
+
+    @Value("${mq.stomp.username}")
+    private String username;
+
+    @Value("${mq.stomp.password}")
+    private String password;
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        // Amazon MQ for RabbitMQ는 STOMP를 직접 지원하지 않으므로,
-        // 스프링의 내장 SimpleBroker를 사용하도록 변경합니다.
-        // 이 코드는 클라이언트와 서버 간의 STOMP 통신을 처리합니다.
-        // 서버와 RabbitMQ 간의 통신은 RabbitTemplate과 @RabbitListener가 AMQP로 담당합니다.
-
-        // "/topic", "/queue"를 목적지로 하는 메시지를 SimpleBroker가 처리
-        registry.enableSimpleBroker("/topic", "/queue");
-
-        // 클라이언트가 메시지를 보낼 때 사용할 접두사
+        // 1. Application Destination Prefix 설정 (클라이언트 -> 서버)
         registry.setApplicationDestinationPrefixes("/app");
+
+        // 2. STOMP Broker Relay 설정 (서버 <-> 외부 브로커 <-> 클라이언트)
+        registry.enableStompBrokerRelay("/topic", "/queue") // ActiveMQ의 Destination Prefix
+                .setRelayHost(host)
+                .setRelayPort(port)
+                .setSystemLogin(username)
+                .setSystemPasscode(password)
+                .setClientLogin(username)
+                .setClientPasscode(password);
     }
 
 }

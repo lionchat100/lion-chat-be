@@ -55,7 +55,7 @@ public abstract class AcceptanceTest {
     private static final MySQLContainer<?> mysql;
     private static final GenericContainer<?> redis;
     private static final MongoDBContainer mongo;
-    private static final RabbitMQContainer rabbitmq;
+    private static final GenericContainer<?> activemq;
     private static final LocalStackContainer localstack;
 
     public static final String S3_BUCKET_NAME = "test-bucket";
@@ -80,16 +80,21 @@ public abstract class AcceptanceTest {
         mongo.start();
         System.setProperty("MONGO_URI", mongo.getReplicaSetUrl());
 
-        // RabbitMQ 시작 (STOMP 플러그인 활성화)
-        rabbitmq = new RabbitMQContainer(DockerImageName.parse("rabbitmq:3-management"))
-                .withPluginsEnabled("rabbitmq_stomp")
-                .withExposedPorts(5672, 15672, 61613);
-        rabbitmq.start();
-        System.setProperty("RABBITMQ_HOST", rabbitmq.getHost());
-        System.setProperty("RABBITMQ_PORT", String.valueOf(rabbitmq.getAmqpPort()));
-        System.setProperty("RABBITMQ_STOMP_PORT", String.valueOf(rabbitmq.getMappedPort(61613)));
-        System.setProperty("RABBITMQ_USERNAME", rabbitmq.getAdminUsername());
-        System.setProperty("RABBITMQ_PASSWORD", rabbitmq.getAdminPassword());
+        /* --- 기존 RabbitMQ 시작 블록 전체를 아래 코드로 교체 --- */
+        // ActiveMQ 시작
+        // ActiveMQ Classic 이미지를 사용하고, 필요한 포트들을 노출합니다.
+        // 61616: OpenWire(JMS), 61613: STOMP, 8161: Web Console
+        activemq = new GenericContainer<>(DockerImageName.parse("apache/activemq-classic:5.18.3"))
+                .withExposedPorts(61616, 61613, 8161);
+        activemq.start();
+        // System Property 이름을 ActiveMQ에 맞게 변경
+        System.setProperty("ACTIVEMQ_HOST", activemq.getHost());
+        System.setProperty("ACTIVEMQ_JMS_PORT", String.valueOf(activemq.getMappedPort(61616)));
+        System.setProperty("ACTIVEMQ_STOMP_PORT", String.valueOf(activemq.getMappedPort(61613)));
+        // ActiveMQ Classic의 기본 계정 정보
+        System.setProperty("ACTIVEMQ_USERNAME", "admin");
+        System.setProperty("ACTIVEMQ_PASSWORD", "admin");
+        /* --- 교체 완료 --- */
 
         // LocalStack 시작 (S3 서비스만 활성화)
         localstack = new LocalStackContainer(DockerImageName.parse("localstack/localstack:2.3"))
@@ -122,21 +127,24 @@ public abstract class AcceptanceTest {
         // MongoDB 설정
         registry.add("spring.data.mongodb.uri", () -> System.getProperty("MONGO_URI"));
 
-        // RabbitMQ 설정
-        registry.add("spring.rabbitmq.host", () -> System.getProperty("RABBITMQ_HOST"));
-        registry.add("spring.rabbitmq.port", () -> System.getProperty("RABBITMQ_PORT"));
-        registry.add("spring.rabbitmq.username", () -> System.getProperty("RABBITMQ_USERNAME"));
-        registry.add("spring.rabbitmq.password", () -> System.getProperty("RABBITMQ_PASSWORD"));
+        /* --- 기존 RabbitMQ 및 STOMP 설정 블록 전체를 아래 코드로 교체 --- */
+        // ActiveMQ 설정 (JMS/OpenWire 용)
+        // broker-url 형식으로 설정합니다.
+        registry.add("spring.activemq.broker-url",
+                () -> String.format("tcp://%s:%s",
+                        System.getProperty("ACTIVEMQ_HOST"),
+                        System.getProperty("ACTIVEMQ_JMS_PORT")));
+        registry.add("spring.activemq.user", () -> System.getProperty("ACTIVEMQ_USERNAME"));
+        registry.add("spring.activemq.password", () -> System.getProperty("ACTIVEMQ_PASSWORD"));
 
-        // STOMP 설정
-        registry.add("spring.messaging.stomp.broker-relay.host", () -> System.getProperty("RABBITMQ_HOST"));
-        registry.add("spring.messaging.stomp.broker-relay.port", () -> System.getProperty("RABBITMQ_STOMP_PORT"));
-        registry.add("spring.messaging.stomp.broker-relay.system-login", () -> System.getProperty("RABBITMQ_USERNAME"));
-        registry.add("spring.messaging.stomp.broker-relay.system-passcode",
-                () -> System.getProperty("RABBITMQ_PASSWORD"));
-        registry.add("spring.messaging.stomp.broker-relay.client-login", () -> System.getProperty("RABBITMQ_USERNAME"));
-        registry.add("spring.messaging.stomp.broker-relay.client-passcode",
-                () -> System.getProperty("RABBITMQ_PASSWORD"));
+        // STOMP 설정 (STOMP Relay 용)
+        // 프로퍼티 키는 동일하지만, 값을 ActiveMQ 정보로 교체합니다.
+        registry.add("spring.messaging.stomp.broker-relay.host", () -> System.getProperty("ACTIVEMQ_HOST"));
+        registry.add("spring.messaging.stomp.broker-relay.port", () -> System.getProperty("ACTIVEMQ_STOMP_PORT"));
+        registry.add("spring.messaging.stomp.broker-relay.system-login", () -> System.getProperty("ACTIVEMQ_USERNAME"));
+        registry.add("spring.messaging.stomp.broker-relay.system-passcode", () -> System.getProperty("ACTIVEMQ_PASSWORD"));
+        registry.add("spring.messaging.stomp.broker-relay.client-login", () -> System.getProperty("ACTIVEMQ_USERNAME"));
+        registry.add("spring.messaging.stomp.broker-relay.client-passcode", () -> System.getProperty("ACTIVEMQ_PASSWORD"));
 
         // AWS S3
         registry.add("cloud.aws.s3.bucket", () -> S3_BUCKET_NAME);
