@@ -175,9 +175,9 @@
 
             body.forEach((chatRoom) => {
                 const listItem = document.createElement("li");
-                listItem.textContent = `Chat Room ID: ${chatRoom.chatRoomId} - 상대: ${chatRoom.name} - 최근 메시지:${chatRoom.lastContent} - 읽음: ${chatRoom.isRead}`;
+                listItem.textContent = `Chat Room ID: ${chatRoom.chatRoomId} - 상대: ${chatRoom.nickname} - 최근 메시지:${chatRoom.lastContent} - 읽음: ${chatRoom.isRead}`;
                 listItem.addEventListener("click", () => {
-                    joinTheRoom(event, chatRoom.chatRoomId, chatRoom.name);
+                    joinTheRoom(event, chatRoom.chatRoomId, chatRoom.nickname);
                 });
                 chatRoomList.appendChild(listItem);
             });
@@ -252,9 +252,9 @@
 
         body.forEach((chatRoom) => {
             const listItem = document.createElement("li");
-            listItem.textContent = `Chat Room ID: ${chatRoom.chatRoomId} - 상대: ${chatRoom.name} - 최근 메시지:${chatRoom.lastContent} - 읽음: ${chatRoom.isRead}`;
+            listItem.textContent = `Chat Room ID: ${chatRoom.chatRoomId} - 상대: ${chatRoom.nickname} - 최근 메시지:${chatRoom.lastContent} - 읽음: ${chatRoom.isRead}`;
             listItem.addEventListener("click", () => {
-                joinTheRoom(event, chatRoom.chatRoomId, chatRoom.name);
+                joinTheRoom(event, chatRoom.chatRoomId, chatRoom.nickname);
             });
             chatRoomList.appendChild(listItem);
         });
@@ -380,14 +380,14 @@
 
     function displayMessage(message) {
         const messageElement = document.createElement("div");
-        messageElement.innerHTML = `<strong>[${message.senderName}]</strong>: ${message.content}`;
+        messageElement.innerHTML = `<strong>[${message.nickname}]</strong>: ${message.content}`;
         messagesArea.appendChild(messageElement);
         messagesArea.scrollTop = messagesArea.scrollHeight; // Auto-scroll
     }
 
     function stackMessage(message) {
         const messageElement = document.createElement("div");
-        messageElement.innerHTML = `<strong>[${message.senderName}]</strong>: ${message.content}`;
+        messageElement.innerHTML = `<strong>[${message.nickname}]</strong>: ${message.content}`;
         messagesArea.insertBefore(messageElement, messagesArea.firstChild);
         messagesArea.scrollTop = 0; // Auto-scroll to top
     }
