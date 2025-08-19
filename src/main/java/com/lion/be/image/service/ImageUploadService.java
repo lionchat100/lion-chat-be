@@ -105,7 +105,6 @@ public class ImageUploadService {
 		performImageDeletion(image, userId);
 	}
 
-	// 실제 삭제 로직을 private 메서드로 분리
 	private void performImageDeletion(Image image, Long userId) {
 		if (!image.getUploaderId().equals(userId)) {
 			throw new CustomException(ErrorCode.IMAGE_DELETE_ACCESS_DENIED);

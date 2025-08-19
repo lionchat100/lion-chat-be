@@ -10,8 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.lion.be.auth.controller.dto.CurrentUserResponse;
 import com.lion.be.auth.domain.UserPrincipal;
-import com.lion.be.global.exception.CustomException;
-import com.lion.be.global.exception.ErrorCode;
 import com.lion.be.user.controller.dto.OnboardingLabelsResponse;
 import com.lion.be.user.domain.Gender;
 import com.lion.be.user.domain.Mbti;
@@ -48,20 +46,6 @@ public class UserReadService {
             .orElseThrow(() -> new RuntimeException("fetchById"));
     }
 
-    /**
-     * 온보딩 완료 여부 검증
-     */
-    public void validateOnboardingCompleted(Long userId) {
-        User user = fetchById(userId);
-
-        if (!user.isOnboardingCompleted()) {
-            throw new CustomException(ErrorCode.USER_ONBOARDING_NOT_COMPLETED);
-        }
-    }
-
-    /**
-     * 온보딩 옵션 조회
-     */
     public OnboardingLabelsResponse getOnboardingOptions(UserPrincipal userPrincipal) {
         if(userPrincipal == null) {
             return null;

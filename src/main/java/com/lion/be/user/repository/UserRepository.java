@@ -52,4 +52,10 @@ public interface UserRepository {
 		int remainingSize,
 		List<Long> extendedExcludeIds
 	);
+
+	Optional<User> fetchByIdWithPhotos(Long userId);
+
+	Optional<String> fetchNicknameById(Long userId);
+
+	boolean existsById(Long userId);
 }

@@ -94,4 +94,19 @@ public class UserRepositoryImpl implements UserRepository {
 			pageable
 		);
 	}
+
+	@Override
+	public Optional<User> fetchByIdWithPhotos(Long userId) {
+		return userQueryDslRepository.findByIdWithPhotos(userId);
+	}
+
+	@Override
+	public Optional<String> fetchNicknameById(Long userId){
+		return userJpaRepository.findNicknameById(userId);
+	}
+
+	@Override
+	public boolean existsById(Long userId){
+		return userJpaRepository.existsById(userId);
+	}
 }

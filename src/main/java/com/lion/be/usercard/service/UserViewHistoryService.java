@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -15,10 +14,8 @@ import java.util.stream.Collectors;
 public class UserViewHistoryService {
 
 	private final RedisTemplate<String, Object> redisTemplate;
-
 	// Redis key prefix
 	private static final String VIEW_HISTORY_KEY_PREFIX = "user:view_history:";
-
 	// TTL: 10분
 	private static final Duration TTL = Duration.ofMinutes(10);
 
@@ -33,8 +30,6 @@ public class UserViewHistoryService {
 			return;
 		}
 
-		log.debug("사용자 {}가 본 카드들 기록: {}", userId, viewedUserIds);
-
 		String key = getViewHistoryKey(userId);
 
 		// Redis Set에 추가 (중복 자동 제거)
@@ -47,9 +42,9 @@ public class UserViewHistoryService {
 		// TTL 설정 (10분)
 		redisTemplate.expire(key, TTL);
 
-		// 현재 총 조회 이력 수 로깅
-		Long totalViewCount = redisTemplate.opsForSet().size(key);
-		log.debug("사용자 {}의 총 조회 이력: {}개 (TTL: {}분)", userId, totalViewCount, TTL.toMinutes());
+		if (log.isDebugEnabled()) {
+			log.debug("사용자 {}가 본 카드들 기록: {}개", userId, viewedUserIds.size());
+		}
 	}
 
 	/**
@@ -93,7 +88,9 @@ public class UserViewHistoryService {
 		// 자기 자신도 제외
 		excludeSet.add(userId);
 
-		log.debug("사용자 {}의 제외 대상: {}명", userId, excludeSet.size());
+		if (log.isTraceEnabled()) {
+			log.trace("사용자 {}의 제외 대상: {}명", userId, excludeSet.size());
+		}
 
 		return new ArrayList<>(excludeSet);
 	}

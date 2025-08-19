@@ -8,9 +8,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.lion.be.auth.domain.UserPrincipal;
+import com.lion.be.user.domain.entity.User;
 import com.lion.be.usercard.controller.dto.UserCardResponse;
-import com.lion.be.userlike.domain.entity.UserLikes;
-import com.lion.be.userlike.repository.UserLikesRepositoryImpl;
+import com.lion.be.userlike.repository.UserLikesRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 public class UserLikesReadService {
 
-	private final UserLikesRepositoryImpl userLikesRepositoryImpl;
+	private final UserLikesRepository userLikesRepository;
 	/**
 	 * 카드 에서 현재 사용자가 좋아요한 사용자들 조회
 	 */
@@ -28,7 +28,7 @@ public class UserLikesReadService {
 			return Set.of();
 		}
 
-		return new HashSet<>(userLikesRepositoryImpl.findLikedUserIdsAmon(currentUserId, targetUserIds));
+		return new HashSet<>(userLikesRepository.fetchLikedUserIdsAmon(currentUserId, targetUserIds));
 	}
 
 	/**
@@ -40,10 +40,10 @@ public class UserLikesReadService {
 		Long userId = userPrincipal.getId();
 
 		// userLikes 테이블에서 fromUserId로 조회
-		List<UserLikes> myLikes = userLikesRepositoryImpl.findByFromUserId(userId);
+		List<User> likedUsers = userLikesRepository.fetchLikedUsersByFromUserId(userId);
 
-		return myLikes.stream()
-			.map(userLikes -> UserCardResponse.from(userLikes.getToUser(), true))
+		return likedUsers.stream()
+			.map(user -> UserCardResponse.from(user, true))
 			.toList();
 	}
 }

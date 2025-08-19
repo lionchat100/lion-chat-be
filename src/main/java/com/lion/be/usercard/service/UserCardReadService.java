@@ -10,7 +10,7 @@ import com.lion.be.global.exception.CustomException;
 import com.lion.be.global.exception.ErrorCode;
 import com.lion.be.user.domain.Position;
 import com.lion.be.user.domain.entity.User;
-import com.lion.be.user.repository.UserRepositoryImpl;
+import com.lion.be.user.repository.UserRepository;
 import com.lion.be.usercard.controller.dto.UserCardResponse;
 import com.lion.be.usercard.util.UserCardFilterUtil;
 import com.lion.be.userlike.service.UserLikesReadService;
@@ -26,7 +26,7 @@ public class UserCardReadService {
 
 	private final UserViewHistoryService userViewHistoryService;
 	private final UserCardFilterUtil userCardFilterUtil;
-	private final UserRepositoryImpl userRepositoryImpl;
+	private final UserRepository userRepository;
 	private final UserLikesReadService userLikesReadService;
 
 	public List<UserCardResponse> getCards(Long userId, int size, List<Long> excludeUserIds) {
@@ -37,7 +37,7 @@ public class UserCardReadService {
 	}
 
 	public UserCardResponse getUserCard(Long id) {
-		return userRepositoryImpl.fetchById(id)
+		return userRepository.fetchByIdWithPhotos(id)
 			.map(user -> UserCardResponse.from(user, false))
 			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 	}
@@ -54,18 +54,14 @@ public class UserCardReadService {
 			return List.of();
 		}
 
-		// 1. 조회한 사용자 ID 목록 추출
 		List<Long> viewedUserIds = users.stream()
 			.map(User::getId)
 			.toList();
 
-		// 2. 조회 이력 기록
 		userViewHistoryService.recordViewedUsers(currentUserId, viewedUserIds);
 
-		// 3. 좋아요 상태 확인
 		Set<Long> likedUserIds = userLikesReadService.getLikedUserIds(currentUserId, viewedUserIds);
 
-		// 4. Response DTO 변환
 		return users.stream()
 			.map(user -> UserCardResponse.from(user, likedUserIds.contains(user.getId())))
 			.toList();

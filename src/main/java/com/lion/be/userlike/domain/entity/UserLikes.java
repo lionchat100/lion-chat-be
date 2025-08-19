@@ -1,14 +1,10 @@
 package com.lion.be.userlike.domain.entity;
 
-import com.lion.be.user.domain.entity.User;
-
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
@@ -26,16 +22,14 @@ public class UserLikes {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "from_user_id", nullable = false)
-	private User fromUser;
+	@Column(name = "from_user_id", nullable = false)
+	private Long fromUserId;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "to_user_id", nullable = false)
-	private User toUser;
+	@Column(name = "to_user_id", nullable = false)
+	private Long toUserId;
 
-	public UserLikes(User fromUser, User toUser) {
-		this.fromUser = fromUser;
-		this.toUser = toUser;
+	public UserLikes(Long fromUserId, Long toUserId) {
+		this.fromUserId = fromUserId;
+		this.toUserId = toUserId;
 	}
 }

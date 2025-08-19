@@ -1,17 +1,11 @@
 package com.lion.be.user.service;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.lion.be.auth.domain.UserPrincipal;
 import com.lion.be.global.exception.CustomException;
 import com.lion.be.global.exception.ErrorCode;
-import com.lion.be.image.domain.entity.Image;
-import com.lion.be.image.repository.ImageRepository;
-import com.lion.be.image.service.ImageUploadService;
 import com.lion.be.user.controller.dto.OnboardingRequest;
 import com.lion.be.user.controller.dto.OnboardingResponse;
 import com.lion.be.user.controller.dto.UserProfileUpdateRequest;
@@ -28,72 +22,63 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 public class UserWriteService {
 
-    private final UserRepository userRepository;
-    private final UserCardFilterUtil userCardFilterUtil;
-	private final ImageRepository imageRepository;
-	private final ImageUploadService imageUploadService;
+	private final UserRepository userRepository;
+	private final UserCardFilterUtil userCardFilterUtil;
+	private final UserImageService userImageService;
 
 	public void save(User user) {
-        userRepository.save(user);
-    }
+		userRepository.save(user);
+	}
 
 	public OnboardingResponse completeUserOnboarding(Long userId, OnboardingRequest request) {
-		User user = userRepository.fetchById(userId)
-			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+		User user = getUserById(userId);
 
-		if (userRepository.existsByNickname(request.nickname())) {
-			throw new CustomException(ErrorCode.NICKNAME_ALREADY_EXISTS);
-		}
+		validateNicknameAvailability(request.nickname());
 
-		// 1. 이미지 ID 검증 및 조회
-		List<Image> images = validateAndGetImages(request.imageIds());
+		userImageService.addInitialUserImages(user, request.imageIds());
 
-		// 2. UserPhoto 생성 (중간 테이블을 통한 연결)
-		for (int i = 0; i < images.size(); i++) {
-			user.addProfileImage(images.get(i), i + 1);
-		}
-
-		// 3. 온보딩 데이터 설정 (이미지 관련 로직 제외)
-		OnboardingData data = OnboardingData.from(request);
-		user.completeOnboarding(data);
-
-		// 4. 클러스터 배정
-		Integer clusterId = assignClusterToNewUser(user);
-		user.assignToCluster(clusterId);
+		// 온보딩 데이터 설정
+		completeUserOnboardingData(user, request);
+		// 클러스터 할당
+		assignClusterToUser(user);
 
 		userRepository.save(user);
-
 		return OnboardingResponse.success(userId);
-	}
-
-	private List<Image> validateAndGetImages(List<Long> imageIds) {
-		if (imageIds == null || imageIds.isEmpty()) {
-			throw new CustomException(ErrorCode.MINIMUM_PHOTOS_REQUIRED);
-		}
-		if (imageIds.size() > 3) {
-			throw new CustomException(ErrorCode.MAXIMUM_PHOTOS_REQUIRED);
-		}
-
-		return imageIds.stream()
-			.map(imageId -> {
-				try {
-					return imageRepository.fetchById(imageId);
-				} catch (CustomException e) {
-					throw new CustomException(ErrorCode.IMAGE_NOT_FOUND);
-				}
-			})
-			.toList();
-	}
-
-	private Integer assignClusterToNewUser(User newUser) {
-		return userCardFilterUtil.assignNewUserToCluster(newUser);
 	}
 
 	public UserProfileUpdateResponse updateUserProfile(UserPrincipal userPrincipal,
 		UserProfileUpdateRequest request) {
-		User user = userRepository.fetchById(userPrincipal.getId())
-			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+		User user = getUserById(userPrincipal.getId());
 
+		updateUserBasicInfo(user, request);
+		updateUserImages(user, request);
+
+		userRepository.save(user);
+		return UserProfileUpdateResponse.success(user.getId());
+	}
+
+	private User getUserById(Long userId) {
+		return userRepository.fetchById(userId)
+			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+	}
+
+	private void validateNicknameAvailability(String nickname) {
+		if (userRepository.existsByNickname(nickname)) {
+			throw new CustomException(ErrorCode.NICKNAME_ALREADY_EXISTS);
+		}
+	}
+
+	private void completeUserOnboardingData(User user, OnboardingRequest request) {
+		OnboardingData data = OnboardingData.from(request);
+		user.completeOnboarding(data);
+	}
+
+	private void assignClusterToUser(User user) {
+		Integer clusterId = userCardFilterUtil.assignNewUserToCluster(user);
+		user.assignToCluster(clusterId);
+	}
+
+	private void updateUserBasicInfo(User user, UserProfileUpdateRequest request) {
 		if (request.bio() != null) {
 			user.updateBio(request.bio());
 		}
@@ -101,19 +86,9 @@ public class UserWriteService {
 		if (request.preferenceType() != null) {
 			user.updatePreferenceType(request.preferenceType());
 		}
+	}
 
-		if (request.imageIds() != null) {
-			imageUploadService.deleteUserPhotos(new ArrayList<>(user.getUserPhotos()), user.getId());
-
-			user.getUserPhotos().clear();
-
-			List<Image> images = validateAndGetImages(request.imageIds());
-			for (int i = 0; i < images.size(); i++) {
-				user.addProfileImage(images.get(i), i + 1);
-			}
-		}
-
-		userRepository.save(user);
-		return UserProfileUpdateResponse.success(user.getId());
+	private void updateUserImages(User user, UserProfileUpdateRequest request) {
+		userImageService.updateUserImages(user, request.imageIds());
 	}
 }
