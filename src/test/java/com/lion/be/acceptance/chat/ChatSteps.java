@@ -17,7 +17,7 @@ public class ChatSteps {
 
     public static ExtractableResponse<Response> _1대1_채팅방을_생성_또는_조회한다(
             String accessToken, Long receiverId, RequestSpecification spec) {
-        Map<String, Long> requestBody = Map.of("receiverId", receiverId);
+        Map<String, Long> requestBody = Map.of("id", receiverId);
         return RestAssured
                 .given().log().all()
                 .spec(spec)
@@ -59,7 +59,7 @@ public class ChatSteps {
     }
 
     public static ExtractableResponse<Response> 채팅방의_초기_메시지_목록을_조회한다(
-            String accessToken, Long chatRoomId, Long lastId, RequestSpecification spec) {
+            String accessToken, Long chatRoomId, String lastId, RequestSpecification spec) {
         return RestAssured
                 .given().log().all()
                 .spec(spec)
@@ -73,7 +73,7 @@ public class ChatSteps {
     }
 
     public static ExtractableResponse<Response> 채팅방의_메시지_목록을_조회한다(
-            String accessToken, Long chatRoomId, Long lastId, RequestSpecification spec) {
+            String accessToken, Long chatRoomId, String lastId, RequestSpecification spec) {
         return RestAssured
                 .given().log().all()
                 .spec(spec)

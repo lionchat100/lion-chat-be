@@ -51,6 +51,10 @@ public class ChatRoomUser {
         return new ChatRoomUser(chatRoom, user);
     }
 
+    public void updateReadStatus(boolean isRead) {
+        this.isRead = isRead;
+    }
+
     public void markAsRead() {
         this.isRead = true;
     }

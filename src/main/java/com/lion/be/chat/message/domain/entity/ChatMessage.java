@@ -50,6 +50,18 @@ public class ChatMessage {
         this.status = status;
     }
 
+    public static ChatMessage createNew(Long senderId, String senderName, Long chatRoomId, String content) {
+        return new ChatMessage(
+                senderId,
+                senderName,
+                chatRoomId,
+                ZonedDateTime.now(),
+                content,
+                false,
+                MessageStatus.PENDING
+        );
+    }
+
     public void markAsRead() {
         this.isRead = true;
     }
