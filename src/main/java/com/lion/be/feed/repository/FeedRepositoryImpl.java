@@ -235,7 +235,7 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
                                         feed.commentCount,
                                         user.nickname,
                                         user.id,
-                                        image.imageUrl)
+                                        image.imageUrl.coalesce("https://tokit-bucket.s3.ap-northeast-2.amazonaws.com/profile/defaultimage.png"))
                         ).from(feed)
                         .join(user).on(feed.user.id.eq(user.id))
                         .leftJoin(userPhoto).on(user.id.eq(userPhoto.user.id), userPhoto.orderIndex.eq(1))
@@ -266,7 +266,7 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
                                         feed.commentCount,
                                         user.nickname,
                                         user.id,
-                                        image.imageUrl)
+                                        image.imageUrl.coalesce("https://tokit-bucket.s3.ap-northeast-2.amazonaws.com/profile/defaultimage.png"))
                         ).from(feed)
                         .join(user).on(feed.user.id.eq(user.id))
                         .leftJoin(userPhoto).on(user.id.eq(userPhoto.user.id), userPhoto.orderIndex.eq(1))

@@ -121,7 +121,7 @@ public class FeedCommentRepositoryImpl implements FeedCommentRepository {
                         comment.createdAt,
                         user.id,
                         user.nickname,
-                        image.imageUrl
+                        image.imageUrl.coalesce("https://tokit-bucket.s3.ap-northeast-2.amazonaws.com/profile/defaultimage.png")
                         ))
                         .from(comment)
                         .join(user).on(comment.user.id.eq(user.id))
