@@ -16,8 +16,9 @@ public class UserViewHistoryService {
 	private final RedisTemplate<String, Object> redisTemplate;
 	// Redis key prefix
 	private static final String VIEW_HISTORY_KEY_PREFIX = "user:view_history:";
-	// TTL: 10분
-	private static final Duration TTL = Duration.ofMinutes(10);
+	//Todo
+	// TTL: 10분으로 바꿔야함 개발중에는 2초로 정의
+	private static final Duration TTL = Duration.ofSeconds(2);
 
 	/**
 	 * 사용자가 본 카드들을 기록합니다. (10분간 유지)
