@@ -35,17 +35,14 @@ public class UserWriteService {
 
 		validateNicknameAvailability(request.nickname());
 
-		// 이미지 처리를 UserImageService에 위임
-		userImageService.setInitialUserImages(user, request.imageIds());
+		userImageService.addInitialUserImages(user, request.imageIds());
 
 		// 온보딩 데이터 설정
 		completeUserOnboardingData(user, request);
-
 		// 클러스터 할당
 		assignClusterToUser(user);
 
 		userRepository.save(user);
-
 		return OnboardingResponse.success(userId);
 	}
 
@@ -59,7 +56,6 @@ public class UserWriteService {
 		userRepository.save(user);
 		return UserProfileUpdateResponse.success(user.getId());
 	}
-
 
 	private User getUserById(Long userId) {
 		return userRepository.fetchById(userId)
