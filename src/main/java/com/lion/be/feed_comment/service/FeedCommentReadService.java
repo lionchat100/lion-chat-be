@@ -42,7 +42,7 @@ public class FeedCommentReadService {
             slice = feedCommentRepository.fetchAllByFeedIdFirst(feedId, pageable);
         }
 
-
+        /*
         List<Long> commentIds = slice.getContent().stream()
                 .map(FeedCommentResponse::id)
                 .toList();
@@ -89,6 +89,9 @@ public class FeedCommentReadService {
         }
 
         return new SliceImpl<>(enrichedContent, slice.getPageable(), slice.hasNext());
+         */
+
+        return slice;
     }
 
 

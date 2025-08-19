@@ -22,6 +22,8 @@ public interface ChatMessageRepository extends MongoRepository<ChatMessage, Obje
     })
     List<ChatMessage> findPendingMessageByReceiverId(Long userId);
 
+    Slice<ChatMessage> findByChatRoomId(Long chatRoomId, Pageable pageable);
+
     /**
      * 채팅방의 메시지를 30개씩 조회합니다.
      * lastId가 0이면 최신 메시지부터, 0이 아니면 해당 ID 이후의 메시지부터 30개씩 조회합니다.

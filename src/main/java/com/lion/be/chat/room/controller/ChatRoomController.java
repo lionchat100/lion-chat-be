@@ -37,7 +37,7 @@ public class ChatRoomController {
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestBody ChatRoomInitRequest request
     ) {
-        Long chatRoomId = chatRoomService.findOrCreateChatRoom(userPrincipal.getId(), request.receiverId());
+        Long chatRoomId = chatRoomService.findOrCreateChatRoom(userPrincipal.getId(), request.id());
         log.info("채팅방 생성 완료: {}", chatRoomId);
         return ResponseEntity.ok(new ChatRoomInitResponse(
                 chatRoomId

@@ -4,6 +4,6 @@ import jakarta.validation.constraints.NotBlank;
 
 public record MessageAckRequest(
         @NotBlank String messageId,
-        @NotBlank Long userId
+        @NotBlank Long id // sender id
 ) {
 }

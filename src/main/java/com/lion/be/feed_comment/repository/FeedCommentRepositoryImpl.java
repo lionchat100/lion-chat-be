@@ -1,6 +1,5 @@
 package com.lion.be.feed_comment.repository;
 
-import com.lion.be.feed.domain.entity.QFeed;
 import com.lion.be.feed_comment.domain.dto.FeedCommentResponse;
 import com.lion.be.feed_comment.domain.dto.FeedCommentSaveResponse;
 import com.lion.be.feed_comment.domain.entity.FeedComment;
@@ -11,7 +10,6 @@ import com.lion.be.image.domain.entity.QImage;
 import com.lion.be.user.domain.Role;
 import com.lion.be.user.domain.entity.QUser;
 import com.lion.be.user.domain.entity.QUserPhoto;
-import com.querydsl.core.Query;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.NumberExpression;
@@ -123,8 +121,7 @@ public class FeedCommentRepositoryImpl implements FeedCommentRepository {
                         comment.createdAt,
                         user.id,
                         user.nickname,
-                        image.imageUrl,
-                        comment.likeCount
+                        image.imageUrl.coalesce("https://tokit-bucket.s3.ap-northeast-2.amazonaws.com/profile/defaultimage.png")
                         ))
                         .from(comment)
                         .join(user).on(comment.user.id.eq(user.id))

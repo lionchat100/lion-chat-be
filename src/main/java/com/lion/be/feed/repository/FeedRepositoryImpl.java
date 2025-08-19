@@ -169,9 +169,7 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
                 queryFactory.select(feed.id)
                         .from(feed)
                         .join(user).on(feed.user.id.eq(user.id), user.role.ne(Role.BANNED))
-                        .where(feed.isDeleted.eq(false),
-                                feed.likeCount.lt(lastLikeCount).or(feed.likeCount.eq(lastLikeCount).and(feed.id.lt(lastId))
-                                        )
+                        .where(feed.isDeleted.eq(false).and(feed.likeCount.lt(lastLikeCount).or(feed.likeCount.eq(lastLikeCount).and(feed.id.lt(lastId))))
                         )
                         .orderBy(feed.likeCount.desc(),feed.id.desc())
                         .limit(limit)
@@ -237,7 +235,7 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
                                         feed.commentCount,
                                         user.nickname,
                                         user.id,
-                                        image.imageUrl)
+                                        image.imageUrl.coalesce("https://tokit-bucket.s3.ap-northeast-2.amazonaws.com/profile/defaultimage.png"))
                         ).from(feed)
                         .join(user).on(feed.user.id.eq(user.id))
                         .leftJoin(userPhoto).on(user.id.eq(userPhoto.user.id), userPhoto.orderIndex.eq(1))
@@ -268,7 +266,7 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
                                         feed.commentCount,
                                         user.nickname,
                                         user.id,
-                                        image.imageUrl)
+                                        image.imageUrl.coalesce("https://tokit-bucket.s3.ap-northeast-2.amazonaws.com/profile/defaultimage.png"))
                         ).from(feed)
                         .join(user).on(feed.user.id.eq(user.id))
                         .leftJoin(userPhoto).on(user.id.eq(userPhoto.user.id), userPhoto.orderIndex.eq(1))

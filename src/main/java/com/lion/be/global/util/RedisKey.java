@@ -18,4 +18,6 @@ public final class RedisKey {
     public static final String DIRTY_FEED_LIKE_KEY = "dirty:feed_like";
     public static final String FEED_LIKE_COUNT_KEY_PREFIX = "feed:like_count:";
     public static final String FEED_LIKED_USERS_KEY_PREFIX = "feed:liked_users:";
+
+    public static final String USER_LIKED_FEED_SET_PREFIX = "user:liked_feed:";
 }
