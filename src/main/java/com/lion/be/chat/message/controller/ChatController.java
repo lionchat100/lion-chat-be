@@ -35,7 +35,7 @@ public class ChatController {
     public ResponseEntity<List<ChatMessageResponse>> getMessageHistory(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestParam Long roomId,
-            @RequestParam String lastId
+            @RequestParam(required = false) String lastId
     ) {
         List<ChatMessageResponse> messages = messageUseCase.findMessagesByIdAndLastId(roomId, lastId, userPrincipal.getId());
         return ResponseEntity.ok(messages);
