@@ -1,5 +1,7 @@
 package com.lion.be.image.repository;
 
+import java.util.List;
+
 import com.lion.be.image.domain.entity.Image;
 
 public interface ImageRepository {
@@ -10,4 +12,5 @@ public interface ImageRepository {
 
     void deleteById(Long id);
 
+	List<Image> fetchAllById(List<Long> imageIds);
 }

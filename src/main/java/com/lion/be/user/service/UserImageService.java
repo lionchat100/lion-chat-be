@@ -2,6 +2,9 @@ package com.lion.be.user.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,17 +30,15 @@ public class UserImageService {
 
 	@Transactional
 	public void updateUserImages(User user, List<Long> imageIds) {
-		// 1. 기존 이미지 삭제
 		deleteExistingImages(user);
 
-		// 2. 새 이미지 추가 (null이거나 빈 리스트면 이미지 없이 저장)
 		if (hasValidImageIds(imageIds)) {
 			addNewImages(user, imageIds);
 		}
 	}
 
 	@Transactional
-	public void setInitialUserImages(User user, List<Long> imageIds) {
+	public void addInitialUserImages(User user, List<Long> imageIds) {
 		validateImageIds(imageIds);
 		List<Image> images = getValidatedImages(imageIds);
 		addImagesToUser(user, images);
@@ -57,17 +58,18 @@ public class UserImageService {
 	}
 
 	private List<Image> getValidatedImages(List<Long> imageIds) {
-		return imageIds.stream()
-			.map(this::getImageById)
-			.toList();
-	}
+		List<Image> foundImages = imageRepository.fetchAllById(imageIds);
 
-	private Image getImageById(Long imageId) {
-		try {
-			return imageRepository.fetchById(imageId);
-		} catch (CustomException e) {
+		if (foundImages.size() != imageIds.size()) {
 			throw new CustomException(ErrorCode.IMAGE_NOT_FOUND);
 		}
+
+		Map<Long, Image> imageMap = foundImages.stream()
+			.collect(Collectors.toMap(Image::getId, Function.identity()));
+
+		return imageIds.stream()
+			.map(imageMap::get)
+			.toList();
 	}
 
 	private void deleteExistingImages(User user) {
