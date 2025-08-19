@@ -20,6 +20,7 @@ public class FeedLikeService {
         if (Objects.equals(redisTemplate.opsForSet().add(likedUsersKey, userIdStr), 1L)) {
             redisTemplate.opsForValue().increment(RedisKey.FEED_LIKE_COUNT_KEY_PREFIX + feedId);
             redisTemplate.opsForSet().add(RedisKey.DIRTY_FEED_LIKE_KEY, String.valueOf(feedId));
+            redisTemplate.opsForSet().add(RedisKey.USER_LIKED_FEED_SET_PREFIX + userIdStr, String.valueOf(feedId));
         }
     }
 
@@ -30,6 +31,7 @@ public class FeedLikeService {
         if (Objects.equals(redisTemplate.opsForSet().remove(likedUsersKey, userIdStr), 1L)) {
             redisTemplate.opsForValue().decrement(RedisKey.FEED_LIKE_COUNT_KEY_PREFIX + feedId);
             redisTemplate.opsForSet().add(RedisKey.DIRTY_FEED_LIKE_KEY, String.valueOf(feedId));
+            redisTemplate.opsForSet().remove(RedisKey.USER_LIKED_FEED_SET_PREFIX + userIdStr, String.valueOf(feedId));
         }
     }
 

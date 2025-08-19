@@ -14,18 +14,21 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Component
-@RequiredArgsConstructor
+//@Component
+//@RequiredArgsConstructor
 @Slf4j
 public class FeedCommentLikeScheduler {
 
+    /*
     private final RedisTemplate<String, Object> redisTemplate;
     private final FeedCommentRepository feedCommentRepository;
+     */
 
     // 10초마다 실행
-    @Scheduled(fixedRate = 10000)
-    @Transactional
+    //@Scheduled(fixedRate = 10000)
+    //@Transactional
     public void syncLikesToDb() {
+        /*
         log.debug("피드 댓글 좋아요 카운트 Batch update 시작");
 
         // 1. Redis Set에서 처리할 대상 ID를 안전하게 가져옵니다.
@@ -94,6 +97,7 @@ public class FeedCommentLikeScheduler {
         }
 
         log.debug("피드 좋아요 카운트 Batch update 끝");
+         */
     }
 
 }
