@@ -29,6 +29,10 @@ public interface UserLikesJpaRepository extends JpaRepository<UserLikes, Long> {
 	@Query("DELETE FROM UserLikes ul WHERE ul.fromUser.id = :fromUserId AND ul.toUser.id = :toUserId")
 	void deleteByFromUserIdAndToUserId(@Param("fromUserId") Long fromUserId, @Param("toUserId") Long toUserId);
 
-	@Query("SELECT ul FROM UserLikes ul JOIN FETCH ul.toUser WHERE ul.fromUser.id = :userId")
+	@Query("SELECT ul FROM UserLikes ul " +
+		"JOIN FETCH ul.toUser u " +
+		"LEFT JOIN FETCH u.userPhotos up " +
+		"WHERE ul.fromUser.id = :userId " +
+		"ORDER BY u.id, up.orderIndex")
 	List<UserLikes> findByFromUserIdWithToUser(@Param("userId") Long userId);
 }
