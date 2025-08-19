@@ -17,11 +17,11 @@ public class CookieUtil {
     public void addCookie(HttpServletResponse response, String name, String value, int maxAge, String domain) {
         ResponseCookie cookie = ResponseCookie.from(name, value)
                 .httpOnly(true)
-                .secure(true)
+//                .secure(true)
                 .path("/")
                 .maxAge(maxAge)
                 .domain(domain)
-                .sameSite("Lax")
+//                .sameSite("Lax")
                 .build();
 
         response.addHeader("Set-Cookie", cookie.toString());
@@ -30,11 +30,12 @@ public class CookieUtil {
     public void deleteCookie(HttpServletResponse response, String name, String domain) {
         ResponseCookie cookie = ResponseCookie.from(name, "")
                 .httpOnly(true)
-                .secure(true)
+//                .secure(true)
                 .path("/")
                 .maxAge(0)
                 .domain(domain)
-                .sameSite("Lax")
+//                .sameSite("Lax")
+                .sameSite("")
                 .build();
 
         response.addHeader("Set-Cookie", cookie.toString());
