@@ -54,4 +54,8 @@ public interface UserRepository {
 	);
 
 	Optional<User> fetchByIdWithPhotos(Long userId);
+
+	Optional<String> fetchNicknameById(Long userId);
+
+	boolean existsById(Long userId);
 }

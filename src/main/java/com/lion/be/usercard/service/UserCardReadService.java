@@ -10,7 +10,7 @@ import com.lion.be.global.exception.CustomException;
 import com.lion.be.global.exception.ErrorCode;
 import com.lion.be.user.domain.Position;
 import com.lion.be.user.domain.entity.User;
-import com.lion.be.user.repository.UserRepositoryImpl;
+import com.lion.be.user.repository.UserRepository;
 import com.lion.be.usercard.controller.dto.UserCardResponse;
 import com.lion.be.usercard.util.UserCardFilterUtil;
 import com.lion.be.userlike.service.UserLikesReadService;
@@ -26,7 +26,7 @@ public class UserCardReadService {
 
 	private final UserViewHistoryService userViewHistoryService;
 	private final UserCardFilterUtil userCardFilterUtil;
-	private final UserRepositoryImpl userRepositoryImpl;
+	private final UserRepository userRepository;
 	private final UserLikesReadService userLikesReadService;
 
 	public List<UserCardResponse> getCards(Long userId, int size, List<Long> excludeUserIds) {
@@ -37,7 +37,7 @@ public class UserCardReadService {
 	}
 
 	public UserCardResponse getUserCard(Long id) {
-		return userRepositoryImpl.fetchByIdWithPhotos(id)
+		return userRepository.fetchByIdWithPhotos(id)
 			.map(user -> UserCardResponse.from(user, false))
 			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 	}
