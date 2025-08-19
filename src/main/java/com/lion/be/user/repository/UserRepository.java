@@ -52,4 +52,6 @@ public interface UserRepository {
 		int remainingSize,
 		List<Long> extendedExcludeIds
 	);
+
+	Optional<User> fetchByIdWithPhotos(Long userId);
 }
