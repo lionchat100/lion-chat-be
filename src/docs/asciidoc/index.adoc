@@ -481,11 +481,17 @@ operation::random_supplement[snippets='http-request,http-response']
 operation::backend_cluster_recommendation[snippets='http-request,http-response']
 
 
-=== 본인 카드 조회 (qr용)
+=== 본인 카드 조회
+
+로그인된 유저의 프로필카드를 볼 수 있습니다.
+
+operation::my_profile_card[snippets='http-request,http-response']
+
+=== 유저 카드 조회
 
 유저 id를 통해 유저 프로필카드를 볼 수 있습니다.
 
-operation::my_profile_card[snippets='http-request,http-response']
+operation::user_profile_card[snippets='http-request,http-response']
 
 === 클러스터에서 필터를 통해 포지션 중심으로 추천받습니다.
 

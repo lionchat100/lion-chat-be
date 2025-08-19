@@ -31,36 +31,41 @@ public class UserCardReadService {
 
 	public List<UserCardResponse> getCards(Long userId, int size, List<Long> excludeUserIds) {
 		List<Long> allExcludeUserIds = userViewHistoryService.getExcludeUserIds(userId, excludeUserIds);
-
 		List<User> recommendedUsers = userCardFilterUtil.getRecommendedUsers(userId, size, allExcludeUserIds);
 
-		List<Long> viewedUserIds = recommendedUsers.stream().map(User::getId).toList();
-		userViewHistoryService.recordViewedUsers(userId, viewedUserIds);
-
-		Set<Long> likedUserIds = userLikesReadService.getLikedUserIds(userId, viewedUserIds);
-
-		return recommendedUsers.stream()
-			.map(user -> UserCardResponse.from(
-				user,
-				likedUserIds.contains(user.getId())
-				))
-			.toList();
+		return convertToUserCardResponses(userId, recommendedUsers);
 	}
 
-	public UserCardResponse getMyCards(Long id) {
+	public UserCardResponse getUserCard(Long id) {
 		return userRepositoryImpl.fetchById(id)
 			.map(user -> UserCardResponse.from(user, false))
 			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 	}
 
 	public List<UserCardResponse> getCardsByPosition(Long userId, int size, List<Long> excludeUserIds, Position position) {
-		List<User> users = userCardFilterUtil.getRecommendedUsersByPosition(userId, size, excludeUserIds, position);
+		List<Long> allExcludeUserIds = userViewHistoryService.getExcludeUserIds(userId, excludeUserIds);
+		List<User> users = userCardFilterUtil.getRecommendedUsersByPosition(userId, size, allExcludeUserIds, position);
 
-		List<Long> viewedUserIds = users.stream().map(User::getId).toList();
-		userViewHistoryService.recordViewedUsers(userId, viewedUserIds);
+		return convertToUserCardResponses(userId, users);
+	}
 
-		Set<Long> likedUserIds = userLikesReadService.getLikedUserIds(userId, viewedUserIds);
+	private List<UserCardResponse> convertToUserCardResponses(Long currentUserId, List<User> users) {
+		if (users.isEmpty()) {
+			return List.of();
+		}
 
+		// 1. 조회한 사용자 ID 목록 추출
+		List<Long> viewedUserIds = users.stream()
+			.map(User::getId)
+			.toList();
+
+		// 2. 조회 이력 기록
+		userViewHistoryService.recordViewedUsers(currentUserId, viewedUserIds);
+
+		// 3. 좋아요 상태 확인
+		Set<Long> likedUserIds = userLikesReadService.getLikedUserIds(currentUserId, viewedUserIds);
+
+		// 4. Response DTO 변환
 		return users.stream()
 			.map(user -> UserCardResponse.from(user, likedUserIds.contains(user.getId())))
 			.toList();

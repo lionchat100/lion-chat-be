@@ -4,7 +4,6 @@ import com.lion.be.chat.room.domain.dto.ChatRoomResponse;
 import com.lion.be.chat.room.domain.entity.QChatRoom;
 import com.lion.be.chat.room.domain.entity.QChatRoomUser;
 import com.lion.be.image.domain.entity.QImage;
-import com.lion.be.user.domain.Role;
 import com.lion.be.user.domain.entity.QUser;
 import com.lion.be.user.domain.entity.QUserPhoto;
 import com.querydsl.core.types.Projections;
@@ -34,14 +33,16 @@ public class ChatRoomQueryDslRepository {
                         otherUser.nickname,
                         chatRoom.recentMessageContent,
                         chatRoom.recentMessageDt,
-                        otherUserImage.imageUrl,
+                        otherUserImage.imageUrl.coalesce("https://tokit-bucket.s3.ap-northeast-2.amazonaws.com/profile/defaultimage.png"),
                         currentUserRoom.isRead.coalesce(true)
                 ))
                 .from(chatRoom)
                 .join(chatRoom.chatRoomUsers, currentUserRoom)
                 .join(chatRoom.chatRoomUsers, otherUserRoom)
                 .join(otherUserRoom.user, otherUser)
-                .join(otherUser.userPhotos, otherUserPhoto)
+                .leftJoin(otherUser.userPhotos, otherUserPhoto)
+                .on(otherUserPhoto.orderIndex.eq(1))
+                .leftJoin(otherUserPhoto.image, otherUserImage)
                 .where(
                         currentUserRoom.user.id.eq(userId)
                                 .and(otherUserRoom.user.id.ne(userId))
