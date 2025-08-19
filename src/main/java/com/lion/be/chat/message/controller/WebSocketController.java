@@ -3,7 +3,7 @@ package com.lion.be.chat.message.controller;
 import com.lion.be.auth.domain.UserPrincipal;
 import com.lion.be.chat.message.domain.dto.ChatMessageRequest;
 import com.lion.be.chat.message.domain.dto.MessageAckRequest;
-import com.lion.be.chat.message.service.MessageService;
+import com.lion.be.chat.message.service.MessageUseCase;
 import com.lion.be.global.aop.CheckRateLimitChat;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +21,7 @@ import java.security.Principal;
 @Slf4j
 public class WebSocketController {
 
-    private final MessageService messageService;
+    private final MessageUseCase messageUseCase;
 
     /**
      * 클라이언트로부터 채팅 메시지를 수신해 저장하고, 메시지 발행 후 결과를 반환합니다.
@@ -40,7 +40,7 @@ public class WebSocketController {
         }
 
         UserPrincipal userPrincipal = (UserPrincipal) ((Authentication) principal).getPrincipal();
-        messageService.sendMessage(request, userPrincipal.getId());
+        messageUseCase.sendMessage(request, userPrincipal.getId());
     }
 
     /**
@@ -53,7 +53,7 @@ public class WebSocketController {
     @MessageMapping("/message.ack")
     public void handleMessageAck(MessageAckRequest ackRequest) {
         log.info("메시지 읽음 확인 요청 수신: {}", ackRequest);
-        messageService.updateReadStatus(ackRequest.messageId(), ackRequest.userId());
-        log.info("메시지 읽음 상태 업데이트 완료: messageId={}, userId={}", ackRequest.messageId(), ackRequest.userId());
+        messageUseCase.updateReadStatus(ackRequest.messageId(), ackRequest.id());
+        log.info("메시지 읽음 상태 업데이트 완료: messageId={}, userId={}", ackRequest.messageId(), ackRequest.id());
     }
 }

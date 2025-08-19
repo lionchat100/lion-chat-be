@@ -134,7 +134,7 @@ public class ChatAcceptanceTest extends AcceptanceTest {
             채팅방에_메시지를_전송한다(사용자1_토큰, chatRoomId, "반갑습니다.", spec);
 
             // when
-            var response = 채팅방의_초기_메시지_목록을_조회한다(사용자1_토큰, chatRoomId, 0L, spec);
+            var response = 채팅방의_초기_메시지_목록을_조회한다(사용자1_토큰, chatRoomId, null, spec);
 
             // then
             메시지_목록_조회_응답을_검증한다(response, 3, "반갑습니다.");
@@ -150,7 +150,7 @@ public class ChatAcceptanceTest extends AcceptanceTest {
             채팅방에_메시지를_전송한다(사용자2_토큰, chatRoomId, "아, 네. 안녕하세요.", spec);
             Thread.sleep(10);
             채팅방에_메시지를_전송한다(사용자1_토큰, chatRoomId, "반갑습니다.", spec);
-            Long lastId = 0L;
+            String lastId = null;
 
             // when
             var response = 채팅방의_메시지_목록을_조회한다(사용자1_토큰, chatRoomId, lastId, spec);
