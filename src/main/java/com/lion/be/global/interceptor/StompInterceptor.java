@@ -1,10 +1,12 @@
 package com.lion.be.global.interceptor;
 
 import com.lion.be.global.util.JwtTokenProvider;
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
@@ -17,7 +19,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class StompInterceptor implements ChannelInterceptor {
 
-    private final JwtTokenProvider jwtTokenProvider; // 직접 구현한 JWT 토큰 유틸리티
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
@@ -29,25 +31,28 @@ public class StompInterceptor implements ChannelInterceptor {
 
             if (jwtToken != null && jwtToken.startsWith("Bearer ")) {
                 String token = jwtToken.substring(7);
-                // 토큰 유효성 검사
-                if (jwtTokenProvider.validateToken(token)) {
-                    // <<< 중요!!! 토큰이 유효하면 인증 정보를 생성하여 세션에 저장합니다.
-                    Authentication authentication = jwtTokenProvider.getAuthentication(
-                            token); // JWT로부터 Authentication 객체 생성
-                    accessor.setUser(authentication); // accessor에 user 정보 저장
-
-                    log.info("User '{}' connected. Session ID: {}", authentication.getName(), accessor.getSessionId());
-                } else {
-                    // 유효하지 않은 토큰 처리 (예: 로깅 후 연결 종료)
-                    log.error("Invalid JWT token received.");
-                    // 예외를 던지거나 메시지 반환을 null로 하여 연결을 거부할 수 있습니다.
-                    // 여기서는 명시적으로 에러를 던지지 않고 연결이 안 되도록 합니다.
-                    // CustomStompErrorHandler를 사용한다면 예외를 던지는 것이 좋습니다.
-                    // throw new AccessDeniedException("Invalid JWT token.");
+                try {
+                    // <<< 중요!!! 토큰 유효성 검사에서 발생하는 예외를 처리합니다.
+                    if (jwtTokenProvider.validateToken(token)) {
+                        Authentication authentication = jwtTokenProvider.getAuthentication(token);
+                        accessor.setUser(authentication);
+                        log.info("User '{}' connected. Session ID: {}", authentication.getName(),
+                                accessor.getSessionId());
+                    }
+                } catch (ExpiredJwtException e) {
+                    // <<< 중요!!! 토큰 만료 시, 클라이언트가 식별할 수 있는 에러 메시지와 함께 예외를 던집니다.
+                    log.info("Expired JWT Token: {}", e.getMessage());
+                    throw new MessageDeliveryException("JWT_EXPIRED");
+                } catch (Exception e) {
+                    // <<< 중요!!! 그 외 다른 JWT 관련 예외 처리
+                    log.error("Invalid JWT Token: {}", e.getMessage());
+                    throw new MessageDeliveryException("INVALID_TOKEN");
                 }
+            } else {
+                // 토큰이 없는 경우
+                throw new MessageDeliveryException("MISSING_TOKEN");
             }
         }
-
         return message;
     }
 
