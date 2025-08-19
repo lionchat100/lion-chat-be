@@ -16,7 +16,7 @@ public class FeedDto {
     private Long id;
     private String title;
     private String content;
-    private ZonedDateTime createdAt;
+    private LocalDateTime createdAt;
     private Long likeCount;
     private Boolean isLiked;
     private Long commentCount;
@@ -36,7 +36,9 @@ public class FeedDto {
         this.commentCount = commentCount;
         this.id = id;
         this.title = title;
-        this.createdAt = createdAt.atZone(ZoneId.of("Asia/Seoul"));
+        this.createdAt = createdAt.atZone(ZoneId.of("UTC"))
+                .withZoneSameInstant(ZoneId.of("Asia/Seoul"))
+                .toLocalDateTime();;
     }
 
 }

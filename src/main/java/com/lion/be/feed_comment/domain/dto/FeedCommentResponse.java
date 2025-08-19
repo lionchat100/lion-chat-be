@@ -11,17 +11,22 @@ public record FeedCommentResponse(Long id,
                                   String content,
                                   long likeCount,
                                   boolean isLiked,
-                                  ZonedDateTime createdAt){
+                                  LocalDateTime createdAt){
 
     public FeedCommentResponse(Long id, Long feedId, String content, LocalDateTime createdAt,
                                Long userId, String userName, String userImageUrl, long likeCount) {
         this(id, feedId, new WriterResponse(userId, userName, userImageUrl), content, likeCount, false,
-                createdAt.atZone(ZoneId.of("Asia/Seoul")));
+                createdAt.atZone(ZoneId.of("UTC"))
+                        .withZoneSameInstant(ZoneId.of("Asia/Seoul"))
+                        .toLocalDateTime());
     }
 
     public FeedCommentResponse(Long id, Long feedId, String content, LocalDateTime createdAt,
                                Long userId, String userName, String userImageUrl){
-        this(id, feedId, new WriterResponse(userId, userName, userImageUrl), content, 0, false, createdAt.atZone(ZoneId.of("Asia/Seoul")));
+        this(id, feedId, new WriterResponse(userId, userName, userImageUrl), content, 0, false,
+                createdAt.atZone(ZoneId.of("UTC"))
+                .withZoneSameInstant(ZoneId.of("Asia/Seoul"))
+                .toLocalDateTime());
     }
 
 }
