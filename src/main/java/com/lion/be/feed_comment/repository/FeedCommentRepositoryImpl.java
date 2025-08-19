@@ -121,8 +121,7 @@ public class FeedCommentRepositoryImpl implements FeedCommentRepository {
                         comment.createdAt,
                         user.id,
                         user.nickname,
-                        image.imageUrl,
-                        comment.likeCount
+                        image.imageUrl
                         ))
                         .from(comment)
                         .join(user).on(comment.user.id.eq(user.id))

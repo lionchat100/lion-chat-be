@@ -33,6 +33,7 @@ public class FeedCommentController {
         return ResponseEntity.ok(response);
     }
 
+    @ElapsedTime
     @GetMapping("/api/feeds/{feedId}/comments")
     public ResponseEntity<Slice<FeedCommentResponse>> fetchAll(@PathVariable Long feedId,
                                                                @RequestParam(value="lastId", required = false) Long lastId,

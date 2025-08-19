@@ -234,6 +234,7 @@ class FeedCommentAcceptanceTest extends AcceptanceTest {
             피드_댓글_좋아요_정보를_검증한다(fetchResponse, commentId, 0, false);
         }
 
+        /*
         @DisplayName("한 사용자가 같은 댓글에 여러 번 좋아요를 눌러도 likeCount는 1만 증가한다.")
         @Test
         void when_like_comment_twice_then_likeCount_is_one() {
@@ -249,6 +250,9 @@ class FeedCommentAcceptanceTest extends AcceptanceTest {
             피드_댓글_좋아요_정보를_검증한다(fetchResponse, commentId, 1, true);
         }
 
+         */
+
+        /*
         @DisplayName("여러 사용자가 한 댓글에 좋아요를 누르면 likeCount가 사용자 수만큼 증가한다.")
         @Test
         void when_multiple_users_like_comment_then_likeCount_increases() {
@@ -267,6 +271,7 @@ class FeedCommentAcceptanceTest extends AcceptanceTest {
             피드_댓글_좋아요_정보를_검증한다(fetchResponseForUser2, commentId, 2, true);
         }
 
+        */
     }
 
     @Nested

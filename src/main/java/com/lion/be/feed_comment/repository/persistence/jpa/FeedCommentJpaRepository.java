@@ -14,7 +14,7 @@ public interface FeedCommentJpaRepository extends JpaRepository<FeedComment, Lon
 
     @ElapsedTime
     @Query("SELECT NEW com.lion.be.feed_comment.domain.dto.FeedCommentResponse(" +
-            "c.id, c.feed.id, c.content, c.createdAt, u.id, u.nickname, img.imageUrl, c.likeCount" // c.likeCount 추가
+            "c.id, c.feed.id, c.content, c.createdAt, u.id, u.nickname, img.imageUrl"
             + ") " +
             "FROM FeedComment c " +
             "JOIN c.user u "+
@@ -39,7 +39,7 @@ public interface FeedCommentJpaRepository extends JpaRepository<FeedComment, Lon
 
     @ElapsedTime
     @Query("SELECT NEW com.lion.be.feed_comment.domain.dto.FeedCommentResponse(" +
-            "c.id, c.feed.id, c.content, c.createdAt, u.id, u.nickname, img.imageUrl, c.likeCount" // c.likeCount 추가
+            "c.id, c.feed.id, c.content, c.createdAt, u.id, u.nickname, img.imageUrl"
             + ") " +
             "FROM FeedComment c " +
             "JOIN c.user u "+
@@ -61,7 +61,7 @@ public interface FeedCommentJpaRepository extends JpaRepository<FeedComment, Lon
     @ElapsedTime
     @Query("""
             SELECT NEW com.lion.be.feed_comment.domain.dto.FeedCommentResponse(
-            c.id, c.feed.id, c.content, c.createdAt, u.id, u.nickname, img.imageUrl, c.likeCount
+            c.id, c.feed.id, c.content, c.createdAt, u.id, u.nickname, img.imageUrl
             )
             FROM FeedComment c
             JOIN c.user u
@@ -74,7 +74,7 @@ public interface FeedCommentJpaRepository extends JpaRepository<FeedComment, Lon
     @ElapsedTime
     @Query("""
             SELECT NEW com.lion.be.feed_comment.domain.dto.FeedCommentResponse(
-            c.id, c.feed.id, c.content, c.createdAt, u.id, u.nickname, img.imageUrl, c.likeCount
+            c.id, c.feed.id, c.content, c.createdAt, u.id, u.nickname, img.imageUrl
             )
             FROM FeedComment c
             JOIN c.user u
