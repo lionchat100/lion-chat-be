@@ -3,6 +3,8 @@ package com.lion.be.acceptance.usercard;
 import static com.lion.be.acceptance.usercard.UserCardSteps.*;
 import static com.lion.be.acceptance.usercard.UserCardSteps.김프론트_로그인;
 
+import java.io.IOException;
+
 import com.lion.be.acceptance.AcceptanceTest;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
@@ -16,14 +18,29 @@ class UserCardAcceptanceTest extends AcceptanceTest {
 	@Nested
 	@DisplayName("카드 추천 시스템")
 	class CardRecommendationTest {
-		@DisplayName("유저 아이디로 카드를 조회 가능하다.(qr용)")
+		@DisplayName("로그인된 유저는 본인 카드를 조회 가능하다.")
 		@Test
-		void when_userId_requests_cards_then_get_user_card(){
+		void when_login_user_requests_cards_then_get_user_card(){
 			api_문서_타이틀("my_profile_card",spec);
 
 			String accessToken = 김프론트_로그인();
 
 			ExtractableResponse<Response> response = 카드를_조회한다(spec, accessToken);
+
+			단일_카드_조회_성공을_검증한다(response);
+		}
+
+		@DisplayName("유저 아이디로 카드를 조회 가능하다.")
+		@Test
+		void when_userId_requests_cards_then_get_user_card() throws IOException {
+			api_문서_타이틀("user_profile_card",spec);
+
+			String accessToken = 김프론트_로그인();
+			원준_완전_온보딩();
+
+			Long userId = 1L ;
+
+			ExtractableResponse<Response> response = Id로_카드를_조회한다(spec, accessToken, userId);
 
 			단일_카드_조회_성공을_검증한다(response);
 		}

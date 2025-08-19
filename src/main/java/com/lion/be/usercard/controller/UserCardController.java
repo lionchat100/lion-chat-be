@@ -2,9 +2,11 @@ package com.lion.be.usercard.controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,11 +28,22 @@ public class UserCardController {
 	private final UserCardReadService userCardReadService;
 
 	@GetMapping("/profile")
-	public ResponseEntity<UserCardResponse> getMyCards(
+	public ResponseEntity<UserCardResponse> getMyCard(
 		@AuthenticationPrincipal UserPrincipal userPrincipal
 		){
-		UserCardResponse cards = userCardReadService.getMyCards(
+		UserCardResponse cards = userCardReadService.getUserCard(
 			userPrincipal.getId()
+		);
+		return ResponseEntity.ok(cards);
+	}
+
+	@GetMapping("/profile/{userId}")
+	public ResponseEntity<UserCardResponse> getUserCard(
+		@AuthenticationPrincipal UserPrincipal userPrincipal,
+		@PathVariable Long userId
+	){
+		UserCardResponse cards = userCardReadService.getUserCard(
+			userId
 		);
 		return ResponseEntity.ok(cards);
 	}
@@ -54,7 +67,7 @@ public class UserCardController {
 	}
 
 	@GetMapping("/cards/category")
-	public ResponseEntity<List<UserCardResponse>> getCardsByCategory(
+	public ResponseEntity<List<UserCardResponse>> getCardsByPosition(
 		@AuthenticationPrincipal UserPrincipal userPrincipal,
 		@RequestParam(defaultValue = "10") int size,
 		@RequestParam(required = false) List<Long> excludeUserIds,

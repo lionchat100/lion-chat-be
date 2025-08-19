@@ -69,6 +69,24 @@ public class UserCardSteps {
 			.extract();
 	}
 
+	public static ExtractableResponse<Response> Id로_카드를_조회한다(
+		RequestSpecification spec, String accessToken,
+		Long userId
+	) {
+		return RestAssured
+			.given()
+			.contentType(MediaType.APPLICATION_JSON_VALUE)
+			.spec(spec)
+			.auth().oauth2(accessToken)
+			.log().all()
+			.when()
+			.get("/api/users/profile/{userId}", userId)
+			.then()
+			.log().all()
+			.extract();
+	}
+
+
 	public static ExtractableResponse<Response> 카드리스트를_조회한다(
 		RequestSpecification spec, String accessToken, int size) {
 		return RestAssured
