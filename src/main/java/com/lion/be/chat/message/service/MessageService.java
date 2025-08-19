@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -131,23 +133,30 @@ public class MessageService {
         chatRoomUser.markAsRead();
         chatRoomUserRepository.save(chatRoomUser);
 
-        return messages.map(message -> {
-            User sender = users.get(message.getSenderId());
-            String imageUrl = null;
-            if (!sender.getUserPhotos().isEmpty()) {
-                imageUrl = sender.getUserPhotos().get(0).getImageUrl();
-            }
-            return new ChatMessageResponse(
-                    message.getId().toString(),
-                    message.getChatRoomId(),
-                    message.getSenderId(),
-                    message.getSenderName(),
-                    imageUrl,
-                    message.getCreatedAt(),
-                    message.getContent(),
-                    isEnd
-            );
-        }).getContent();
-    }
+        List<ChatMessage> messageList = messages.getContent();
+        int lastIndex = messageList.size() - 1;
+        return IntStream.range(0, messageList.size())
+                .mapToObj(i -> {
+                    ChatMessage message = messageList.get(i);
+                    User sender = users.get(message.getSenderId());
 
+                    String imageUrl = sender.getUserPhotos().isEmpty()
+                            ? null
+                            : sender.getUserPhotos().get(0).getImageUrl();
+
+                    boolean isLast = (i == lastIndex) && isEnd;
+
+                    return new ChatMessageResponse(
+                            message.getId().toString(),
+                            message.getChatRoomId(),
+                            message.getSenderId(),
+                            message.getSenderName(),
+                            imageUrl,
+                            message.getCreatedAt(),
+                            message.getContent(),
+                            isLast
+                    );
+                })
+                .collect(Collectors.toList());
+    }
 }
