@@ -4,7 +4,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.messaging.simp.stomp.StompReactorNettyCodec;
+import org.springframework.messaging.tcp.reactor.ReactorNettyTcpClient;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+import reactor.netty.tcp.SslProvider;
+import reactor.netty.tcp.TcpClient;
 
 @Configuration
 @Profile("!test")
@@ -24,13 +28,22 @@ public class WebSocketProdConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        // 1. Application Destination Prefix 설정 (클라이언트 -> 서버)
+        // Application Destination Prefix 설정
         registry.setApplicationDestinationPrefixes("/app");
 
-        // 2. STOMP Broker Relay 설정 (서버 <-> 외부 브로커 <-> 클라이언트)
-        registry.enableStompBrokerRelay("/topic", "/queue") // ActiveMQ의 Destination Prefix
-                .setRelayHost(host)
-                .setRelayPort(port)
+        // SSL/TLS를 지원하는 Netty TcpClient 생성
+        TcpClient tcpClient = TcpClient.create()
+                .host(host)
+                .port(port)
+                .secure(SslProvider.defaultClientProvider());
+
+        StompReactorNettyCodec codec = new StompReactorNettyCodec();
+
+        ReactorNettyTcpClient<byte[]> reactorNettyTcpClient = new ReactorNettyTcpClient<>(tcpClient, codec);
+
+        // STOMP Broker Relay 설정
+        registry.enableStompBrokerRelay("/topic", "/queue")
+                .setTcpClient(reactorNettyTcpClient)
                 .setSystemLogin(username)
                 .setSystemPasscode(password)
                 .setClientLogin(username)
