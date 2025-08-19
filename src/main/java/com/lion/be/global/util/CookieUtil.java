@@ -35,7 +35,6 @@ public class CookieUtil {
                 .maxAge(0)
                 .domain(domain)
 //                .sameSite("Lax")
-                .sameSite("")
                 .build();
 
         response.addHeader("Set-Cookie", cookie.toString());
