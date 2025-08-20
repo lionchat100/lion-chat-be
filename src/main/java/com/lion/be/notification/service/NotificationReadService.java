@@ -1,5 +1,6 @@
 package com.lion.be.notification.service;
 
+import com.lion.be.global.aop.ElapsedTime;
 import com.lion.be.global.exception.CustomException;
 import com.lion.be.global.exception.ErrorCode;
 import com.lion.be.image.domain.entity.Image;
@@ -76,7 +77,7 @@ public class NotificationReadService {
                                 receiver.getNickname(),
                                 notification.getType().name(),
                                 notification.getCreatedAt(),
-                                userImageMap.get(notification.getFromUserId()),
+                                userImageMap.get(notification.getFromUserId()) != null ? userImageMap.get(notification.getFromUserId()) : "https://tokit-bucket.s3.ap-northeast-2.amazonaws.com/profile/defaultimage.png",
                                     notification.getTargetId()
                         )
                 ).toList();
