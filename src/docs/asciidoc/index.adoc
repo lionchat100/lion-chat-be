@@ -301,13 +301,13 @@ operation::fetch_all_feed_comment_success[snippets='http-request,http-response']
 
 3초 이내에 연속으로 댓글 작성을 요청하여 실패하는 경우입니다.
 
-operation::rate_limit_3_seconds_fail[snippets='http-request,http-response']
+operation::comment_rate_limit_3_seconds_fail[snippets='http-request,http-response']
 
 ==== 실패 (10분 제한 위반)
 
-10분 이내에 6번째 댓글 작성을 요청하여 실패하는 경우입니다.
+1분 이내에 6번째 댓글 작성을 요청하여 실패하는 경우입니다.
 
-operation::rate_limit_10_minutes_fail[snippets='http-request,http-response']
+operation::comment_rate_limit_1_minutes_fail[snippets='http-request,http-response']
 
 [[like-feed-comment]]
 === 피드 댓글 좋아요

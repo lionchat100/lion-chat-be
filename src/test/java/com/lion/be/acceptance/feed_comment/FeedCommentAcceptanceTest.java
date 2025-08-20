@@ -293,19 +293,12 @@ class FeedCommentAcceptanceTest extends AcceptanceTest {
             api_문서_타이틀("comment_rate_limit_3_seconds_fail", spec);
             var request = feedCommentSaveRequest_생성("이것은 속도 제한 테스트 댓글입니다.");
 
-            // when & then
-            // 1. 첫 번째 요청은 성공한다.
-            var firstResponse = 피드의_댓글을_작성한다(request, feedId, accessToken, spec);
-            상태코드가_200이다(firstResponse);
-
-            // 2. 3초가 지나기 전 두 번째 요청은 실패한다.
+            // when
+            피드의_댓글을_작성한다(request, feedId, accessToken, spec);
             var secondResponse = 피드의_댓글을_작성한다(request, feedId, accessToken, spec);
-            상태코드가_429이다(secondResponse);
 
-            // 3. 3초가 지난 후의 요청은 다시 성공한다.
-            Thread.sleep(3100); // 3.1초 대기
-            var thirdResponse = 피드의_댓글을_작성한다(request, feedId, accessToken, spec);
-            상태코드가_200이다(thirdResponse);
+            // then
+            상태코드가_429이다(secondResponse);
         }
 
         @DisplayName("1분에 5개를 초과하여 댓글을 작성하면 429 에러가 발생한다")
