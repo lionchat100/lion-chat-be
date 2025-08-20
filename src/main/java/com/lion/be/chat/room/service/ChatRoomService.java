@@ -47,23 +47,15 @@ public class ChatRoomService {
             log.info("기존 채팅방이 존재합니다. ChatRoomId: {}", chatRoomId.get());
             return chatRoomId.get();
         } else {
-            ChatRoom chatRoom = chatRoomRepository.save(new ChatRoom());
+            ChatRoom chatRoom = new ChatRoom();
 
             User user1 = userRepository.findById(senderId)
                     .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
             User user2 = userRepository.findById(receiverId)
                     .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-            if (user1.getRole() == Role.BANNED || user2.getRole() == Role.BANNED) {
-                log.warn("블록된 유저가 있는 채팅방은 만들 수 없습니다.");
-                throw new IllegalArgumentException("블록된 유저가 있는 채팅방은 만들 수 없습니다.");
-            }
-
             ChatRoomUser user1ChatRoomUser = ChatRoomUser.create(chatRoom, user1);
             ChatRoomUser user2ChatRoomUser = ChatRoomUser.create(chatRoom, user2);
-            chatRoomUserRepository.save(user1ChatRoomUser);
-            chatRoomUserRepository.save(user2ChatRoomUser);
-
             chatRoom.addUser(user1ChatRoomUser);
             chatRoom.addUser(user2ChatRoomUser);
             chatRoomRepository.save(chatRoom);
@@ -81,17 +73,6 @@ public class ChatRoomService {
             applicationEventPublisher.publishEvent(
                     new NotificationEvent(notification.getId(), senderId, receiverId, NotificationType.CHATROOM, chatRoom.getId())
             );
-
-//            NotificationResponse.toResponse(
-//                    senderId,
-//                    receiverId,
-//                    chatRoom.getId(),
-//                    NotificationType.CHATROOM,
-//                    ZonedDateTime.now(),
-//                    userRepository.fetchByIdWithPhotos(senderId).orElseThrow(() ->
-//                            new CustomException(ErrorCode.USER_NOT_FOUND)
-//                    ).getImageUrl()
-//            );
 
             return chatRoom.getId();
         }
