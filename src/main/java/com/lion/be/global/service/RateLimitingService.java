@@ -21,53 +21,74 @@ public class RateLimitingService {
     private final ProxyManager<String> proxyManager;
     private final RedisTemplate<String, Object> redisTemplate;
 
-    public Bucket resolveFeedBucket(Long userId) {
-        String key = "rate-limit:feed:" + userId;
-        return proxyManager.builder().build(key, this::createNewFeedBucketConfig);
+    public Bucket resolveFeedBucketPerSecond(Long userId) {
+        String key = "rate-limit:feed:second:" + userId;
+        return proxyManager.builder().build(key, this::createFeedBucketConfigPerSecond);
     }
 
-    public Bucket resolveFeedCommentBucket(Long feedId, Long userId) {
-        String key = "rate-limit:comment:" + feedId + ":" + userId;
-        return proxyManager.builder().build(key, this::createNewFeedCommentBucketConfig); // 메소드명 변경
+    public Bucket resolveFeedBucketPerMinute(Long userId) {
+        String key = "rate-limit:feed:minute:" + userId;
+        return proxyManager.builder().build(key, this::createFeedBucketConfigPerMinute);
     }
 
-    public Bucket resolveChatBucket(Long chatRoomId, Long userId) {
-        String key = "rate-limit:chat:" + chatRoomId + ":" + userId;
-        return proxyManager.builder().build(key, this::createNewChatBucketConfig);
+    public Bucket resolveFeedCommentBucketPerSecond(Long feedId, Long userId) {
+        String key = "rate-limit:comment:second:" + feedId + ":" + userId;
+        return proxyManager.builder().build(key, this::createFeedCommentBucketConfigPerSecond);
     }
 
-    private BucketConfiguration createNewFeedBucketConfig() {
-        Bandwidth limitPer3Seconds = Bandwidth.classic(1, Refill.intervally(1, Duration.ofSeconds(3)));
-        Bandwidth limitPer10Minutes = Bandwidth.classic(5, Refill.intervally(5, Duration.ofMinutes(10)));
+    public Bucket resolveFeedCommentBucketPerMinute(Long feedId, Long userId) {
+        String key = "rate-limit:comment:minute:" + feedId + ":" + userId;
+        return proxyManager.builder().build(key, this::createFeedCommentBucketConfigPerMinute);
+    }
+
+    public Bucket resolveChatBucketBurst(Long chatRoomId, Long userId) {
+        String key = "rate-limit:chat:burst:" + chatRoomId + ":" + userId;
+        return proxyManager.builder().build(key, this::createChatBucketConfigBurst);
+    }
+
+    public Bucket resolveChatBucketSustained(Long chatRoomId, Long userId) {
+        String key = "rate-limit:chat:sustained:" + chatRoomId + ":" + userId;
+        return proxyManager.builder().build(key, this::createChatBucketConfigSustained);
+    }
+
+    private BucketConfiguration createFeedBucketConfigPerSecond() {
         return BucketConfiguration.builder()
-                .addLimit(limitPer3Seconds)
-                .addLimit(limitPer10Minutes)
+                .addLimit(Bandwidth.classic(1, Refill.intervally(1, Duration.ofSeconds(3))))
                 .build();
     }
 
-    private BucketConfiguration createNewFeedCommentBucketConfig() {
-        Bandwidth limitPer3Seconds = Bandwidth.classic(1, Refill.intervally(1, Duration.ofSeconds(3)));
-        Bandwidth limitPer1Minute = Bandwidth.classic(5, Refill.intervally(5, Duration.ofMinutes(1)));
+    private BucketConfiguration createFeedBucketConfigPerMinute() {
         return BucketConfiguration.builder()
-                .addLimit(limitPer3Seconds)
-                .addLimit(limitPer1Minute)
+                .addLimit(Bandwidth.classic(5, Refill.intervally(5, Duration.ofMinutes(10))))
                 .build();
     }
 
-    private BucketConfiguration createNewChatBucketConfig() {
-        // 정책: 1초에 최대 2개, 10초간 총 10개까지 허용
-        Bandwidth burstLimit = Bandwidth.classic(10, Refill.intervally(10, Duration.ofSeconds(10)));
-        Bandwidth sustainedLimit = Bandwidth.classic(2, Refill.intervally(2, Duration.ofSeconds(1)));
-
+    private BucketConfiguration createFeedCommentBucketConfigPerSecond() {
         return BucketConfiguration.builder()
-                .addLimit(burstLimit)       // 장기적인 제한
-                .addLimit(sustainedLimit)   // 단기적인 제한
+                .addLimit(Bandwidth.classic(1, Refill.intervally(1, Duration.ofSeconds(3))))
+                .build();
+    }
+
+    private BucketConfiguration createFeedCommentBucketConfigPerMinute() {
+        return BucketConfiguration.builder()
+                .addLimit(Bandwidth.classic(5, Refill.intervally(5, Duration.ofMinutes(1))))
+                .build();
+    }
+
+    private BucketConfiguration createChatBucketConfigBurst() {
+        return BucketConfiguration.builder()
+                .addLimit(Bandwidth.classic(10, Refill.intervally(10, Duration.ofSeconds(10)))) // 장기
+                .build();
+    }
+
+    private BucketConfiguration createChatBucketConfigSustained() {
+        return BucketConfiguration.builder()
+                .addLimit(Bandwidth.classic(2, Refill.intervally(2, Duration.ofSeconds(1)))) // 단기
                 .build();
     }
 
     @Profile("test")
     public void clearAllBuckets() {
-        // "rate-limit:" 패턴으로 시작하는 모든 키를 찾습니다.
         Set<String> keys = redisTemplate.keys("rate-limit:*");
         if (keys != null && !keys.isEmpty()) {
             log.info("[TEST] Deleting {} rate-limiting buckets from Redis.", keys.size());

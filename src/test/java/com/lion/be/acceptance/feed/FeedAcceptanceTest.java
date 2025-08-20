@@ -1,25 +1,35 @@
 package com.lion.be.acceptance.feed;
 
-import static com.lion.be.acceptance.auth.AuthSteps.비회원이_로그인한다;
-import static com.lion.be.acceptance.auth.AuthSteps.원준이_로그인한다;
-import static com.lion.be.acceptance.feed.FeedSteps.*;
+import static com.lion.be.acceptance.feed.FeedSteps.내_피드를_조회한다;
+import static com.lion.be.acceptance.feed.FeedSteps.다회_요청제한을_검증한다;
+import static com.lion.be.acceptance.feed.FeedSteps.문서_없이_피드_하나를_조회한다;
+import static com.lion.be.acceptance.feed.FeedSteps.상태코드_200이다;
+import static com.lion.be.acceptance.feed.FeedSteps.상태코드_401이다;
+import static com.lion.be.acceptance.feed.FeedSteps.상태코드_404이다;
+import static com.lion.be.acceptance.feed.FeedSteps.인기_피드를_조회한다;
+import static com.lion.be.acceptance.feed.FeedSteps.최신_피드를_조회한다;
+import static com.lion.be.acceptance.feed.FeedSteps.피드_댓글_정보를_검증한다;
+import static com.lion.be.acceptance.feed.FeedSteps.피드_삭제_후_조회_응답을_검증한다;
+import static com.lion.be.acceptance.feed.FeedSteps.피드_전체_조회_응답을_검증한다;
+import static com.lion.be.acceptance.feed.FeedSteps.피드_좋아요_정보를_검증한다;
+import static com.lion.be.acceptance.feed.FeedSteps.피드_하나를_조회한다;
+import static com.lion.be.acceptance.feed.FeedSteps.피드를_삭제한다;
+import static com.lion.be.acceptance.feed.FeedSteps.피드를_수정한다;
+import static com.lion.be.acceptance.feed.FeedSteps.피드를_작성한다;
+import static com.lion.be.acceptance.feed.FeedSteps.피드에_좋아요를_누른다;
+import static com.lion.be.acceptance.feed.FeedSteps.피드의_동등성을_검증한다;
+import static com.lion.be.acceptance.feed.FeedSteps.피드의_제한을_조심하며_작성한다;
+import static com.lion.be.acceptance.feed.FeedSteps.피드의_좋아요를_취소한다;
 import static com.lion.be.acceptance.feed_comment.FeedCommentSteps.feedCommentSaveRequest_생성;
 import static com.lion.be.acceptance.feed_comment.FeedCommentSteps.피드의_댓글을_작성한다;
-import static com.lion.be.acceptance.user.UserSteps.온보딩을_완료한다;
-import static com.lion.be.acceptance.util.UserFixture.회원_멋사2_온보딩_요청;
 
 import com.lion.be.acceptance.AcceptanceTest;
-import com.lion.be.acceptance.util.UserFixture;
 import com.lion.be.feed.service.FeedLikeScheduler;
-import com.lion.be.feed_comment.service.FeedCommentLikeScheduler;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +46,7 @@ public class FeedAcceptanceTest extends AcceptanceTest {
         api_문서_타이틀("save_feed_success", spec);
 
         // given
-		String accessToken = 토킷_완전_온보딩();
+        String accessToken = 토킷_완전_온보딩();
         // when
         ExtractableResponse<Response> response = 피드를_작성한다(accessToken, spec, "Test Title", "Test Content");
         Long feedId = response.jsonPath().getLong("feedId");
@@ -52,7 +62,7 @@ public class FeedAcceptanceTest extends AcceptanceTest {
         api_문서_타이틀("save_feed_success", spec);
 
         // given
-		String accessToken = 토킷_완전_온보딩();
+        String accessToken = 토킷_완전_온보딩();
         // when
         ExtractableResponse<Response> response = 피드를_작성한다(accessToken, spec, "Test Title", "Test Content");
         Long feedId = response.jsonPath().getLong("feedId");
@@ -71,7 +81,7 @@ public class FeedAcceptanceTest extends AcceptanceTest {
         api_문서_타이틀("delete_feed_success", spec);
 
         // given
-		String accessToken = 토킷_완전_온보딩();
+        String accessToken = 토킷_완전_온보딩();
 
         ExtractableResponse<Response> response = 피드를_작성한다(accessToken, spec, "Test Title", "Test Content");
         Long feedId = response.jsonPath().getLong("feedId");
@@ -88,7 +98,7 @@ public class FeedAcceptanceTest extends AcceptanceTest {
     @DisplayName("피드 삭제를 검증")
     void when_find_deleted_feed_then_response_404() throws IOException {
         // given
-		String accessToken = 토킷_완전_온보딩();
+        String accessToken = 토킷_완전_온보딩();
 
         ExtractableResponse<Response> response = 피드를_작성한다(accessToken, spec, "Test Title", "Test Content");
         Long feedId = response.jsonPath().getLong("feedId");
@@ -106,9 +116,9 @@ public class FeedAcceptanceTest extends AcceptanceTest {
     @DisplayName("권한 없는 사용자 피드 삭제 실패")
     void when_delete_feed_then_response_401() throws IOException {
         // given
-		String accessToken1 = 토킷_완전_온보딩();
+        String accessToken1 = 토킷_완전_온보딩();
 
-		String accessToken2 = 원준_완전_온보딩();
+        String accessToken2 = 원준_완전_온보딩();
 
         ExtractableResponse<Response> response = 피드를_작성한다(accessToken1, spec, "Test Title", "Test Content");
         Long feedId = response.jsonPath().getLong("feedId");
@@ -127,7 +137,7 @@ public class FeedAcceptanceTest extends AcceptanceTest {
     @DisplayName("피드 수정 성공")
     void when_update_feed_then_response_200() throws IOException {
         // given
-		String accessToken = 토킷_완전_온보딩();
+        String accessToken = 토킷_완전_온보딩();
 
         ExtractableResponse<Response> feedReponse = 피드를_작성한다(accessToken, spec, "Test Title", "Test Content");
         Long feedId = feedReponse.jsonPath().getLong("feedId");
@@ -147,9 +157,9 @@ public class FeedAcceptanceTest extends AcceptanceTest {
     @DisplayName("권한 없는 사용자 피드 수정 실패")
     void when_update_feed_then_response_401() throws IOException {
         // given
-		String accessToken1 = 토킷_완전_온보딩();
+        String accessToken1 = 토킷_완전_온보딩();
 
-		String accessToken2 = 원준_완전_온보딩();
+        String accessToken2 = 원준_완전_온보딩();
 
         ExtractableResponse<Response> feedReponse = 피드를_작성한다(accessToken1, spec, "Test Title", "Test Content");
         Long feedId = feedReponse.jsonPath().getLong("feedId");
@@ -170,7 +180,7 @@ public class FeedAcceptanceTest extends AcceptanceTest {
     void when_fetch_all_recent_feed_then_response_200() throws IOException {
         // given
         api_문서_타이틀("fetch_all_recent_feed_success", spec);
-		String accessToken = 토킷_완전_온보딩();
+        String accessToken = 토킷_완전_온보딩();
 
         List<String> feedTitles = List.of("Test Title 1", "Test Title 2", "Test Title 3", "Test Title 4",
                 "Test Title 5");
@@ -198,7 +208,7 @@ public class FeedAcceptanceTest extends AcceptanceTest {
     @DisplayName("피드 목록에서 삭제가 반영되는지 검증한다")
     void when_soft_delete_then_response_200() throws IOException {
         // given
-		String accessToken = 토킷_완전_온보딩();
+        String accessToken = 토킷_완전_온보딩();
 
         List<String> feedTitles = new ArrayList<>(
                 List.of("Test Title 1", "Test Title 2", "Test Title 3", "Test Title 4", "Test Title 5"));
@@ -224,8 +234,8 @@ public class FeedAcceptanceTest extends AcceptanceTest {
     void when_fetch_hot_recent_feed_then_response_200() throws IOException {
         // given
         api_문서_타이틀("fetch_all_hot_feed_success", spec);
-		String accessToken1 = 토킷_완전_온보딩();
-		String accessToken2 = 원준_완전_온보딩();
+        String accessToken1 = 토킷_완전_온보딩();
+        String accessToken2 = 원준_완전_온보딩();
 
         List<String> feedTitles = new ArrayList<>(
                 List.of("Test Title 1", "Test Title 2", "Test Title 3", "Test Title 4", "Test Title 5"));
@@ -272,7 +282,7 @@ public class FeedAcceptanceTest extends AcceptanceTest {
         // given
         api_문서_타이틀("like_feed_success", spec);
 
-		String accessToken = 토킷_완전_온보딩();
+        String accessToken = 토킷_완전_온보딩();
 
         var feedResponse = 피드를_작성한다(accessToken, spec, "좋아요 테스트 피드", "내용");
         Long feedId = feedResponse.jsonPath().getLong("feedId");
@@ -291,7 +301,7 @@ public class FeedAcceptanceTest extends AcceptanceTest {
         // given
         api_문서_타이틀("unlike_feed_success", spec);
 
-		String accessToken = 토킷_완전_온보딩();
+        String accessToken = 토킷_완전_온보딩();
 
         var feedResponse = 피드를_작성한다(accessToken, spec, "좋아요 취소 테스트 피드", "내용");
         Long feedId = feedResponse.jsonPath().getLong("feedId");
@@ -310,10 +320,10 @@ public class FeedAcceptanceTest extends AcceptanceTest {
     void when_multiple_users_like_feed_then_likeCount_increases() throws IOException {
         // given
         // 사용자 1 (토킷)
-		String accessToken1 = 토킷_완전_온보딩();
+        String accessToken1 = 토킷_완전_온보딩();
 
         // 사용자 2 (원준)
-		String accessToken2 = 원준_완전_온보딩(); // 원준 온보딩
+        String accessToken2 = 원준_완전_온보딩(); // 원준 온보딩
 
         var feedResponse = 피드를_작성한다(accessToken1, spec, "멀티 좋아요 테스트 피드", "내용");
         Long feedId = feedResponse.jsonPath().getLong("feedId");
@@ -337,17 +347,17 @@ public class FeedAcceptanceTest extends AcceptanceTest {
     void when_write_comment_then_commentCount_increases() throws IOException {
         // given
         // 사용자 1 (토킷)
-		String accessToken1 = 토킷_완전_온보딩();
+        String accessToken1 = 토킷_완전_온보딩();
 
         // 사용자 2 (원준)
-		String accessToken2 = 원준_완전_온보딩(); // 원준 온보딩
+        String accessToken2 = 원준_완전_온보딩(); // 원준 온보딩
 
         var feedResponse = 피드를_작성한다(accessToken1, spec, "멀티 좋아요 테스트 피드", "내용");
         Long feedId = feedResponse.jsonPath().getLong("feedId");
 
         // when
         피드의_댓글을_작성한다(feedCommentSaveRequest_생성("회원1작성"), feedId, accessToken1, spec);
-        피드의_댓글을_작성한다(feedCommentSaveRequest_생성("회원2작성"),feedId, accessToken2, spec);
+        피드의_댓글을_작성한다(feedCommentSaveRequest_생성("회원2작성"), feedId, accessToken2, spec);
 
         // then
         var fetchResponse1 = 피드_하나를_조회한다(accessToken1, spec, feedId);
@@ -359,7 +369,7 @@ public class FeedAcceptanceTest extends AcceptanceTest {
     void when_call_my_feeds_then_return_my_feeds() throws IOException {
         // given
         api_문서_타이틀("fetch_my_feeds_success", spec);
-		String accessToken1 = 토킷_완전_온보딩();
+        String accessToken1 = 토킷_완전_온보딩();
         String accessToken2 = 원준_완전_온보딩();
 
         List<String> feedTitles = List.of("내 피드 1", "내 피드 2", "내 피드 3");
@@ -374,7 +384,7 @@ public class FeedAcceptanceTest extends AcceptanceTest {
         List<String> expectedContents = List.of("내용 3", "내용 2");
 
         // when
-        ExtractableResponse<Response> response = 내_피드를_조회한다(accessToken1, spec,null,null);
+        ExtractableResponse<Response> response = 내_피드를_조회한다(accessToken1, spec, null, null);
 
         // then
         피드_전체_조회_응답을_검증한다(response, 2, expectedTitles, expectedContents, List.of(false, false));
@@ -384,8 +394,8 @@ public class FeedAcceptanceTest extends AcceptanceTest {
     @DisplayName("같은 유저가 3초 내에 글을 2번 쓰면 실패한다.")
     void when_write_feeds_twice_in_3seconds_then_429() throws IOException {
         //given
-		String accessToken = 토킷_완전_온보딩();
-        String accessToken2 = 원준_완전_온보딩();
+        api_문서_타이틀("feed_rate_limit_3_seconds_fail", spec);
+        String accessToken = 토킷_완전_온보딩();
 
         List<String> feedTitles = List.of("내 피드 1", "내 피드 2");
         List<String> feedContents = List.of("내용 1", "내용 2");
@@ -399,15 +409,15 @@ public class FeedAcceptanceTest extends AcceptanceTest {
         다회_요청제한을_검증한다(response);
     }
 
-
     @Test
     @DisplayName("같은 유저가 10초 내에 글을 5번 쓰면 실패한다.")
     void when_write_feeds_many_in_10seconds_then_429() throws IOException {
         //given
-		String accessToken = 토킷_완전_온보딩();
+        api_문서_타이틀("feed_rate_limit_10_minutes_fail", spec);
+        String accessToken = 토킷_완전_온보딩();
 
-        List<String> feedTitles = List.of("내 피드 1", "내 피드 2","내 피드 3", "내 피드 4","내 피드 5", "내 피드 6");
-        List<String> feedContents = List.of("내 피드 1", "내 피드 2","내 피드 3", "내 피드 4","내 피드 5", "내 피드 6");
+        List<String> feedTitles = List.of("내 피드 1", "내 피드 2", "내 피드 3", "내 피드 4", "내 피드 5", "내 피드 6");
+        List<String> feedContents = List.of("내 피드 1", "내 피드 2", "내 피드 3", "내 피드 4", "내 피드 5", "내 피드 6");
 
         피드의_제한을_조심하며_작성한다(accessToken, spec, feedTitles.get(0), feedContents.get(0));
         피드의_제한을_조심하며_작성한다(accessToken, spec, feedTitles.get(1), feedContents.get(1));

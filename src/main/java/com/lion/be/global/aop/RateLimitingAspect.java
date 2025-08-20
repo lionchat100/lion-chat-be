@@ -20,43 +20,52 @@ public class RateLimitingAspect {
 
     private final RateLimitingService rateLimitingService;
 
-    // === 피드 생성 제한을 처리하는 Advice ===
     @Around("@annotation(com.lion.be.global.aop.CheckRateLimitFeed)")
     public Object checkFeedRateLimit(ProceedingJoinPoint joinPoint) throws Throwable {
         UserPrincipal userPrincipal = findUserPrincipal(joinPoint.getArgs());
         if (userPrincipal == null) {
-            // 인증 정보가 없으면 로직을 통과
             return joinPoint.proceed();
         }
 
-        Bucket bucket = rateLimitingService.resolveFeedBucket(userPrincipal.getId());
-        if (bucket.tryConsume(1)) {
-            return joinPoint.proceed();
-        } else {
-            throw new CustomException(ErrorCode.TOO_MANY_API_REQUEST_EXCEPTION);
+        Bucket bucketPerSecond = rateLimitingService.resolveFeedBucketPerSecond(userPrincipal.getId());
+        Bucket bucketPerMinute = rateLimitingService.resolveFeedBucketPerMinute(userPrincipal.getId());
+
+        if (!bucketPerSecond.tryConsume(1)) {
+            // 초당 제한에 대한 커스텀 예외
+            throw new CustomException(ErrorCode.TOO_MANY_REQUESTS_PER_SECONDS_EXCEPTION);
         }
+
+        if (!bucketPerMinute.tryConsume(1)) {
+            // 분당 제한에 대한 커스텀 예외
+            throw new CustomException(ErrorCode.TOO_MANY_REQUESTS_PER_MINUTE_EXCEPTION); // 새로운 예외 코드
+        }
+
+        return joinPoint.proceed();
     }
 
-    // === 피드 댓글 생성 제한을 처리하는 Advice ===
     @Around("@annotation(com.lion.be.global.aop.CheckRateLimitFeedComment)")
     public Object checkFeedCommentRateLimit(ProceedingJoinPoint joinPoint) throws Throwable {
         UserPrincipal userPrincipal = findUserPrincipal(joinPoint.getArgs());
         Long feedId = findArgumentByName(joinPoint, "feedId", Long.class);
 
         if (userPrincipal == null || feedId == null) {
-            // 필요한 정보가 없으면 로직을 통과 (혹은 예외 처리)
             return joinPoint.proceed();
         }
 
-        Bucket bucket = rateLimitingService.resolveFeedCommentBucket(feedId, userPrincipal.getId());
-        if (bucket.tryConsume(1)) {
-            return joinPoint.proceed();
-        } else {
-            throw new CustomException(ErrorCode.TOO_MANY_API_REQUEST_EXCEPTION);
+        Bucket bucketPerSecond = rateLimitingService.resolveFeedCommentBucketPerSecond(feedId, userPrincipal.getId());
+        Bucket bucketPerMinute = rateLimitingService.resolveFeedCommentBucketPerMinute(feedId, userPrincipal.getId());
+
+        if (!bucketPerSecond.tryConsume(1)) {
+            throw new CustomException(ErrorCode.TOO_MANY_REQUESTS_PER_SECONDS_EXCEPTION);
         }
+
+        if (!bucketPerMinute.tryConsume(1)) {
+            throw new CustomException(ErrorCode.TOO_MANY_REQUESTS_PER_MINUTE_EXCEPTION);
+        }
+
+        return joinPoint.proceed();
     }
 
-    // === 채팅 메시지 제한을 처리하는 Advice 추가 ===
     @Around("@annotation(com.lion.be.global.aop.CheckRateLimitChat)")
     public Object checkChatRateLimit(ProceedingJoinPoint joinPoint) throws Throwable {
         UserPrincipal userPrincipal = findUserPrincipal(joinPoint.getArgs());
@@ -80,12 +89,18 @@ public class RateLimitingAspect {
 
         Long userId = userPrincipal.getId();
 
-        Bucket bucket = rateLimitingService.resolveChatBucket(roomId, userId);
-        if (bucket.tryConsume(1)) {
-            return joinPoint.proceed();
-        } else {
-            throw new CustomException(ErrorCode.TOO_MANY_API_REQUEST_EXCEPTION);
+        Bucket burstBucket = rateLimitingService.resolveChatBucketBurst(roomId, userId);
+        Bucket sustainedBucket = rateLimitingService.resolveChatBucketSustained(roomId, userId);
+
+        if (!sustainedBucket.tryConsume(1)) {
+            throw new CustomException(ErrorCode.TOO_MANY_REQUESTS_PER_SECONDS_EXCEPTION);
         }
+
+        if (!burstBucket.tryConsume(1)) {
+            throw new CustomException(ErrorCode.TOO_MANY_REQUESTS_PER_MINUTE_EXCEPTION);
+        }
+
+        return joinPoint.proceed();
     }
 
     private <T> T findArgumentByName(ProceedingJoinPoint joinPoint, String name, Class<T> returnType) {
