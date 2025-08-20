@@ -3,7 +3,7 @@ package com.lion.be.userlike.repository;
 import java.util.List;
 
 import com.lion.be.user.domain.entity.User;
-import com.lion.be.userlike.domain.entity.UserLikes;
+import com.lion.be.notification.domain.entity.UserLikes;
 
 public interface UserLikesRepository {
 

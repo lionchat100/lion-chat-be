@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import com.lion.be.user.domain.entity.User;
-import com.lion.be.userlike.domain.entity.UserLikes;
+import com.lion.be.notification.domain.entity.UserLikes;
 
 import io.lettuce.core.dynamic.annotation.Param;
 

@@ -3,10 +3,12 @@ package com.lion.be.chat.room.service;
 import com.lion.be.chat.room.domain.dto.ChatRoomResponse;
 import com.lion.be.chat.room.domain.entity.ChatRoom;
 import com.lion.be.chat.room.domain.entity.ChatRoomUser;
-import com.lion.be.chat.room.repository.ChatRoomJpaRepository;
-import com.lion.be.chat.room.repository.ChatRoomQueryDslRepository;
 import com.lion.be.chat.room.repository.ChatRoomRepository;
 import com.lion.be.chat.room.repository.ChatRoomUserRepository;
+import com.lion.be.global.exception.CustomException;
+import com.lion.be.global.exception.ErrorCode;
+import com.lion.be.notification.domain.NotificationType;
+import com.lion.be.notification.domain.dto.NotificationResponse;
 import com.lion.be.user.domain.Role;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.repository.UserRepository;
@@ -15,9 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -45,7 +45,7 @@ public class ChatRoomService {
             User user1 = userRepository.findById(senderId);
             User user2 = userRepository.findById(receiverId);
 
-            if(user1.getRole() == Role.BANNED || user2.getRole() == Role.BANNED) {
+            if (user1.getRole() == Role.BANNED || user2.getRole() == Role.BANNED) {
                 log.warn("블록된 유저가 있는 채팅방은 만들 수 없습니다.");
                 throw new IllegalArgumentException("블록된 유저가 있는 채팅방은 만들 수 없습니다.");
             }
@@ -59,6 +59,17 @@ public class ChatRoomService {
             chatRoom.addUser(user2ChatRoomUser);
             chatRoomRepository.save(chatRoom);
             log.info("새 채팅방을 생성합니다. ChatRoomId: {}", chatRoom.getId());
+
+            NotificationResponse.toResponse(
+                    senderId,
+                    receiverId,
+                    chatRoom.getId(),
+                    NotificationType.CHATROOM,
+                    ZonedDateTime.now(),
+                    userRepository.fetchByIdWithPhotos(senderId).orElseThrow(() ->
+                            new CustomException(ErrorCode.USER_NOT_FOUND)
+                    ).getImageUrl()
+            );
 
             return chatRoom.getId();
         }
@@ -100,7 +111,7 @@ public class ChatRoomService {
 
     public boolean checkUserExistsInChatRoom(Long chatRoomId, Long userId) {
         Set<ChatRoomUser> chatRoomUsers = chatRoomUserRepository.findById_ChatRoomId(chatRoomId);
-        if(chatRoomUsers.isEmpty()) {
+        if (chatRoomUsers.isEmpty()) {
             log.info("채팅방에 유저가 없습니다. chatRoomId: {}", chatRoomId);
             return false;
         }

@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Repository;
 
 import com.lion.be.user.domain.entity.User;
-import com.lion.be.userlike.domain.entity.UserLikes;
+import com.lion.be.notification.domain.entity.UserLikes;
 import com.lion.be.userlike.repository.persistence.jpa.UserLikesJpaRepository;
 
 import lombok.RequiredArgsConstructor;
