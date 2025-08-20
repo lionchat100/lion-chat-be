@@ -4,13 +4,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.lion.be.notification.repository.NotificationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.lion.be.auth.domain.UserPrincipal;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.usercard.controller.dto.UserCardResponse;
-import com.lion.be.userlike.repository.UserLikesRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 public class UserLikesReadService {
 
-	private final UserLikesRepository userLikesRepository;
+	private final NotificationRepository notificationRepository;
 	/**
 	 * 카드 에서 현재 사용자가 좋아요한 사용자들 조회
 	 */
@@ -28,7 +28,7 @@ public class UserLikesReadService {
 			return Set.of();
 		}
 
-		return new HashSet<>(userLikesRepository.fetchLikedUserIdsAmon(currentUserId, targetUserIds));
+		return new HashSet<>(notificationRepository.findLikedUserIdsAmon(currentUserId, targetUserIds));
 	}
 
 	/**
@@ -40,7 +40,7 @@ public class UserLikesReadService {
 		Long userId = userPrincipal.getId();
 
 		// userLikes 테이블에서 fromUserId로 조회
-		List<User> likedUsers = userLikesRepository.fetchLikedUsersByFromUserId(userId);
+		List<User> likedUsers = notificationRepository.fetchAllLikeUser(userId);
 
 		return likedUsers.stream()
 			.map(user -> UserCardResponse.from(user, true))

@@ -76,6 +76,7 @@
     let token = null;
     let lastId = null;
     let subscription = null;
+    let alarmSubscription = null;
     const connectBtn = document.getElementById("connect-btn");
     const loginBtn = document.getElementById("login-btn");
     const loginForm = document.getElementById("login-form");
@@ -107,6 +108,14 @@
         if (subscription) {
             subscription.unsubscribe();
             subscription = null;
+        }
+
+    }
+
+    function alarmUnsubscribe(){
+        if(alarmSubscription){
+            alarmSubscription.unsubscribe();
+            alarmSubscription = null;
         }
     }
 
@@ -154,6 +163,11 @@
         stompClient.activate();
     }
 
+    function alarmReceived(payload){
+        const msg = JSON.parse(payload.body);
+        console.log(msg)
+    }
+
     async function login(event) {
         event.preventDefault();
         token = usernameInput.value.trim();
@@ -199,7 +213,7 @@
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify({ receiverId: opponentId }),
+                body: JSON.stringify({ id: opponentId }),
             });
 
             const body = await res.json();
@@ -319,6 +333,12 @@
                 onMessageReceived
             );
         }
+
+        alarmUnsubscribe();
+        alarmSubscription = stompClient.subscribe(
+            `/topic/alarm/${4}`,
+            alarmReceived
+        );
     }
 
     function sendMessage(event) {

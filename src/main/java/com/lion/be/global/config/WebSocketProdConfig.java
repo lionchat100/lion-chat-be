@@ -12,6 +12,7 @@ import reactor.netty.tcp.TcpClient;
 
 @Configuration
 @Profile("!test")
+//@Profile("prod")
 public class WebSocketProdConfig implements WebSocketMessageBrokerConfigurer {
 
     @Value("${mq.stomp.host}")
