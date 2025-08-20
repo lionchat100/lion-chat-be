@@ -69,13 +69,13 @@ public class NotificationReadService {
         List<NotificationResponse> notificationResponses =
                 origins.stream().map(
                         notification ->
-                            new NotificationResponse(
+                            NotificationResponse.toResponse(
                                 notification.getId(),
                                 notification.getFromUserId(),
                                 userNicknameMap.get(notification.getFromUserId()),
                                 notification.getToUserId(),
                                 receiver.getNickname(),
-                                notification.getType().name(),
+                                notification.getType(),
                                 notification.getCreatedAt(),
                                 userImageMap.get(notification.getFromUserId()) != null ? userImageMap.get(notification.getFromUserId()) : "https://tokit-bucket.s3.ap-northeast-2.amazonaws.com/profile/defaultimage.png",
                                     notification.getTargetId()
