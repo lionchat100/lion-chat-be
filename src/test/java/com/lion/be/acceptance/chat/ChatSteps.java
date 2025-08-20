@@ -42,6 +42,20 @@ public class ChatSteps {
                 .extract();
     }
 
+    public static ExtractableResponse<Response> 채팅방_참가자_정보를_조회한다(
+            String accessToken, Long chatRoomId, RequestSpecification spec
+    ) {
+        return RestAssured
+                .given().log().all()
+                .spec(spec)
+                .auth().oauth2(accessToken)
+                .queryParam("roomId", chatRoomId)
+                .when()
+                .get("/api/chatrooms/context")
+                .then().log().all()
+                .extract();
+    }
+
     public static ExtractableResponse<Response> 채팅방에_메시지를_전송한다(
             String accessToken, Long chatRoomId, String content, RequestSpecification spec) {
         Map<String, Object> requestBody = Map.of("chatRoomId", chatRoomId, "content", content);
@@ -125,6 +139,14 @@ public class ChatSteps {
                 () -> assertThat(messages).hasSize(expectedSize),
                 () -> assertThat(messages.get(0).get("content")).isEqualTo(firstMessageContent),
                 () -> assertThat(messages.get(0).get("messageId")).isNotNull()
+        );
+    }
+
+    public static void 채팅방_참가자_정보를_검증한다(ExtractableResponse<Response> response, Long senderId) {
+        Long parsedSenderId = response.jsonPath().getLong("senderId");
+
+        Assertions.assertAll(
+                () -> assertThat(parsedSenderId).isEqualTo(senderId)
         );
     }
 
