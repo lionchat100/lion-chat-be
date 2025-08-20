@@ -13,4 +13,6 @@ public interface ImageRepository {
     void deleteById(Long id);
 
 	List<Image> fetchAllById(List<Long> imageIds);
+
+    List<Image> fetchAllByUserId(List<Long> userIds);
 }

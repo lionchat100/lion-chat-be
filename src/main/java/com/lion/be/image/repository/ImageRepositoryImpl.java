@@ -36,4 +36,8 @@ public class ImageRepositoryImpl implements ImageRepository {
 		return imageJpaRepository.findAllById(imageIds);
 	}
 
+    @Override
+    public List<Image> fetchAllByUserId(List<Long> userIds) {
+        return imageJpaRepository.fetchByUserIds(userIds);
+    }
 }

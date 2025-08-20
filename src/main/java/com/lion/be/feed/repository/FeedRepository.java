@@ -84,7 +84,7 @@ public interface FeedRepository extends JpaRepository<Feed, Long>, FeedRepositor
 //            """)
 //    Slice<FeedResponse> fetchHotFeedsAfter(Long lastLikeCount, Long lastId, Pageable pageable);
 
-    @Query("select f from Feed f where f.id = :id and f.isDeleted = false")
+    @Query("select f from Feed f join fetch f.user u where f.id = :id and f.isDeleted = false and u.role <> 'BANNED'")
     Optional<Feed> findFeed(Long id);
 
     @Modifying(clearAutomatically = true)

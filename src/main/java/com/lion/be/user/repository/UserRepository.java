@@ -2,6 +2,8 @@ package com.lion.be.user.repository;
 
 import com.lion.be.user.domain.Position;
 import com.lion.be.user.domain.entity.User;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -58,4 +60,6 @@ public interface UserRepository {
 	Optional<String> fetchNicknameById(Long userId);
 
 	boolean existsById(Long userId);
+
+	List<User> fetchAllUser(@Param("userIds") List<Long> userIds);
 }

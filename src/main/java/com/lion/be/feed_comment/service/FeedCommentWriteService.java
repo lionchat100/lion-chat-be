@@ -12,10 +12,13 @@ import com.lion.be.feed_comment.repository.FeedCommentRepository;
 import com.lion.be.global.exception.CustomException;
 import com.lion.be.global.exception.ErrorCode;
 import com.lion.be.global.util.RedisKey;
+import com.lion.be.notification.domain.NotificationType;
+import com.lion.be.notification.domain.dto.NotificationEvent;
 import com.lion.be.user.domain.Role;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.service.UserReadService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +34,8 @@ public class FeedCommentWriteService {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
+    private final ApplicationEventPublisher applicationEventPublisher;
+
     public FeedCommentSaveResponse save(Long feedId, Long userId, FeedCommentSaveRequest request) {
         Feed feed = feedReadService.fetchById(feedId);
         User user = userReadService.fetchById(userId);
@@ -44,6 +49,13 @@ public class FeedCommentWriteService {
         String commentCountKey = RedisKey.COMMENT_COUNT_KEY + feedId;
         redisTemplate.opsForValue().increment(commentCountKey);
         redisTemplate.opsForSet().add(RedisKey.DIRTY_COMMENT_COUNT_KEY, String.valueOf(feedId));
+
+        Long writerId = feed.getId();
+        if(!writerId.equals(userId)) {
+            applicationEventPublisher.publishEvent(
+                    new NotificationEvent(userId, writerId, NotificationType.POST_LIKE, feed.getId())
+            );
+        }
 
         return new FeedCommentSaveResponse(savedResponse.commentId());
     }

@@ -8,12 +8,14 @@ import com.lion.be.chat.room.repository.ChatRoomUserRepository;
 import com.lion.be.global.exception.CustomException;
 import com.lion.be.global.exception.ErrorCode;
 import com.lion.be.notification.domain.NotificationType;
+import com.lion.be.notification.domain.dto.NotificationEvent;
 import com.lion.be.notification.domain.dto.NotificationResponse;
 import com.lion.be.user.domain.Role;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +33,7 @@ public class ChatRoomService {
     private final UserRepository userRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomUserRepository chatRoomUserRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional
     public Long findOrCreateChatRoom(Long senderId, Long receiverId) {
@@ -60,16 +63,20 @@ public class ChatRoomService {
             chatRoomRepository.save(chatRoom);
             log.info("새 채팅방을 생성합니다. ChatRoomId: {}", chatRoom.getId());
 
-            NotificationResponse.toResponse(
-                    senderId,
-                    receiverId,
-                    chatRoom.getId(),
-                    NotificationType.CHATROOM,
-                    ZonedDateTime.now(),
-                    userRepository.fetchByIdWithPhotos(senderId).orElseThrow(() ->
-                            new CustomException(ErrorCode.USER_NOT_FOUND)
-                    ).getImageUrl()
+            applicationEventPublisher.publishEvent(
+                    new NotificationEvent(senderId, receiverId, NotificationType.CHATROOM, chatRoom.getId())
             );
+
+//            NotificationResponse.toResponse(
+//                    senderId,
+//                    receiverId,
+//                    chatRoom.getId(),
+//                    NotificationType.CHATROOM,
+//                    ZonedDateTime.now(),
+//                    userRepository.fetchByIdWithPhotos(senderId).orElseThrow(() ->
+//                            new CustomException(ErrorCode.USER_NOT_FOUND)
+//                    ).getImageUrl()
+//            );
 
             return chatRoom.getId();
         }
