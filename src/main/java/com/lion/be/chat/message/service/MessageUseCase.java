@@ -110,11 +110,14 @@ public class MessageUseCase {
                     ChatMessage message = messageList.get(i);
                     User sender = users.get(message.getSenderId());
 
-                    String imageUrl = userRepository.fetchByIdWithPhotos(sender.getId())
-                            .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND))
-                            .getUserPhotos().stream()
-                            .map(UserPhoto::getImageUrl)
-                            .toList().get(0);
+//                    String imageUrl = userRepository.fetchByIdWithPhotos(sender.getId())
+//                            .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND))
+//                            .getUserPhotos().stream()
+//                            .map(UserPhoto::getImageUrl)
+//                            .toList().get(0);
+                    String imageUrl = userRepository.fetchByIdWithPhotos(sender.getId()).orElseThrow(() ->
+                            new CustomException(ErrorCode.USER_NOT_FOUND)
+                    ).getImageUrl();
 
                     boolean isLast = (i == lastIndex) && isEnd;
 
