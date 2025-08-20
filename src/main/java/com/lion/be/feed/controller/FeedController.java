@@ -51,7 +51,7 @@ public class FeedController {
             @RequestParam(value = "size", required = false) Integer size,
             @AuthenticationPrincipal UserPrincipal userPrincipal) { // ✨ 유저 정보 추가
         Long currentUserId = (userPrincipal != null) ? userPrincipal.getId() : null;
-        if (lastLikeCount != null && lastId != null && lastLikeCount > 0 && lastId > 0) {
+        if (lastLikeCount != null && lastId != null && lastLikeCount >= 0 && lastId > 0) {
             return ResponseEntity.ok(feedReadService.getHotFeedsAfter(lastLikeCount, lastId, size, currentUserId));
         }
         return ResponseEntity.ok(feedReadService.getHotFeedsFirst(size, currentUserId));

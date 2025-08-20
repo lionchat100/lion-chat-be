@@ -200,13 +200,13 @@ public class FeedReadService {
 
     private Pageable getRecentPageable(Integer size) {
         return PageRequest.of(0,
-                size != null && size <= DEFAULT_PAGE_SIZE ? size : DEFAULT_PAGE_SIZE,
+                size != null && size <= DEFAULT_PAGE_SIZE && size > 0 ? size : DEFAULT_PAGE_SIZE,
                 Sort.by(Sort.Direction.DESC, "id"));
     }
 
     private Pageable getHotPageable(Integer size) {
         return PageRequest.of(0,
-                size != null && size <= DEFAULT_PAGE_SIZE ? size : DEFAULT_PAGE_SIZE);
+                size != null && size <= DEFAULT_PAGE_SIZE && size > 0 ? size : DEFAULT_PAGE_SIZE);
     }
 
 }
