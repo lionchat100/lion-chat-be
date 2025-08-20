@@ -13,6 +13,8 @@ import com.lion.be.chat.room.service.ChatRoomPersistence;
 import com.lion.be.global.exception.CustomException;
 import com.lion.be.global.exception.ErrorCode;
 import com.lion.be.user.domain.entity.User;
+import com.lion.be.user.domain.entity.UserPhoto;
+import com.lion.be.user.repository.UserRepository;
 import com.lion.be.user.repository.persistence.jpa.UserJpaRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +37,8 @@ import java.util.stream.IntStream;
 @Slf4j
 public class MessageUseCase {
 
-    private final UserJpaRepository userRepository;
+    private final UserRepository userRepository;
+    private final UserJpaRepository userJpaRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomUserRepository chatRoomUserRepository;
@@ -43,7 +46,6 @@ public class MessageUseCase {
     private final MessagePersistence messagePersistence;
     private final ChatRoomPersistence chatRoomPersistence;
 
-    @Transactional
     public void sendMessage(ChatMessageRequest request, Long senderId) {
         ChatRoom chatRoom = chatRoomRepository.findById(request.chatRoomId())
                 .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
@@ -61,8 +63,9 @@ public class MessageUseCase {
         }
     }
 
-    public void updateReadStatus(String messageId, Long userId) {
-        User user = userRepository.findById(userId)
+    @Transactional
+    public void processReadAck(String messageId, Long userId) {
+        User user = userJpaRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         ChatMessage message = chatMessageRepository.findById(new ObjectId(messageId))
                 .orElseThrow(() -> new CustomException(ErrorCode.MESSAGE_NOT_FOUND));
@@ -80,7 +83,7 @@ public class MessageUseCase {
         } else {
             messages = chatMessageRepository.findMessagesByIdAndLastId(roomId, new ObjectId(lastId), pageable);
         }
-        boolean isEnd = messages.hasNext();
+        boolean isEnd = !messages.hasNext();
 
         List<ObjectId> unreadMessageIds = messages.getContent().stream()
                 .filter(message -> !message.getSenderId().equals(userId))
@@ -94,7 +97,7 @@ public class MessageUseCase {
         Set<Long> senderIds = messages.stream()
                 .map(ChatMessage::getSenderId)
                 .collect(Collectors.toSet());
-        Map<Long, User> users = userRepository.findByIdIn(senderIds).stream()
+        Map<Long, User> users = userJpaRepository.findByIdIn(senderIds).stream()
                 .collect(Collectors.toMap(User::getId, user -> user));
 
         ChatRoomUser chatRoomUser = chatRoomUserRepository.findById_ChatRoomIdAndId_UserId(roomId, userId);
@@ -107,9 +110,14 @@ public class MessageUseCase {
                     ChatMessage message = messageList.get(i);
                     User sender = users.get(message.getSenderId());
 
-                    String imageUrl = sender.getUserPhotos().isEmpty()
-                            ? null
-                            : sender.getUserPhotos().get(0).getImageUrl();
+//                    String imageUrl = userRepository.fetchByIdWithPhotos(sender.getId())
+//                            .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND))
+//                            .getUserPhotos().stream()
+//                            .map(UserPhoto::getImageUrl)
+//                            .toList().get(0);
+                    String imageUrl = userRepository.fetchByIdWithPhotos(sender.getId()).orElseThrow(() ->
+                            new CustomException(ErrorCode.USER_NOT_FOUND)
+                    ).getImageUrl();
 
                     boolean isLast = (i == lastIndex) && isEnd;
 
@@ -117,7 +125,7 @@ public class MessageUseCase {
                             message.getId().toString(),
                             message.getChatRoomId(),
                             message.getSenderId(),
-                            message.getSenderName(),
+                            sender.getNickname(),
                             imageUrl,
                             message.getCreatedAt(),
                             message.getContent(),
