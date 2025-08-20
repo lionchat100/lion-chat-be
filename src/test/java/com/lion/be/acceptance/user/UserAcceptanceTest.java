@@ -181,7 +181,7 @@ class UserAcceptanceTest extends AcceptanceTest {
 			Map<String, Object> updateRequest = Map.of(
 				"bio", "수정된 자기소개입니다",
 				"imageId", newImageId,
-				"preferenceType", "PREFERENCE_FOCUSED"
+				"focusType", "PREFERENCE_FOCUSED"
 			);
 
 			// when
