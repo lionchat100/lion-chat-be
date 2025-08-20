@@ -1,5 +1,9 @@
 package com.lion.be.userlike.service;
 
+import com.lion.be.notification.domain.NotificationType;
+import com.lion.be.notification.domain.dto.NotificationEvent;
+import com.lion.be.notification.domain.entity.Notification;
+import com.lion.be.notification.repository.NotificationRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -7,9 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.lion.be.global.exception.CustomException;
 import com.lion.be.global.exception.ErrorCode;
 import com.lion.be.user.repository.UserRepository;
-import com.lion.be.userlike.domain.entity.LikeCreatedEvent;
-import com.lion.be.userlike.domain.entity.UserLikes;
-import com.lion.be.userlike.repository.UserLikesRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserLikesWriteService {
 
-	private final UserLikesRepository userLikesRepository;
+	private final NotificationRepository notificationRepository;
 	private final UserRepository userRepository;
 	private final ApplicationEventPublisher eventPublisher;
 
@@ -30,28 +31,20 @@ public class UserLikesWriteService {
 			throw new CustomException(ErrorCode.USER_CAN_NOT_LIKE_HIMSELF);
 		}
 
-		if (userLikesRepository.existsByFromUserIdAndToUserId(currentUserId, targetUserId)) {
+		if (notificationRepository.extractProfileLike(currentUserId, targetUserId).isPresent()) {
 			// 좋아요 취소
-			userLikesRepository.deleteByFromUserIdAndToUserId(currentUserId, targetUserId);
+			notificationRepository.deleteNotification(currentUserId, targetUserId);
 			return false;
 		} else {
-			String fromUserNickname = userRepository.fetchNicknameById(currentUserId)
-				.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-			if (!userRepository.existsById(targetUserId)) {
-				throw new CustomException(ErrorCode.USER_NOT_FOUND);
-			}
-
-			UserLikes userLikes = new UserLikes(currentUserId, targetUserId);
-			userLikesRepository.save(userLikes);
-
-			// 서비스 계층에서 이벤트 발행
-			LikeCreatedEvent event = new LikeCreatedEvent(
-				currentUserId,
-				targetUserId,
-				fromUserNickname
+			Notification notification = notificationRepository.save(new Notification(
+					currentUserId,
+					targetUserId,
+					currentUserId,
+					NotificationType.PROFILE_LIKE
+			));
+			eventPublisher.publishEvent(
+					new NotificationEvent(notification.getId(), currentUserId, targetUserId, NotificationType.PROFILE_LIKE, currentUserId)
 			);
-			eventPublisher.publishEvent(event);
 
 			return true;
 		}
