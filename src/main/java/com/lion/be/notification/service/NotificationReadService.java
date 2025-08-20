@@ -29,7 +29,7 @@ public class NotificationReadService {
     private final ImageRepository imageRepository;
 
     public Slice<NotificationResponse> fetchAllAlarm(Long currentUserId, Long lastId, int size){
-        size = Math.max(size, 30);
+        size = size > 0 && size <=30 ? size : 30;
         int limit = size + 1;
         Pageable pageable = PageRequest.of(0, limit, Sort.by("id").descending());
 
