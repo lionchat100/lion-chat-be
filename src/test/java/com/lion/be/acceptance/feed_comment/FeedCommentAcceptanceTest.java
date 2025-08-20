@@ -290,7 +290,7 @@ class FeedCommentAcceptanceTest extends AcceptanceTest {
         @Test
         void when_comment_too_fast_then_throw_429() throws InterruptedException {
             // given
-            api_문서_타이틀("rate_limit_3_seconds_fail", spec);
+            api_문서_타이틀("comment_rate_limit_3_seconds_fail", spec);
             var request = feedCommentSaveRequest_생성("이것은 속도 제한 테스트 댓글입니다.");
 
             // when & then
@@ -312,7 +312,7 @@ class FeedCommentAcceptanceTest extends AcceptanceTest {
         @Test
         void when_comment_more_than_5_in_10_minutes_then_throw_429() throws InterruptedException {
             // given
-            api_문서_타이틀("rate_limit_10_minutes_fail", spec);
+            api_문서_타이틀("comment_rate_limit_1_minutes_fail", spec);
             var request = feedCommentSaveRequest_생성("이것은 10분 제한 테스트 댓글입니다.");
 
             // when & then

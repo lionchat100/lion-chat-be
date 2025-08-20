@@ -31,12 +31,12 @@ public class RateLimitingAspect {
         Bucket bucketPerMinute = rateLimitingService.resolveFeedBucketPerMinute(userPrincipal.getId());
 
         if (!bucketPerSecond.tryConsume(1)) {
-            // 여기에 초당 제한에 대한 커스텀 예외를 발생시킵니다.
-            throw new CustomException(ErrorCode.TOO_MANY_REQUESTS_PER_SECONDS_EXCEPTION); // 예시: 기존 예외 사용
+            // 초당 제한에 대한 커스텀 예외
+            throw new CustomException(ErrorCode.TOO_MANY_REQUESTS_PER_SECONDS_EXCEPTION);
         }
 
         if (!bucketPerMinute.tryConsume(1)) {
-            // 여기에 분당 제한에 대한 새로운 커스텀 예외를 발생시킵니다.
+            // 분당 제한에 대한 커스텀 예외
             throw new CustomException(ErrorCode.TOO_MANY_REQUESTS_PER_MINUTE_EXCEPTION); // 새로운 예외 코드
         }
 

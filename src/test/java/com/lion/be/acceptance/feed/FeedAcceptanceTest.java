@@ -384,8 +384,8 @@ public class FeedAcceptanceTest extends AcceptanceTest {
     @DisplayName("같은 유저가 3초 내에 글을 2번 쓰면 실패한다.")
     void when_write_feeds_twice_in_3seconds_then_429() throws IOException {
         //given
+            api_문서_타이틀("feed_rate_limit_3_seconds_fail", spec);
 		String accessToken = 토킷_완전_온보딩();
-        String accessToken2 = 원준_완전_온보딩();
 
         List<String> feedTitles = List.of("내 피드 1", "내 피드 2");
         List<String> feedContents = List.of("내용 1", "내용 2");
@@ -404,6 +404,7 @@ public class FeedAcceptanceTest extends AcceptanceTest {
     @DisplayName("같은 유저가 10초 내에 글을 5번 쓰면 실패한다.")
     void when_write_feeds_many_in_10seconds_then_429() throws IOException {
         //given
+        api_문서_타이틀("feed_rate_limit_10_minutes_fail", spec);
 		String accessToken = 토킷_완전_온보딩();
 
         List<String> feedTitles = List.of("내 피드 1", "내 피드 2","내 피드 3", "내 피드 4","내 피드 5", "내 피드 6");
