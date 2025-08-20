@@ -53,7 +53,8 @@ public class NotificationListener {
                 receiver.getNickname(),
                 event.type(),
                 notification.getCreatedAt(),
-                imageUrl
+                imageUrl,
+                event.targetId()
         );
 
         messagingTemplate.convertAndSend(destination, message);

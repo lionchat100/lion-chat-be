@@ -39,11 +39,11 @@ public class UserLikesWriteService {
 			Notification notification = notificationRepository.save(new Notification(
 					currentUserId,
 					targetUserId,
-					targetUserId,
+					currentUserId,
 					NotificationType.PROFILE_LIKE
 			));
 			eventPublisher.publishEvent(
-					new NotificationEvent(notification.getId(), currentUserId, targetUserId, NotificationType.PROFILE_LIKE, targetUserId)
+					new NotificationEvent(notification.getId(), currentUserId, targetUserId, NotificationType.PROFILE_LIKE, currentUserId)
 			);
 
 			return true;

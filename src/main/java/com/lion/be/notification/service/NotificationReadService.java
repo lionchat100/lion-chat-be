@@ -76,7 +76,8 @@ public class NotificationReadService {
                                 receiver.getNickname(),
                                 notification.getType().name(),
                                 notification.getCreatedAt(),
-                                userImageMap.get(notification.getFromUserId())
+                                userImageMap.get(notification.getFromUserId()),
+                                    notification.getTargetId()
                         )
                 ).toList();
 

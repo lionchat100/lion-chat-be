@@ -14,7 +14,8 @@ public record NotificationResponse(
         String receiverNickName,
         String notificationType,
         LocalDateTime createdAt,
-        String imageUrl
+        String imageUrl,
+        Long targetId
 ) {
     public static NotificationResponse toResponse(
             Long id,
@@ -24,7 +25,8 @@ public record NotificationResponse(
             String receiverNickname,
             NotificationType notificationType,
             LocalDateTime createdAt,
-            String imageUrl
+            String imageUrl,
+            Long targetId
     ) {
         return new NotificationResponse(
                 id,
@@ -36,7 +38,8 @@ public record NotificationResponse(
                 createdAt.atZone(ZoneId.of("UTC"))
                         .withZoneSameInstant(ZoneId.of("Asia/Seoul"))
                         .toLocalDateTime(),
-                imageUrl
+                imageUrl,
+                targetId
         );
     }
 }
