@@ -48,7 +48,7 @@ public class UserQueryDslRepository {
 
 		return jpaQueryFactory
 			.selectFrom(user)
-			.leftJoin(user.userPhotos, userPhoto).fetchJoin()
+//			.leftJoin(user.userPhotos, userPhoto).fetchJoin()
 			.where(conditions)
 			.orderBy(user.createdAt.desc())
 			.limit(size)
@@ -71,7 +71,7 @@ public class UserQueryDslRepository {
 
 		return jpaQueryFactory
 			.selectFrom(user)
-			.leftJoin(user.userPhotos, userPhoto).fetchJoin()
+//			.leftJoin(user.userPhotos, userPhoto).fetchJoin()
 			.where(conditions)
 			.orderBy(user.id.desc())
 			.offset(pageable.getOffset())
@@ -94,7 +94,7 @@ public class UserQueryDslRepository {
 
 		return jpaQueryFactory
 			.selectFrom(user)
-			.leftJoin(user.userPhotos, userPhoto).fetchJoin()
+//			.leftJoin(user.userPhotos, userPhoto).fetchJoin()
 			.where(conditions)
 			.orderBy(user.id.desc())
 			.offset(pageable.getOffset())
