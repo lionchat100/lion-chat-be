@@ -1,28 +1,36 @@
 package com.lion.be.notification.domain.entity;
 
 
+import com.lion.be.global.entity.BaseEntity;
 import com.lion.be.notification.domain.NotificationType;
-import jakarta.persistence.Column;
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "notifications")
+@Table(name="notifications")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public abstract class Notification {
+public class Notification extends BaseEntity {
 
-    @EmbeddedId
-    protected NotificationId id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "type", nullable = false)
-    protected NotificationType type;
+    private Long fromUserId;
+    private Long toUserId;
+
+    @Enumerated(value = EnumType.STRING)
+    private NotificationType type;
+
+    private Long targetId;
+
+    public Notification(Long fromUserId, Long toUserId, Long targetId, NotificationType type){
+        this.fromUserId = fromUserId;
+        this.toUserId = toUserId;
+        this.targetId = targetId;
+        this.type = type;
+    }
 
 }

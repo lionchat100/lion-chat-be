@@ -1,6 +1,5 @@
 package com.lion.be.userlike.service;
 
-import com.lion.be.notification.domain.entity.ProfileLikeNotification;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
