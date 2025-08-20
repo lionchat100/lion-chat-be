@@ -13,6 +13,7 @@ import com.lion.be.chat.room.service.ChatRoomPersistence;
 import com.lion.be.global.exception.CustomException;
 import com.lion.be.global.exception.ErrorCode;
 import com.lion.be.user.domain.entity.User;
+import com.lion.be.user.domain.entity.UserPhoto;
 import com.lion.be.user.repository.UserRepository;
 import com.lion.be.user.repository.persistence.jpa.UserJpaRepository;
 import jakarta.transaction.Transactional;
@@ -109,9 +110,11 @@ public class MessageUseCase {
                     ChatMessage message = messageList.get(i);
                     User sender = users.get(message.getSenderId());
 
-                    String imageUrl = userRepository.fetchByIdWithPhotos(sender.getId()).orElseThrow(() ->
-                            new CustomException(ErrorCode.USER_NOT_FOUND)
-                    ).getImageUrl();
+                    String imageUrl = userRepository.fetchByIdWithPhotos(sender.getId())
+                            .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND))
+                            .getUserPhotos().stream()
+                            .map(UserPhoto::getImageUrl)
+                            .toList().get(0);
 
                     boolean isLast = (i == lastIndex) && isEnd;
 
