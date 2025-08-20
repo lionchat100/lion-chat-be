@@ -63,7 +63,6 @@ public class MessageUseCase {
         }
     }
 
-    @Transactional
     public void processReadAck(String messageId, Long userId) {
         User user = userJpaRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
