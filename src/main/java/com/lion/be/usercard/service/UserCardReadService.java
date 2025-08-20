@@ -1,6 +1,7 @@
 package com.lion.be.usercard.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import com.lion.be.global.exception.CustomException;
 import com.lion.be.global.exception.ErrorCode;
 import com.lion.be.user.domain.Position;
 import com.lion.be.user.domain.entity.User;
+import com.lion.be.user.domain.entity.UserPhoto;
 import com.lion.be.user.repository.UserRepository;
 import com.lion.be.usercard.controller.dto.UserCardResponse;
 import com.lion.be.usercard.util.UserCardFilterUtil;
@@ -36,10 +38,17 @@ public class UserCardReadService {
 		return convertToUserCardResponses(userId, recommendedUsers);
 	}
 
-	public UserCardResponse getUserCard(Long id) {
-		return userRepository.fetchByIdWithPhotos(id)
-			.map(user -> UserCardResponse.from(user, false))
+	public UserCardResponse getUserCard(Long targetUserId, Long currentUserId) {
+		User user = userRepository.fetchByIdWithPhotos(targetUserId)
 			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+		boolean isLiked = false;
+		if (currentUserId != null) {
+			Set<Long> likedUserIds = userLikesReadService.getLikedUserIds(currentUserId, List.of(targetUserId));
+			isLiked = likedUserIds.contains(targetUserId);
+		}
+
+		return UserCardResponse.from(user, isLiked);
 	}
 
 	public List<UserCardResponse> getCardsByPosition(Long userId, int size, List<Long> excludeUserIds, Position position) {
@@ -54,16 +63,20 @@ public class UserCardReadService {
 			return List.of();
 		}
 
-		List<Long> viewedUserIds = users.stream()
+		List<Long> userIds = users.stream()
 			.map(User::getId)
 			.toList();
 
-		userViewHistoryService.recordViewedUsers(currentUserId, viewedUserIds);
+		userViewHistoryService.recordViewedUsers(currentUserId, userIds);
+		Set<Long> likedUserIds = userLikesReadService.getLikedUserIds(currentUserId, userIds);
 
-		Set<Long> likedUserIds = userLikesReadService.getLikedUserIds(currentUserId, viewedUserIds);
+		Map<Long, List<UserPhoto>> photosMap = userRepository.findPhotosMapByUserIds(userIds);
 
 		return users.stream()
-			.map(user -> UserCardResponse.from(user, likedUserIds.contains(user.getId())))
+			.map(user -> {
+				List<UserPhoto> photos = photosMap.getOrDefault(user.getId(), List.of());
+				return UserCardResponse.from(user, photos, likedUserIds.contains(user.getId()));
+			})
 			.toList();
 	}
 }

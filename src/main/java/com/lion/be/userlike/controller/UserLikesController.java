@@ -20,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/user/likes")
+@RequestMapping("/api/users/likes")
 public class UserLikesController {
 
 	private final UserLikesWriteService userLikesWriteService;

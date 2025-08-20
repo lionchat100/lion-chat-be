@@ -42,4 +42,28 @@ public record UserCardResponse (
 			isLikedByMe
 		);
 	}
+
+	/**
+	 * N+1 문제 해결을 위한 새로운 메서드 (photos 직접 전달)
+	 *
+	 * @param user 사용자 엔티티
+	 * @param photos 별도로 조회한 UserPhoto 목록
+	 * @param isLikedByMe 좋아요 여부
+	 */
+	public static UserCardResponse from(User user, List<UserPhoto> photos, boolean isLikedByMe) {
+		return new UserCardResponse(
+			user.getId(),
+			user.getNickname(),
+			user.getUniversity(),
+			user.getIsUniversityView(),
+			user.getPosition(),
+			user.getMbti(),
+			photos.stream()
+				.map(UserPhoto::getImageUrl)
+				.toList(),
+			user.getBio(),
+			user.getPreferenceType(),
+			isLikedByMe
+		);
+	}
 }
