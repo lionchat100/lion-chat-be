@@ -48,8 +48,10 @@ public class ChatRoomService {
         } else {
             ChatRoom chatRoom = chatRoomRepository.save(new ChatRoom());
 
-            User user1 = userRepository.findById(senderId);
-            User user2 = userRepository.findById(receiverId);
+            User user1 = userRepository.findById(senderId)
+                    .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+            User user2 = userRepository.findById(receiverId)
+                    .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
             if (user1.getRole() == Role.BANNED || user2.getRole() == Role.BANNED) {
                 log.warn("블록된 유저가 있는 채팅방은 만들 수 없습니다.");

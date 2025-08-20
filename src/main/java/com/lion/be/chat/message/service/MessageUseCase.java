@@ -46,6 +46,7 @@ public class MessageUseCase {
     private final MessagePersistence messagePersistence;
     private final ChatRoomPersistence chatRoomPersistence;
 
+    @Transactional
     public void sendMessage(ChatMessageRequest request, Long senderId) {
         ChatRoom chatRoom = chatRoomRepository.findById(request.chatRoomId())
                 .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
