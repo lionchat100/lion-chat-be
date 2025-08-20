@@ -2,15 +2,17 @@ package com.lion.be.user.repository;
 
 import com.lion.be.user.domain.Position;
 import com.lion.be.user.domain.entity.User;
-import org.springframework.data.jpa.repository.Query;
+import com.lion.be.user.domain.entity.UserPhoto;
+
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface UserRepository {
 
-    User findById(Long userId);
+    Optional<User> findById(Long userId);
 
     Optional<User> fetchByEmail(String email);
 
@@ -57,9 +59,8 @@ public interface UserRepository {
 
 	Optional<User> fetchByIdWithPhotos(Long userId);
 
-	Optional<String> fetchNicknameById(Long userId);
 
-	boolean existsById(Long userId);
+	Map<Long, List<UserPhoto>> findPhotosMapByUserIds(List<Long> userIds);
 
 	List<User> fetchAllUser(@Param("userIds") List<Long> userIds);
 }

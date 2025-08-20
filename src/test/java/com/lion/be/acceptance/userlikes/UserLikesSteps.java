@@ -26,7 +26,7 @@ public class UserLikesSteps {
 			.auth().oauth2(accessToken)
 			.log().all()
 			.when()
-			.post("/api/user/likes/{targetUserId}", targetUserId)
+			.post("/api/users/likes/{targetUserId}", targetUserId)
 			.then()
 			.log().all()
 			.extract();
@@ -41,7 +41,7 @@ public class UserLikesSteps {
 			.auth().oauth2(accessToken)
 			.log().all()
 			.when()
-			.get("/api/user/likes/lists")
+			.get("/api/users/likes/lists")
 			.then()
 			.log().all()
 			.extract();
@@ -55,7 +55,7 @@ public class UserLikesSteps {
 			.spec(spec)
 			.log().all()
 			.when()
-			.post("/api/user/likes/" + targetUserId)
+			.post("/api/users/likes/" + targetUserId)
 			.then()
 			.log().all()
 			.extract();
@@ -69,7 +69,7 @@ public class UserLikesSteps {
 			.spec(spec)
 			.log().all()
 			.when()
-			.get("/api/user/likes/lists")
+			.get("/api/users/likes/lists")
 			.then()
 			.log().all()
 			.extract();
