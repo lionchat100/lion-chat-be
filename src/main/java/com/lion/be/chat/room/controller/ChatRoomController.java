@@ -1,6 +1,7 @@
 package com.lion.be.chat.room.controller;
 
 import com.lion.be.auth.domain.UserPrincipal;
+import com.lion.be.chat.room.domain.dto.ChatRoomParticipantsInfoResponse;
 import com.lion.be.chat.room.domain.dto.ChatRoomInitRequest;
 import com.lion.be.chat.room.domain.dto.ChatRoomInitResponse;
 import com.lion.be.chat.room.domain.dto.ChatRoomResponse;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -52,5 +54,19 @@ public class ChatRoomController {
     @GetMapping
     public ResponseEntity<List<ChatRoomResponse>> getMyChatRoomList(@AuthenticationPrincipal UserPrincipal userPrincipal) {
         return ResponseEntity.ok(chatRoomService.getChatRooms(userPrincipal.getId()));
+    }
+
+    /**
+     * 채팅방 참여자의 정보를 불러옵니다.
+     * @param userPrincipal
+     * @param roomId
+     * @return
+     */
+    @GetMapping("/context")
+    public ResponseEntity<ChatRoomParticipantsInfoResponse> getChatRoomParticipants(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestParam Long roomId
+    ) {
+        return ResponseEntity.ok(chatRoomService.findChatRoomParticipants(userPrincipal.getId(), roomId));
     }
 }

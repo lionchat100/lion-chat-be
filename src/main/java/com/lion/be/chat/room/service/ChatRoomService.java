@@ -1,5 +1,7 @@
 package com.lion.be.chat.room.service;
 
+import com.lion.be.chat.message.service.MessageService;
+import com.lion.be.chat.room.domain.dto.ChatRoomParticipantsInfoResponse;
 import com.lion.be.chat.room.domain.dto.ChatRoomResponse;
 import com.lion.be.chat.room.domain.entity.ChatRoom;
 import com.lion.be.chat.room.domain.entity.ChatRoomUser;
@@ -9,7 +11,6 @@ import com.lion.be.global.exception.CustomException;
 import com.lion.be.global.exception.ErrorCode;
 import com.lion.be.notification.domain.NotificationType;
 import com.lion.be.notification.domain.dto.NotificationEvent;
-import com.lion.be.notification.domain.dto.NotificationResponse;
 import com.lion.be.notification.domain.entity.Notification;
 import com.lion.be.notification.repository.NotificationRepository;
 import com.lion.be.user.domain.Role;
@@ -21,7 +22,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -37,6 +37,7 @@ public class ChatRoomService {
     private final ChatRoomUserRepository chatRoomUserRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final NotificationRepository notificationRepository;
+    private final MessageService messageService;
 
     @Transactional
     public Long findOrCreateChatRoom(Long senderId, Long receiverId) {
@@ -96,6 +97,18 @@ public class ChatRoomService {
         }
     }
 
+    public ChatRoomParticipantsInfoResponse findChatRoomParticipants(Long userId, Long chatRoomId) {
+        User sender = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        ChatRoomUser receiver = messageService.findOpponentChatRoomUser(chatRoomId, sender);
+        return ChatRoomParticipantsInfoResponse.toResponse(
+                userId,
+                receiver.getUser().getId(),
+                sender.getNickname(),
+                receiver.getUser().getNickname()
+        );
+    }
+
     /**
      * 채팅방에 입장할 유저 2명의 정보를 저장합니다.
      *
@@ -130,6 +143,7 @@ public class ChatRoomService {
         return chatRoomRepository.findChatRoomListByUserId(userId);
     }
 
+    @Deprecated
     public boolean checkUserExistsInChatRoom(Long chatRoomId, Long userId) {
         Set<ChatRoomUser> chatRoomUsers = chatRoomUserRepository.findById_ChatRoomId(chatRoomId);
         if (chatRoomUsers.isEmpty()) {
