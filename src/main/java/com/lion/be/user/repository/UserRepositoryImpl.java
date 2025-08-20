@@ -23,9 +23,9 @@ public class UserRepositoryImpl implements UserRepository {
 	private final UserQueryDslRepository userQueryDslRepository;
 
 	@Override
-	public User findById(Long userId) {
-		return userJpaRepository.findById(userId)
-			.orElseThrow(() -> new RuntimeException("findById"));
+	public Optional<User> findById(Long userId) {
+		return Optional.ofNullable(userJpaRepository.findById(userId)
+			.orElseThrow(() -> new RuntimeException("findById")));
 	}
 
 	@Override
