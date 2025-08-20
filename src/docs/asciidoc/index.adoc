@@ -156,6 +156,13 @@ operation::test_login_success[snippets='http-request,http-response']
 
 operation::create_chat_room_success[snippets='http-request,http-response']
 
+[[chatroom-context]]
+=== 채팅방 참가자 정보 반환
+
+채팅방 id를 통해 채팅방 참가자들의 정보를 불러옵니다.
+
+operation::get_chat_room_participants_success[snippets='http-request,http-response']
+
 [[chat-sendMessage]]
 === 채팅 메시지 전송
 
