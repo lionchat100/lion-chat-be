@@ -122,4 +122,15 @@ public class JwtTokenProvider {
         }
     }
 
+    /**
+     * 토큰에서 사용자 ID (Long)를 직접 추출합니다.
+     * StompInterceptor에서 WebSocket 세션의 Principal 이름을 설정하기 위해 사용됩니다.
+     * @param token JWT 액세스 토큰
+     * @return 사용자 ID
+     */
+    public Long getUserIdFromToken(String token) {
+        Claims claims = parseClaims(token);
+        return claims.get(ID_KEY, Long.class);
+    }
+
 }

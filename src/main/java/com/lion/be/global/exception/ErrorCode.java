@@ -42,7 +42,9 @@ public enum ErrorCode {
     IMAGE_DELETE_ACCESS_DENIED(HttpStatus.FORBIDDEN,"이미지 소유권자 가 아닙니다." ),
     BANNED_USER_LOGIN(HttpStatus.UNAUTHORIZED,"밴된 유저입니다. "),
     TOO_MANY_REQUESTS_PER_SECONDS_EXCEPTION(HttpStatus.TOO_MANY_REQUESTS, "초당 API 요청 횟수를 초과했습니다."),
-    TOO_MANY_REQUESTS_PER_MINUTE_EXCEPTION(HttpStatus.TOO_MANY_REQUESTS, "분당 API 요청 횟수를 초과했습니다.");
+    TOO_MANY_REQUESTS_PER_MINUTE_EXCEPTION(HttpStatus.TOO_MANY_REQUESTS, "분당 API 요청 횟수를 초과했습니다."),
+
+    NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "알림을 찾을 수 없습니다.");
 
     private final HttpStatus status;
     private final String message;
