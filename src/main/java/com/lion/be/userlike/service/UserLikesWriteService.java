@@ -2,6 +2,7 @@ package com.lion.be.userlike.service;
 
 import com.lion.be.notification.domain.NotificationType;
 import com.lion.be.notification.domain.dto.NotificationEvent;
+import com.lion.be.notification.domain.entity.Notification;
 import com.lion.be.notification.repository.NotificationRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -35,8 +36,14 @@ public class UserLikesWriteService {
 			notificationRepository.deleteNotification(currentUserId, targetUserId);
 			return false;
 		} else {
+			Notification notification = notificationRepository.save(new Notification(
+					currentUserId,
+					targetUserId,
+					targetUserId,
+					NotificationType.PROFILE_LIKE
+			));
 			eventPublisher.publishEvent(
-					new NotificationEvent(currentUserId, targetUserId, NotificationType.PROFILE_LIKE, targetUserId)
+					new NotificationEvent(notification.getId(), currentUserId, targetUserId, NotificationType.PROFILE_LIKE, targetUserId)
 			);
 
 			return true;

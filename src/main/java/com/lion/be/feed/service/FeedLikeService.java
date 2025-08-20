@@ -10,6 +10,8 @@ import com.lion.be.global.exception.ErrorCode;
 import com.lion.be.global.util.RedisKey;
 import com.lion.be.notification.domain.NotificationType;
 import com.lion.be.notification.domain.dto.NotificationEvent;
+import com.lion.be.notification.domain.entity.Notification;
+import com.lion.be.notification.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -22,6 +24,7 @@ public class FeedLikeService {
     private final FeedRepository feedRepository;
     private final RedisTemplate<String, Object> redisTemplate;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final NotificationRepository notificationRepository;
 
     public void likeFeed(Long feedId, Long userId) {
 
@@ -37,8 +40,17 @@ public class FeedLikeService {
             redisTemplate.opsForSet().add(RedisKey.USER_LIKED_FEED_SET_PREFIX + userIdStr, String.valueOf(feedId));
 
             if(!writerId.equals(userId)) {
+                Notification notification = notificationRepository.save(
+                        new Notification(
+                                userId,
+                                writerId,
+                                feedId,
+                                NotificationType.POST_LIKE
+                        )
+                );
+
                 applicationEventPublisher.publishEvent(
-                        new NotificationEvent(userId, writerId, NotificationType.POST_LIKE, feedId)
+                        new NotificationEvent(notification.getId(), userId, writerId, NotificationType.POST_LIKE, feedId)
                 );
             }
         }

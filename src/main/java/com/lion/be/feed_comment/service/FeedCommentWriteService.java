@@ -14,6 +14,8 @@ import com.lion.be.global.exception.ErrorCode;
 import com.lion.be.global.util.RedisKey;
 import com.lion.be.notification.domain.NotificationType;
 import com.lion.be.notification.domain.dto.NotificationEvent;
+import com.lion.be.notification.domain.entity.Notification;
+import com.lion.be.notification.repository.NotificationRepository;
 import com.lion.be.user.domain.Role;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.service.UserReadService;
@@ -35,6 +37,7 @@ public class FeedCommentWriteService {
     private final RedisTemplate<String, Object> redisTemplate;
 
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final NotificationRepository notificationRepository;
 
     public FeedCommentSaveResponse save(Long feedId, Long userId, FeedCommentSaveRequest request) {
         Feed feed = feedReadService.fetchById(feedId);
@@ -50,10 +53,19 @@ public class FeedCommentWriteService {
         redisTemplate.opsForValue().increment(commentCountKey);
         redisTemplate.opsForSet().add(RedisKey.DIRTY_COMMENT_COUNT_KEY, String.valueOf(feedId));
 
-        Long writerId = feed.getId();
-        if(!writerId.equals(userId)) {
+        Long feedWriterId = feed.getUser().getId();
+        if(!feedWriterId.equals(userId)) {
+            Notification notification = notificationRepository.save(
+                    new Notification(
+                            userId,
+                            feedWriterId,
+                            feedId,
+                            NotificationType.COMMENT
+                    )
+            );
+
             applicationEventPublisher.publishEvent(
-                    new NotificationEvent(userId, writerId, NotificationType.POST_LIKE, feed.getId())
+                    new NotificationEvent(notification.getId(), userId, feedWriterId, NotificationType.COMMENT, feed.getId())
             );
         }
 

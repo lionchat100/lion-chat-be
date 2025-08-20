@@ -10,6 +10,8 @@ import com.lion.be.global.exception.ErrorCode;
 import com.lion.be.notification.domain.NotificationType;
 import com.lion.be.notification.domain.dto.NotificationEvent;
 import com.lion.be.notification.domain.dto.NotificationResponse;
+import com.lion.be.notification.domain.entity.Notification;
+import com.lion.be.notification.repository.NotificationRepository;
 import com.lion.be.user.domain.Role;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.repository.UserRepository;
@@ -34,6 +36,7 @@ public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomUserRepository chatRoomUserRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final NotificationRepository notificationRepository;
 
     @Transactional
     public Long findOrCreateChatRoom(Long senderId, Long receiverId) {
@@ -63,8 +66,17 @@ public class ChatRoomService {
             chatRoomRepository.save(chatRoom);
             log.info("새 채팅방을 생성합니다. ChatRoomId: {}", chatRoom.getId());
 
+            Notification notification = notificationRepository.save(
+                    new Notification(
+                            senderId,
+                            receiverId,
+                            chatRoom.getId(),
+                            NotificationType.CHATROOM
+                    )
+            );
+
             applicationEventPublisher.publishEvent(
-                    new NotificationEvent(senderId, receiverId, NotificationType.CHATROOM, chatRoom.getId())
+                    new NotificationEvent(notification.getId(), senderId, receiverId, NotificationType.CHATROOM, chatRoom.getId())
             );
 
 //            NotificationResponse.toResponse(

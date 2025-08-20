@@ -1,6 +1,7 @@
 package com.lion.be.image.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.lion.be.global.exception.CustomException;
 import com.lion.be.global.exception.ErrorCode;
@@ -39,5 +40,10 @@ public class ImageRepositoryImpl implements ImageRepository {
     @Override
     public List<Image> fetchAllByUserId(List<Long> userIds) {
         return imageJpaRepository.fetchByUserIds(userIds);
+    }
+
+    @Override
+    public Optional<Image> fetchByUserId(Long userId) {
+        return imageJpaRepository.fetchByUserId(userId);
     }
 }

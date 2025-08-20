@@ -1,5 +1,7 @@
 package com.lion.be.notification.service;
 
+import com.lion.be.global.exception.CustomException;
+import com.lion.be.global.exception.ErrorCode;
 import com.lion.be.image.domain.entity.Image;
 import com.lion.be.image.repository.ImageRepository;
 import com.lion.be.notification.domain.dto.NotificationResponse;
@@ -43,6 +45,8 @@ public class NotificationReadService {
             origins.remove(size);
         }
 
+        User receiver = userRepository.fetchById(currentUserId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
         List<Long> userIds = origins.stream()
                 .map(Notification::getFromUserId)
                 .toList();
@@ -69,10 +73,10 @@ public class NotificationReadService {
                                 notification.getFromUserId(),
                                 userNicknameMap.get(notification.getFromUserId()),
                                 notification.getToUserId(),
-                                userNicknameMap.get(notification.getToUserId()),
+                                receiver.getNickname(),
                                 notification.getType().name(),
                                 notification.getCreatedAt(),
-                                userImageMap.get(notification.getToUserId())
+                                userImageMap.get(notification.getFromUserId())
                         )
                 ).toList();
 
