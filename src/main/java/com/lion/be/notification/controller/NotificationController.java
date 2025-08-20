@@ -1,4 +1,4 @@
-package com.lion.be.notification;
+package com.lion.be.notification.controller;
 
 import com.lion.be.auth.domain.UserPrincipal;
 import com.lion.be.notification.domain.dto.NotificationResponse;
