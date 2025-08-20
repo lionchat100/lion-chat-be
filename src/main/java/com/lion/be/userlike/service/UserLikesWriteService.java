@@ -1,5 +1,6 @@
 package com.lion.be.userlike.service;
 
+import com.lion.be.notification.domain.entity.ProfileLikeNotification;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,7 +9,7 @@ import com.lion.be.global.exception.CustomException;
 import com.lion.be.global.exception.ErrorCode;
 import com.lion.be.user.repository.UserRepository;
 import com.lion.be.userlike.domain.entity.LikeCreatedEvent;
-import com.lion.be.userlike.domain.entity.UserLikes;
+import com.lion.be.notification.domain.entity.UserLikes;
 import com.lion.be.userlike.repository.UserLikesRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -42,8 +43,9 @@ public class UserLikesWriteService {
 				throw new CustomException(ErrorCode.USER_NOT_FOUND);
 			}
 
-			UserLikes userLikes = new UserLikes(currentUserId, targetUserId);
-			userLikesRepository.save(userLikes);
+
+
+			userLikesRepository.save();
 
 			// 서비스 계층에서 이벤트 발행
 			LikeCreatedEvent event = new LikeCreatedEvent(
