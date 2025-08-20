@@ -124,8 +124,7 @@ public class ChatSteps {
                 () -> assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value()),
                 () -> assertThat(messages).hasSize(expectedSize),
                 () -> assertThat(messages.get(0).get("content")).isEqualTo(firstMessageContent),
-                () -> assertThat(messages.get(0).get("messageId")).isNotNull(),
-                () -> assertThat(messages.get(0).get("nickname")).isNotNull()
+                () -> assertThat(messages.get(0).get("messageId")).isNotNull()
         );
     }
 

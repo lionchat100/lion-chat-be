@@ -53,7 +53,7 @@ public class WebSocketController {
     @MessageMapping("/message.ack")
     public void handleMessageAck(MessageAckRequest ackRequest) {
         log.info("메시지 읽음 확인 요청 수신: {}", ackRequest);
-        messageUseCase.updateReadStatus(ackRequest.messageId(), ackRequest.id());
+        messageUseCase.processReadAck(ackRequest.messageId(), ackRequest.id());
         log.info("메시지 읽음 상태 업데이트 완료: messageId={}, userId={}", ackRequest.messageId(), ackRequest.id());
     }
 }
