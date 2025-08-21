@@ -147,6 +147,7 @@ public class UserCardSteps {
 			() -> assertThat(response.jsonPath().getString("position")).isNotEmpty(),
 			() -> assertThat(response.jsonPath().getString("mbti")).isNotNull(),
 			() -> assertThat(response.jsonPath().getList("imageUrls")).isNotEmpty(),
+			() -> assertThat(response.jsonPath().getList("imageIds")).isNotEmpty(),
 			() -> assertThat(response.jsonPath().getString("bio")).isNotEmpty(),
 			() -> assertThat(response.jsonPath().getBoolean("isLikedByMe")).isFalse()
 		);
@@ -271,6 +272,8 @@ public class UserCardSteps {
 			() -> assertThat(firstCard.get("mbti")).isNotNull(),
 			() -> assertThat(firstCard.get("imageUrls")).isNotNull(),
 			() -> assertThat((List<?>) firstCard.get("imageUrls")).isNotEmpty(),
+			() -> assertThat(firstCard.get("imageIds")).isNotNull(),
+			() -> assertThat((List<?>) firstCard.get("imageIds")).isNotEmpty(),
 			() -> assertThat(firstCard.get("bio")).isNotNull(),
 			() -> assertThat((String) firstCard.get("bio")).isNotEmpty(),
 			() -> assertThat(response.jsonPath().getBoolean("isLikedByMe")).isFalse()
