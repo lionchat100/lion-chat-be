@@ -18,6 +18,7 @@ public record UserCardResponse (
 	Position position,
 	Mbti mbti,
 	List<String> imageUrls,
+	List<Long> imageIds,
 	String bio,
 	@JsonProperty("focusType")
 	PreferenceType preferenceType,
@@ -37,6 +38,9 @@ public record UserCardResponse (
 			user.getUserPhotos().stream()
 				.map(UserPhoto::getImageUrl)
 				.toList(),
+			user.getUserPhotos().stream()
+				.map(UserPhoto::getId)
+					.toList(),
 			user.getBio(),
 			user.getPreferenceType(),
 			isLikedByMe
@@ -60,6 +64,9 @@ public record UserCardResponse (
 			user.getMbti(),
 			photos.stream()
 				.map(UserPhoto::getImageUrl)
+				.toList(),
+			user.getUserPhotos().stream()
+				.map(UserPhoto::getId)
 				.toList(),
 			user.getBio(),
 			user.getPreferenceType(),

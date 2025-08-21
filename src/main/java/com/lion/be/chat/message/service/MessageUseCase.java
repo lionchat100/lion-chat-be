@@ -14,7 +14,6 @@ import com.lion.be.global.exception.CustomException;
 import com.lion.be.global.exception.ErrorCode;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.domain.entity.UserPhoto;
-import com.lion.be.user.repository.UserRepository;
 import com.lion.be.user.repository.persistence.jpa.UserJpaRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -37,8 +36,9 @@ import java.util.stream.IntStream;
 @Slf4j
 public class MessageUseCase {
 
-    private final UserRepository userRepository;
-    private final UserJpaRepository userJpaRepository;
+    private static final String DEFAULT_IMAGE_URL = "https://tokit-bucket.s3.ap-northeast-2.amazonaws.com/profile/defaultimage.png";
+
+    private final UserJpaRepository userRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomUserRepository chatRoomUserRepository;
@@ -65,7 +65,7 @@ public class MessageUseCase {
     }
 
     public void processReadAck(String messageId, Long userId) {
-        User user = userJpaRepository.findById(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         ChatMessage message = chatMessageRepository.findById(new ObjectId(messageId))
                 .orElseThrow(() -> new CustomException(ErrorCode.MESSAGE_NOT_FOUND));
@@ -97,8 +97,21 @@ public class MessageUseCase {
         Set<Long> senderIds = messages.stream()
                 .map(ChatMessage::getSenderId)
                 .collect(Collectors.toSet());
-        Map<Long, User> users = userJpaRepository.findByIdIn(senderIds).stream()
+        Map<Long, User> users = userRepository.findByIdIn(senderIds).stream()
                 .collect(Collectors.toMap(User::getId, user -> user));
+        Map<Long, String> userPhotos = userRepository.findByIdIn(senderIds).stream()
+                .collect(Collectors.toMap(
+                                User::getId,
+                                user -> {
+                                    List<UserPhoto> photo = user.getUserPhotos();
+                                    if (photo.isEmpty()) {
+                                        return DEFAULT_IMAGE_URL;
+                                    } else {
+                                        return photo.get(0).getImageUrl();
+                                    }
+                                }
+                        )
+                );
 
         ChatRoomUser chatRoomUser = chatRoomUserRepository.findById_ChatRoomIdAndId_UserId(roomId, userId);
         chatRoomPersistence.updateChatRoomUserReadStatus(chatRoomUser, true);
@@ -108,16 +121,8 @@ public class MessageUseCase {
         return IntStream.range(0, messageList.size())
                 .mapToObj(i -> {
                     ChatMessage message = messageList.get(i);
-                    User sender = users.get(message.getSenderId());
-
-//                    String imageUrl = userRepository.fetchByIdWithPhotos(sender.getId())
-//                            .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND))
-//                            .getUserPhotos().stream()
-//                            .map(UserPhoto::getImageUrl)
-//                            .toList().get(0);
-                    String imageUrl = userRepository.fetchByIdWithPhotos(sender.getId()).orElseThrow(() ->
-                            new CustomException(ErrorCode.USER_NOT_FOUND)
-                    ).getImageUrl();
+                    String nickname = users.get(message.getSenderId()).getNickname();
+                    String imageUrl = userPhotos.get(message.getSenderId());
 
                     boolean isLast = (i == lastIndex) && isEnd;
 
@@ -125,7 +130,7 @@ public class MessageUseCase {
                             message.getId().toString(),
                             message.getChatRoomId(),
                             message.getSenderId(),
-                            sender.getNickname(),
+                            nickname,
                             imageUrl,
                             message.getCreatedAt(),
                             message.getContent(),
