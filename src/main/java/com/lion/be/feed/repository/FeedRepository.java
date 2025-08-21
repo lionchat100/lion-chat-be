@@ -1,10 +1,6 @@
 package com.lion.be.feed.repository;
 
-import com.lion.be.feed.domain.dto.FeedResponse;
 import com.lion.be.feed.domain.entity.Feed;
-import com.lion.be.global.aop.ElapsedTime;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -14,75 +10,9 @@ import java.util.Optional;
 import org.springframework.data.repository.query.Param;
 
 public interface FeedRepository extends JpaRepository<Feed, Long>, FeedRepositoryCustom {
-    //첫 전체 조회
-//    @ElapsedTime
-//    @Query("""
-//            SELECT new com.lion.be.feed.domain.dto.FeedResponse(
-//                f.id, f.title, f.content, f.createdAt,
-//                f.likeCount, f.commentCount,
-//                u.nickname, u.id, img.imageUrl
-//            )
-//            FROM Feed f
-//            JOIN f.user u
-//            LEFT JOIN u.userPhotos up ON up.orderIndex = 1
-//            LEFT JOIN up.image img
-//            WHERE f.isDeleted = false and u.role != 'BANNED'
-//            """)
-//    Slice<FeedResponse> fetchRecentFeedsFirst(Pageable pageable);
 
     @Query("select f from Feed f join fetch f.user where f.id = :id and f.isDeleted = false")
     Optional<Feed> fetchById(Long id);
-
-    //이후 전체 조회
-//    @ElapsedTime
-//    @Query("""
-//            SELECT new com.lion.be.feed.domain.dto.FeedResponse(
-//                f.id, f.title, f.content, f.createdAt,
-//                f.likeCount, f.commentCount,
-//                u.nickname, u.id, img.imageUrl
-//            )
-//            FROM Feed f
-//            JOIN f.user u
-//            LEFT JOIN u.userPhotos up ON up.orderIndex = 1
-//            LEFT JOIN up.image img
-//            WHERE f.isDeleted = false AND f.id < :lastId and u.role != 'BANNED'
-//            """)
-//    Slice<FeedResponse> fetchRecentFeedsAfter(Long lastId, Pageable pageable);
-
-    //첫 좋아요 순 조회(커서 페이지네이션(1차적으로 like_count, 2차적으로는 게시글의 pk), 페이징, 기간 별 or 전체 기간)
-//    @ElapsedTime
-//    @Query("""
-//            SELECT new com.lion.be.feed.domain.dto.FeedResponse(
-//                f.id, f.title, f.content, f.createdAt,
-//                f.likeCount, f.commentCount,
-//                u.nickname, u.id, img.imageUrl
-//            )
-//            FROM Feed f
-//            JOIN f.user u
-//            LEFT JOIN u.userPhotos up ON up.orderIndex = 1
-//            LEFT JOIN up.image img
-//            WHERE f.isDeleted = false and u.role != 'BANNED'
-//            ORDER BY f.likeCount DESC, f.id DESC
-//            """)
-//    Slice<FeedResponse> fetchHotFeedsFirst(Pageable pageable);
-//
-//    //이후 좋아요 순 조회
-//    @ElapsedTime
-//    @Query("""
-//            SELECT new com.lion.be.feed.domain.dto.FeedResponse(
-//                f.id, f.title, f.content, f.createdAt,
-//                f.likeCount, f.commentCount,
-//                u.nickname, u.id, img.imageUrl
-//            )
-//            FROM Feed f
-//            JOIN f.user u
-//            LEFT JOIN u.userPhotos up ON up.orderIndex = 1
-//            LEFT JOIN up.image img
-//            WHERE f.isDeleted = false and u.role != 'BANNED'
-//            AND (f.likeCount < :lastLikeCount OR (f.likeCount = :lastLikeCount AND f.id < :lastId))
-//            ORDER BY f.likeCount DESC, f.id DESC
-//            """)
-//    Slice<FeedResponse> fetchHotFeedsAfter(Long lastLikeCount, Long lastId, Pageable pageable);
 
     @Query("select f from Feed f join fetch f.user u where f.id = :id and f.isDeleted = false and u.role <> 'BANNED'")
     Optional<Feed> findFeed(Long id);
@@ -103,35 +33,4 @@ public interface FeedRepository extends JpaRepository<Feed, Long>, FeedRepositor
     """)
     void softDeleteById(@Param("feedId") Long feedId);
 
-//    @ElapsedTime
-//    @Query("""
-//            SELECT new com.lion.be.feed.domain.dto.FeedResponse(
-//                f.id, f.title, f.content, f.createdAt,
-//                f.likeCount, f.commentCount,
-//                u.nickname, u.id, img.imageUrl
-//            )
-//            FROM Feed f
-//            JOIN f.user u
-//            LEFT JOIN u.userPhotos up ON up.orderIndex = 1
-//            LEFT JOIN up.image img
-//            WHERE f.isDeleted = false AND u.id = :currentUserId
-//            """)
-//    Slice<FeedResponse> fetchFeedsByUserIdFirst(Long currentUserId, Pageable recentPageable);
-//
-//    @ElapsedTime
-//    @Query("""
-//            SELECT new com.lion.be.feed.domain.dto.FeedResponse(
-//                f.id, f.title, f.content, f.createdAt,
-//                f.likeCount, f.commentCount,
-//                u.nickname, u.id, img.imageUrl
-//            )
-//            FROM Feed f
-//            JOIN f.user u
-//            LEFT JOIN u.userPhotos up ON up.orderIndex = 1
-//            LEFT JOIN up.image img
-//            WHERE f.isDeleted = false AND u.id = :currentUserId AND f.id < :lastId
-//            """)
-//    Slice<FeedResponse> fetchFeedsByUserIdAfter(Long currentUserId, Long lastId, Pageable recentPageable);
-
-    //생각할 것: 검색이 되는가? 검색이 된다면 어디까지 될 것인가?
 }

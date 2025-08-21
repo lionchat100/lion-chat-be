@@ -5,7 +5,6 @@ import com.lion.be.feed_comment.domain.dto.FeedCommentSaveResponse;
 import com.lion.be.feed_comment.domain.entity.FeedComment;
 import com.lion.be.feed_comment.domain.entity.QFeedComment;
 import com.lion.be.feed_comment.repository.persistence.jpa.FeedCommentJpaRepository;
-import com.lion.be.global.aop.ElapsedTime;
 import com.lion.be.image.domain.entity.QImage;
 import com.lion.be.user.domain.Role;
 import com.lion.be.user.domain.entity.QUser;
@@ -69,7 +68,6 @@ public class FeedCommentRepositoryImpl implements FeedCommentRepository {
                 .orElseThrow(() -> new RuntimeException("TODO"));
     }
 
-    @ElapsedTime
     @Override
     public Slice<FeedCommentResponse> fetchAllByFeedIdFirst(Long feedId, Pageable pageable) {
         int size = pageable.getPageSize();
@@ -90,7 +88,6 @@ public class FeedCommentRepositoryImpl implements FeedCommentRepository {
         return getFeedCommentResponses(pageable, size, user, comment, userPhoto, image, targetIds);
     }
 
-    @ElapsedTime
     @Override
     public Slice<FeedCommentResponse> fetchAllByFeedIdAfter(Long feedId, Long lastId, Pageable pageable) {
         int size = pageable.getPageSize();

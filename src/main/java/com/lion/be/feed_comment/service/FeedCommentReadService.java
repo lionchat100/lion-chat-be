@@ -3,19 +3,13 @@ package com.lion.be.feed_comment.service;
 import com.lion.be.feed_comment.domain.dto.FeedCommentResponse;
 import com.lion.be.feed_comment.repository.FeedCommentRepository;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
-import com.lion.be.global.aop.ElapsedTime;
 import com.lion.be.global.exception.CustomException;
 import com.lion.be.global.exception.ErrorCode;
-import com.lion.be.global.util.RedisKey;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +25,6 @@ public class FeedCommentReadService {
     private static final String LIKE_COUNT_KEY_PREFIX = "comment:like_count:";
     private static final String LIKED_USERS_KEY_PREFIX = "comment:liked_users:";
 
-    @ElapsedTime
     public Slice<FeedCommentResponse> fetchAll(Long feedId, Long lastId, int size, Long userId) {
         Pageable pageable = PageRequest.of(0, size > 0 && size <=30 ? size:30);
 
@@ -41,55 +34,6 @@ public class FeedCommentReadService {
         }else{
             slice = feedCommentRepository.fetchAllByFeedIdFirst(feedId, pageable);
         }
-
-        /*
-        List<Long> commentIds = slice.getContent().stream()
-                .map(FeedCommentResponse::id)
-                .toList();
-
-        List<Object> likeCounts = redisTemplate.opsForValue().multiGet(
-                commentIds.stream().map(id -> RedisKey.COMMENT_LIKE_COUNT_KEY_PREFIX + id).collect(Collectors.toList())
-        );
-
-
-        List<FeedCommentResponse> enrichedContent = new ArrayList<>();
-        for(int i=0; i< slice.getContent().size(); i++){
-            FeedCommentResponse comment = slice.getContent().get(i);
-            String likeCountKey = RedisKey.COMMENT_LIKE_COUNT_KEY_PREFIX + comment.id();
-            String likedUsersKey = RedisKey.COMMENT_LIKED_USERS_KEY_PREFIX + comment.id();
-
-            Object likeCountObj = likeCounts.get(i);
-
-            long likeCount;
-            // Redis에서 좋아요 수를 가져오거나, 없으면 DB에서 가져온 값을 사용
-            if(likeCountObj != null){
-                likeCount = ((Number) likeCountObj).longValue();
-            }else{
-                likeCount = comment.likeCount();
-                redisTemplate.opsForValue().set(likeCountKey, likeCount);
-            }
-
-            // 현재 사용자가 좋아요를 눌렀는지 확인
-            boolean isLiked = Boolean.TRUE.equals(
-                    redisTemplate.opsForSet().isMember(likedUsersKey, String.valueOf(userId))
-            );
-
-            // 댓글 응답 객체 업데이트
-            enrichedContent.add(
-                    new FeedCommentResponse(
-                            comment.id(),
-                            comment.feedId(),
-                            comment.writer(),
-                            comment.content(),
-                            likeCount, // 최종 계산된 좋아요 수
-                            isLiked,
-                            comment.createdAt()
-                    )
-            );
-        }
-
-        return new SliceImpl<>(enrichedContent, slice.getPageable(), slice.hasNext());
-         */
 
         return slice;
     }
