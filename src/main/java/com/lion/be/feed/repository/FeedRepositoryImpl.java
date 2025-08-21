@@ -2,7 +2,6 @@ package com.lion.be.feed.repository;
 
 import com.lion.be.feed.domain.dto.FeedResponse;
 import com.lion.be.feed.domain.entity.QFeed;
-import com.lion.be.global.aop.ElapsedTime;
 import com.lion.be.image.domain.entity.QImage;
 import com.lion.be.user.domain.Role;
 import com.lion.be.user.domain.entity.QUser;
@@ -87,7 +86,6 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
                 .execute();
     }
 
-    @ElapsedTime
     @Override
     public Slice<FeedResponse> fetchRecentFeedsFirst(Pageable pageable) {
         int size = pageable.getPageSize();
@@ -109,7 +107,6 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
         return getFeedResponses(pageable, size, user, feed, userPhoto, image, targetFeedIds);
     }
 
-    @ElapsedTime
     @Override
     public Slice<FeedResponse> fetchRecentFeedsAfter(Long lastId, Pageable pageable) {
         int size = pageable.getPageSize();
@@ -132,7 +129,6 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
 
     }
 
-    @ElapsedTime
     @Override
     public Slice<FeedResponse> fetchHotFeedsFirst(Pageable pageable) {
         int size = pageable.getPageSize();
@@ -155,7 +151,6 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
     }
 
 
-    @ElapsedTime
     @Override
     public Slice<FeedResponse> fetchHotFeedsAfter(Long lastLikeCount, Long lastId, Pageable pageable) {
         int size = pageable.getPageSize();
@@ -179,7 +174,6 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
     }
 
 
-    @ElapsedTime
     @Override
     public Slice<FeedResponse> fetchFeedsByUserIdFirst(Long currentUserId, Pageable pageable) {
         int size = pageable.getPageSize();
@@ -201,7 +195,6 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
         return getFeedResponses(pageable, size, user, feed, userPhoto, image, targetFeedIds);
     }
 
-    @ElapsedTime
     @Override
     public Slice<FeedResponse> fetchFeedsByUserIdAfter(Long currentUserId, Long lastId, Pageable pageable) {
         int size = pageable.getPageSize();
