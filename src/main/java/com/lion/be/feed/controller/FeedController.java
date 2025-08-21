@@ -9,7 +9,6 @@ import com.lion.be.feed.domain.dto.FeedWriteRequest;
 import com.lion.be.feed.service.FeedReadService;
 import com.lion.be.feed.service.FeedWriteService;
 import com.lion.be.global.aop.CheckRateLimitFeed;
-import com.lion.be.global.aop.ElapsedTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +30,6 @@ public class FeedController {
     private final FeedWriteService feedWriteService;
 
     @GetMapping("/api/feeds")
-    @ElapsedTime
     public ResponseEntity<Slice<FeedResponse>> showRecentFeeds(
             @RequestParam(value = "lastId", required = false) Long lastId,
             @RequestParam(value = "size", required = false) Integer size,
@@ -44,7 +42,6 @@ public class FeedController {
     }
 
     @GetMapping("/api/feeds/hot")
-    @ElapsedTime
     public ResponseEntity<Slice<FeedResponse>> showHotFeeds(
             @RequestParam(value = "lastLikeCount", required = false) Long lastLikeCount,
             @RequestParam(value = "lastId", required = false) Long lastId,
