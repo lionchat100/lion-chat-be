@@ -14,7 +14,6 @@ import com.lion.be.global.exception.CustomException;
 import com.lion.be.global.exception.ErrorCode;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.domain.entity.UserPhoto;
-import com.lion.be.user.repository.UserRepository;
 import com.lion.be.user.repository.persistence.jpa.UserJpaRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -66,7 +65,7 @@ public class MessageUseCase {
     }
 
     public void processReadAck(String messageId, Long userId) {
-        User user = userJpaRepository.findById(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         ChatMessage message = chatMessageRepository.findById(new ObjectId(messageId))
                 .orElseThrow(() -> new CustomException(ErrorCode.MESSAGE_NOT_FOUND));
@@ -98,7 +97,9 @@ public class MessageUseCase {
         Set<Long> senderIds = messages.stream()
                 .map(ChatMessage::getSenderId)
                 .collect(Collectors.toSet());
-        Map<Long, String> users = userRepository.findByIdIn(senderIds).stream()
+        Map<Long, User> users = userRepository.findByIdIn(senderIds).stream()
+                .collect(Collectors.toMap(User::getId, user -> user));
+        Map<Long, String> userPhotos = userRepository.findByIdIn(senderIds).stream()
                 .collect(Collectors.toMap(
                                 User::getId,
                                 user -> {
@@ -120,7 +121,8 @@ public class MessageUseCase {
         return IntStream.range(0, messageList.size())
                 .mapToObj(i -> {
                     ChatMessage message = messageList.get(i);
-                    String imageUrl = users.get(message.getSenderId());
+                    String nickname = users.get(message.getSenderId()).getNickname();
+                    String imageUrl = userPhotos.get(message.getSenderId());
 
                     boolean isLast = (i == lastIndex) && isEnd;
 
@@ -128,7 +130,7 @@ public class MessageUseCase {
                             message.getId().toString(),
                             message.getChatRoomId(),
                             message.getSenderId(),
-                            sender.getNickname(),
+                            nickname,
                             imageUrl,
                             message.getCreatedAt(),
                             message.getContent(),
