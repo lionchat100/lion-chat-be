@@ -1,23 +1,27 @@
 package com.lion.be.chat.room.service;
 
+import com.lion.be.chat.message.service.MessageService;
+import com.lion.be.chat.room.domain.dto.ChatRoomParticipantsInfoResponse;
 import com.lion.be.chat.room.domain.dto.ChatRoomResponse;
 import com.lion.be.chat.room.domain.entity.ChatRoom;
 import com.lion.be.chat.room.domain.entity.ChatRoomUser;
-import com.lion.be.chat.room.repository.ChatRoomJpaRepository;
-import com.lion.be.chat.room.repository.ChatRoomQueryDslRepository;
 import com.lion.be.chat.room.repository.ChatRoomRepository;
 import com.lion.be.chat.room.repository.ChatRoomUserRepository;
+import com.lion.be.global.exception.CustomException;
+import com.lion.be.global.exception.ErrorCode;
+import com.lion.be.notification.domain.NotificationType;
+import com.lion.be.notification.domain.dto.NotificationEvent;
+import com.lion.be.notification.domain.entity.Notification;
+import com.lion.be.notification.repository.NotificationRepository;
 import com.lion.be.user.domain.Role;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -31,6 +35,9 @@ public class ChatRoomService {
     private final UserRepository userRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomUserRepository chatRoomUserRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
+    private final NotificationRepository notificationRepository;
+    private final MessageService messageService;
 
     @Transactional
     public Long findOrCreateChatRoom(Long senderId, Long receiverId) {
@@ -40,28 +47,47 @@ public class ChatRoomService {
             log.info("기존 채팅방이 존재합니다. ChatRoomId: {}", chatRoomId.get());
             return chatRoomId.get();
         } else {
-            ChatRoom chatRoom = chatRoomRepository.save(new ChatRoom());
+            ChatRoom chatRoom = new ChatRoom();
 
-            User user1 = userRepository.findById(senderId);
-            User user2 = userRepository.findById(receiverId);
-
-            if(user1.getRole() == Role.BANNED || user2.getRole() == Role.BANNED) {
-                log.warn("블록된 유저가 있는 채팅방은 만들 수 없습니다.");
-                throw new IllegalArgumentException("블록된 유저가 있는 채팅방은 만들 수 없습니다.");
-            }
+            User user1 = userRepository.findById(senderId)
+                    .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+            User user2 = userRepository.findById(receiverId)
+                    .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
             ChatRoomUser user1ChatRoomUser = ChatRoomUser.create(chatRoom, user1);
             ChatRoomUser user2ChatRoomUser = ChatRoomUser.create(chatRoom, user2);
-            chatRoomUserRepository.save(user1ChatRoomUser);
-            chatRoomUserRepository.save(user2ChatRoomUser);
-
             chatRoom.addUser(user1ChatRoomUser);
             chatRoom.addUser(user2ChatRoomUser);
             chatRoomRepository.save(chatRoom);
             log.info("새 채팅방을 생성합니다. ChatRoomId: {}", chatRoom.getId());
 
+            Notification notification = notificationRepository.save(
+                    new Notification(
+                            senderId,
+                            receiverId,
+                            chatRoom.getId(),
+                            NotificationType.CHATROOM
+                    )
+            );
+
+            applicationEventPublisher.publishEvent(
+                    new NotificationEvent(notification.getId(), senderId, receiverId, NotificationType.CHATROOM, chatRoom.getId())
+            );
+
             return chatRoom.getId();
         }
+    }
+
+    public ChatRoomParticipantsInfoResponse findChatRoomParticipants(Long userId, Long chatRoomId) {
+        User sender = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        ChatRoomUser receiver = messageService.findOpponentChatRoomUser(chatRoomId, sender);
+        return ChatRoomParticipantsInfoResponse.toResponse(
+                userId,
+                receiver.getUser().getId(),
+                sender.getNickname(),
+                receiver.getUser().getNickname()
+        );
     }
 
     /**
@@ -98,9 +124,10 @@ public class ChatRoomService {
         return chatRoomRepository.findChatRoomListByUserId(userId);
     }
 
+    @Deprecated
     public boolean checkUserExistsInChatRoom(Long chatRoomId, Long userId) {
         Set<ChatRoomUser> chatRoomUsers = chatRoomUserRepository.findById_ChatRoomId(chatRoomId);
-        if(chatRoomUsers.isEmpty()) {
+        if (chatRoomUsers.isEmpty()) {
             log.info("채팅방에 유저가 없습니다. chatRoomId: {}", chatRoomId);
             return false;
         }

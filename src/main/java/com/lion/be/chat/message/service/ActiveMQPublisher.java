@@ -3,6 +3,8 @@ package com.lion.be.chat.message.service;
 import com.lion.be.chat.message.domain.dto.ChatMessageResponse;
 import com.lion.be.chat.message.domain.entity.ChatMessage;
 import com.lion.be.chat.room.repository.ChatRoomUserRepository;
+import com.lion.be.global.exception.CustomException;
+import com.lion.be.global.exception.ErrorCode;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +25,8 @@ public class ActiveMQPublisher implements MessagePublisher {
     @Override
     public void publishMessage(ChatMessage message) {
         String destination = DESTINATION + message.getChatRoomId();
-        User sender = userRepository.findById(message.getSenderId());
+        User sender = userRepository.findById(message.getSenderId())
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         ChatMessageResponse response = ChatMessageResponse.toResponse(message, sender, sender.getImageUrl(), false);
         messagingTemplate.convertAndSend(destination, response);
     }

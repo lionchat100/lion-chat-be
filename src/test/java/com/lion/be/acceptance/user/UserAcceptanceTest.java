@@ -181,7 +181,7 @@ class UserAcceptanceTest extends AcceptanceTest {
 			Map<String, Object> updateRequest = Map.of(
 				"bio", "수정된 자기소개입니다",
 				"imageId", newImageId,
-				"preferenceType", "PREFERENCE_FOCUSED"
+				"focusType", "PREFERENCE_FOCUSED"
 			);
 
 			// when
@@ -203,7 +203,7 @@ class UserAcceptanceTest extends AcceptanceTest {
 			// given - 이미지 제외한 수정 요청
 			Map<String, Object> updateRequest = Map.of(
 				"bio", "이미지 없이 수정된 bio",
-				"preferenceType", "PREFERENCE_FOCUSED"
+				"focusType", "PREFERENCE_FOCUSED"
 			);
 
 			// when

@@ -1,17 +1,6 @@
 package com.lion.be.acceptance.chat;
 
-import static com.lion.be.acceptance.chat.ChatSteps._1대1_채팅방을_생성_또는_조회한다;
-import static com.lion.be.acceptance.chat.ChatSteps.기존_채팅방_조회_응답을_검증한다;
-import static com.lion.be.acceptance.chat.ChatSteps.메시지_목록_조회_응답을_검증한다;
-import static com.lion.be.acceptance.chat.ChatSteps.메시지_전송_응답을_검증한다;
-import static com.lion.be.acceptance.chat.ChatSteps.상태코드가_200이다;
-import static com.lion.be.acceptance.chat.ChatSteps.상태코드가_429이다;
-import static com.lion.be.acceptance.chat.ChatSteps.자신의_채팅방_목록을_조회한다;
-import static com.lion.be.acceptance.chat.ChatSteps.채팅방_목록_조회_응답을_검증한다;
-import static com.lion.be.acceptance.chat.ChatSteps.채팅방_생성_응답을_검증한다;
-import static com.lion.be.acceptance.chat.ChatSteps.채팅방에_메시지를_전송한다;
-import static com.lion.be.acceptance.chat.ChatSteps.채팅방의_메시지_목록을_조회한다;
-import static com.lion.be.acceptance.chat.ChatSteps.채팅방의_초기_메시지_목록을_조회한다;
+import static com.lion.be.acceptance.chat.ChatSteps.*;
 import static com.lion.be.acceptance.user.UserSteps.회원_id를_가져온다;
 
 import com.lion.be.acceptance.AcceptanceTest;
@@ -93,6 +82,21 @@ public class ChatAcceptanceTest extends AcceptanceTest {
 
             // then
             채팅방_목록_조회_응답을_검증한다(response, 2, "백엔드전문가");
+        }
+
+        @DisplayName("채팅방 참가자 정보를 조회한다")
+        @Test
+        void getChatRoomParticipants() throws InterruptedException {
+            // given
+            api_문서_타이틀("get_chat_room_participants_success", spec);
+            var firstResponse = _1대1_채팅방을_생성_또는_조회한다(사용자1_토큰, 사용자2_ID, spec);
+            Long firstChatRoomId = firstResponse.jsonPath().getLong("chatRoomId");
+
+            // when
+            var response = 채팅방_참가자_정보를_조회한다(사용자1_토큰, firstChatRoomId, spec);
+
+            // then
+            채팅방_참가자_정보를_검증한다(response, 사용자1_ID);
         }
 
     }

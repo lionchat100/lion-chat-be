@@ -14,6 +14,7 @@ import com.lion.be.global.exception.CustomException;
 import com.lion.be.global.exception.ErrorCode;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.domain.entity.UserPhoto;
+import com.lion.be.user.repository.UserRepository;
 import com.lion.be.user.repository.persistence.jpa.UserJpaRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -64,8 +65,8 @@ public class MessageUseCase {
         }
     }
 
-    public void updateReadStatus(String messageId, Long userId) {
-        User user = userRepository.findById(userId)
+    public void processReadAck(String messageId, Long userId) {
+        User user = userJpaRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         ChatMessage message = chatMessageRepository.findById(new ObjectId(messageId))
                 .orElseThrow(() -> new CustomException(ErrorCode.MESSAGE_NOT_FOUND));
@@ -83,7 +84,7 @@ public class MessageUseCase {
         } else {
             messages = chatMessageRepository.findMessagesByIdAndLastId(roomId, new ObjectId(lastId), pageable);
         }
-        boolean isEnd = messages.hasNext();
+        boolean isEnd = !messages.hasNext();
 
         List<ObjectId> unreadMessageIds = messages.getContent().stream()
                 .filter(message -> !message.getSenderId().equals(userId))
@@ -127,7 +128,7 @@ public class MessageUseCase {
                             message.getId().toString(),
                             message.getChatRoomId(),
                             message.getSenderId(),
-                            message.getSenderName(),
+                            sender.getNickname(),
                             imageUrl,
                             message.getCreatedAt(),
                             message.getContent(),

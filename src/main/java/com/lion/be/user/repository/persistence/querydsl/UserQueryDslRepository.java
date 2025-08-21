@@ -4,7 +4,9 @@ import static com.lion.be.user.domain.entity.QUser.*;
 import static com.lion.be.user.domain.entity.QUserPhoto.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
@@ -13,6 +15,7 @@ import com.lion.be.user.domain.OnboardingStatus;
 import com.lion.be.user.domain.Position;
 import com.lion.be.user.domain.Role;
 import com.lion.be.user.domain.entity.User;
+import com.lion.be.user.domain.entity.UserPhoto;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -28,6 +31,37 @@ public class UserQueryDslRepository {
 	private static final BooleanExpression COMPLETED_NON_ADMIN_USER =
 		user.onboardingStatus.eq(OnboardingStatus.COMPLETED)
 			.and(user.role.ne(Role.ADMIN));
+
+	/**
+	 * N+1 문제 해결을 위한 UserPhoto 배치 조회
+	 *
+	 * 여러 사용자의 사진을 한 번의 쿼리로 조회하여 Map으로 반환
+	 * orderIndex 순서로 정렬하여 프로필 사진 순서 보장
+	 */
+	public Map<Long, List<UserPhoto>> findPhotosMapByUserIds(List<Long> userIds) {
+		if (userIds == null || userIds.isEmpty()) {
+			return Map.of();
+		}
+
+		// 한 번의 쿼리로 모든 UserPhoto 조회
+		List<UserPhoto> photos = jpaQueryFactory
+			.selectFrom(userPhoto)
+			.leftJoin(userPhoto.user, user).fetchJoin()  // User 정보도 함께 조회
+			.leftJoin(userPhoto.image).fetchJoin()       // Image 정보도 함께 조회
+			.where(userPhoto.user.id.in(userIds))
+			.orderBy(
+				userPhoto.user.id.asc(),     // 사용자별로 그룹화
+				userPhoto.orderIndex.asc()   // 사진 순서 정렬
+			)
+			.fetch();
+
+		// User ID를 키로 하는 Map으로 변환
+		return photos.stream()
+			.collect(Collectors.groupingBy(
+				photo -> photo.getUser().getId(),
+				Collectors.toList()
+			));
+	}
 
 	/**
 	 * 동일 클러스터 내 사용자 조회
@@ -48,7 +82,6 @@ public class UserQueryDslRepository {
 
 		return jpaQueryFactory
 			.selectFrom(user)
-			.leftJoin(user.userPhotos, userPhoto).fetchJoin()
 			.where(conditions)
 			.orderBy(user.createdAt.desc())
 			.limit(size)
@@ -71,7 +104,6 @@ public class UserQueryDslRepository {
 
 		return jpaQueryFactory
 			.selectFrom(user)
-			.leftJoin(user.userPhotos, userPhoto).fetchJoin()
 			.where(conditions)
 			.orderBy(user.id.desc())
 			.offset(pageable.getOffset())
@@ -94,7 +126,6 @@ public class UserQueryDslRepository {
 
 		return jpaQueryFactory
 			.selectFrom(user)
-			.leftJoin(user.userPhotos, userPhoto).fetchJoin()
 			.where(conditions)
 			.orderBy(user.id.desc())
 			.offset(pageable.getOffset())

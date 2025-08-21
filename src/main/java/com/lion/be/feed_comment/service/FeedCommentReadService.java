@@ -33,7 +33,7 @@ public class FeedCommentReadService {
 
     @ElapsedTime
     public Slice<FeedCommentResponse> fetchAll(Long feedId, Long lastId, int size, Long userId) {
-        Pageable pageable = PageRequest.of(0, size);
+        Pageable pageable = PageRequest.of(0, size > 0 && size <=30 ? size:30);
 
         Slice<FeedCommentResponse> slice;
         if(lastId != null) {
