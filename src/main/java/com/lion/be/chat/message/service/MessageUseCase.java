@@ -15,17 +15,13 @@ import com.lion.be.global.exception.ErrorCode;
 import com.lion.be.image.domain.entity.Image;
 import com.lion.be.image.repository.ImageRepository;
 import com.lion.be.user.domain.entity.User;
-import com.lion.be.user.domain.entity.UserPhoto;
 import com.lion.be.user.repository.persistence.jpa.UserJpaRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -46,11 +42,11 @@ public class MessageUseCase {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomUserRepository chatRoomUserRepository;
     private final MessageService messageService;
-    private final MessagePersistence messagePersistence;
+    private final MessageWriteService messageWriteService;
     private final ChatRoomPersistence chatRoomPersistence;
     private final ImageRepository imageRepository;
+    private final MessageReadService messageReadService;
 
-    
     public void sendMessage(ChatMessageRequest request, Long senderId) {
         ChatRoom chatRoom = chatRoomRepository.findById(request.chatRoomId())
                 .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
@@ -58,7 +54,7 @@ public class MessageUseCase {
         ChatRoomUser chatRoomSender = chatRoomUserRepository.findById_ChatRoomIdAndId_UserId(request.chatRoomId(), senderId);
         ChatMessage message = ChatMessageRequest.fromRequest(request, chatRoomSender.getUser());
 
-        messagePersistence.updateMessageStatus(message, MessageStatus.PENDING);
+        messageWriteService.updateMessageStatus(message, MessageStatus.PENDING);
         try {
             messageService.publishMessage(message, chatRoom, chatRoomSender);
         } catch (Exception e) {
@@ -68,35 +64,22 @@ public class MessageUseCase {
         }
     }
 
+    @Transactional
     public void processReadAck(String messageId, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         ChatMessage message = chatMessageRepository.findById(new ObjectId(messageId))
                 .orElseThrow(() -> new CustomException(ErrorCode.MESSAGE_NOT_FOUND));
-        messagePersistence.updateMessageStatus(message, MessageStatus.DELIVERED);
+        messageWriteService.updateMessageStatus(message, MessageStatus.DELIVERED);
         ChatRoomUser receiverChatRoomUser = messageService.findOpponentChatRoomUser(message.getChatRoomId(), user);
         chatRoomPersistence.updateChatRoomUserReadStatus(receiverChatRoomUser, true);
     }
 
     public List<ChatMessageResponse> findMessagesByIdAndLastId(Long roomId, String lastId, Long userId) {
-        Pageable pageable = PageRequest.of(0, 30, Sort.by("_id").descending());
-
-        Slice<ChatMessage> messages;
-        if (lastId == null || lastId.isEmpty()) {
-            messages = chatMessageRepository.findByChatRoomId(roomId, pageable);
-        } else {
-            messages = chatMessageRepository.findMessagesByIdAndLastId(roomId, new ObjectId(lastId), pageable);
-        }
+        Slice<ChatMessage> messages = messageReadService.getMessages(roomId, lastId);
         boolean isEnd = !messages.hasNext();
 
-        List<ObjectId> unreadMessageIds = messages.getContent().stream()
-                .filter(message -> !message.getSenderId().equals(userId))
-                .map(ChatMessage::getId)
-                .collect(Collectors.toList());
-
-        if (!unreadMessageIds.isEmpty()) {
-            chatMessageRepository.markMessagesAsRead(unreadMessageIds);
-        }
+        messageReadService.updateMessagesAsRead(messages, userId);
 
         Set<Long> senderIds = messages.stream()
                 .map(ChatMessage::getSenderId)
@@ -106,26 +89,9 @@ public class MessageUseCase {
         Map<Long, String> userPhotoMap = new HashMap<>();
 
         List<Image> images = imageRepository.fetchAllByUserId(senderIds.stream().toList());
-        for(Image image : images){
+        for (Image image : images) {
             userPhotoMap.put(image.getUploaderId(), image.getImageUrl());
         }
-
-        /*
-        Map<Long, String> userPhotos = userRepository.findByIdIn(senderIds).stream()
-                .collect(Collectors.toMap(
-                                User::getId,
-                                user -> {
-                                    List<UserPhoto> photo = user.getUserPhotos();
-                                    if (photo.isEmpty()) {
-                                        return DEFAULT_IMAGE_URL;
-                                    } else {
-                                        return photo.get(0).getImageUrl();
-                                    }
-                                }
-                        )
-                );
-
-         */
 
         ChatRoomUser chatRoomUser = chatRoomUserRepository.findById_ChatRoomIdAndId_UserId(roomId, userId);
         chatRoomPersistence.updateChatRoomUserReadStatus(chatRoomUser, true);
@@ -137,7 +103,7 @@ public class MessageUseCase {
                     ChatMessage message = messageList.get(i);
                     String mappedImage = userPhotoMap.get(message.getSenderId());
                     String nickname = users.get(message.getSenderId()).getNickname();
-                    String imageUrl = mappedImage != null ? mappedImage : "https://tokit-bucket.s3.ap-northeast-2.amazonaws.com/profile/defaultimage.png";
+                    String imageUrl = mappedImage != null ? mappedImage : DEFAULT_IMAGE_URL;
 
                     boolean isLast = (i == lastIndex) && isEnd;
 

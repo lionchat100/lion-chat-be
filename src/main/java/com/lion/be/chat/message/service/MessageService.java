@@ -19,7 +19,7 @@ public class MessageService {
 
     private final ChatRoomUserRepository chatRoomUserRepository;
     private final MessagePublisher messagePublisher;
-    private final MessagePersistence messagePersistence;
+    private final MessageWriteService messageWriteService;
     private final ChatRoomPersistence chatRoomPersistence;
 
     @Transactional
@@ -27,7 +27,7 @@ public class MessageService {
         messagePublisher.publishMessage(message);
 
         ChatRoomUser receiverChatRoomUser = findOpponentChatRoomUser(message.getChatRoomId(), chatRoomSender.getUser());
-        messagePersistence.updateMessageStatus(message, MessageStatus.PUBLISHED);
+        messageWriteService.updateMessageStatus(message, MessageStatus.PUBLISHED);
         chatRoomPersistence.updateChatRoomRecentMessage(chatRoom, message);
         chatRoomPersistence.updateChatRoomUserReadStatus(chatRoomSender, true);
         chatRoomPersistence.updateChatRoomUserReadStatus(receiverChatRoomUser, false);
