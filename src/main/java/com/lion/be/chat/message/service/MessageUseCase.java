@@ -12,6 +12,8 @@ import com.lion.be.chat.room.repository.ChatRoomUserRepository;
 import com.lion.be.chat.room.service.ChatRoomPersistence;
 import com.lion.be.global.exception.CustomException;
 import com.lion.be.global.exception.ErrorCode;
+import com.lion.be.image.domain.entity.Image;
+import com.lion.be.image.repository.ImageRepository;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.domain.entity.UserPhoto;
 import com.lion.be.user.repository.persistence.jpa.UserJpaRepository;
@@ -25,6 +27,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,6 +48,7 @@ public class MessageUseCase {
     private final MessageService messageService;
     private final MessagePersistence messagePersistence;
     private final ChatRoomPersistence chatRoomPersistence;
+    private final ImageRepository imageRepository;
 
     @Transactional
     public void sendMessage(ChatMessageRequest request, Long senderId) {
@@ -97,8 +101,16 @@ public class MessageUseCase {
         Set<Long> senderIds = messages.stream()
                 .map(ChatMessage::getSenderId)
                 .collect(Collectors.toSet());
-        Map<Long, User> users = userRepository.findByIdIn(senderIds).stream()
-                .collect(Collectors.toMap(User::getId, user -> user));
+
+        Map<Long, User> users = userRepository.findByIdIn(senderIds).stream().collect(Collectors.toMap(User::getId, user -> user));
+        Map<Long, String> userPhotoMap = new HashMap<>();
+
+        List<Image> images = imageRepository.fetchAllByUserId(senderIds.stream().toList());
+        for(Image image : images){
+            userPhotoMap.put(image.getUploaderId(), image.getImageUrl());
+        }
+
+        /*
         Map<Long, String> userPhotos = userRepository.findByIdIn(senderIds).stream()
                 .collect(Collectors.toMap(
                                 User::getId,
@@ -113,6 +125,8 @@ public class MessageUseCase {
                         )
                 );
 
+         */
+
         ChatRoomUser chatRoomUser = chatRoomUserRepository.findById_ChatRoomIdAndId_UserId(roomId, userId);
         chatRoomPersistence.updateChatRoomUserReadStatus(chatRoomUser, true);
 
@@ -121,8 +135,9 @@ public class MessageUseCase {
         return IntStream.range(0, messageList.size())
                 .mapToObj(i -> {
                     ChatMessage message = messageList.get(i);
+                    String mappedImage = userPhotoMap.get(message.getSenderId());
                     String nickname = users.get(message.getSenderId()).getNickname();
-                    String imageUrl = userPhotos.get(message.getSenderId());
+                    String imageUrl = mappedImage != null ? mappedImage : "https://tokit-bucket.s3.ap-northeast-2.amazonaws.com/profile/defaultimage.png";
 
                     boolean isLast = (i == lastIndex) && isEnd;
 
