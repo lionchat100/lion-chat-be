@@ -65,7 +65,7 @@ public record UserCardResponse (
 			photos.stream()
 				.map(UserPhoto::getImageUrl)
 				.toList(),
-			user.getUserPhotos().stream()
+			photos.stream()
 				.map(UserPhoto::getId)
 				.toList(),
 			user.getBio(),
