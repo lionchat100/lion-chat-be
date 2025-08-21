@@ -37,8 +37,9 @@ import java.util.stream.IntStream;
 @Slf4j
 public class MessageUseCase {
 
-    private final UserRepository userRepository;
-    private final UserJpaRepository userJpaRepository;
+    private static final String DEFAULT_IMAGE_URL = "https://tokit-bucket.s3.ap-northeast-2.amazonaws.com/profile/defaultimage.png";
+
+    private final UserJpaRepository userRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomUserRepository chatRoomUserRepository;
@@ -97,8 +98,19 @@ public class MessageUseCase {
         Set<Long> senderIds = messages.stream()
                 .map(ChatMessage::getSenderId)
                 .collect(Collectors.toSet());
-        Map<Long, User> users = userJpaRepository.findByIdIn(senderIds).stream()
-                .collect(Collectors.toMap(User::getId, user -> user));
+        Map<Long, String> users = userRepository.findByIdIn(senderIds).stream()
+                .collect(Collectors.toMap(
+                                User::getId,
+                                user -> {
+                                    List<UserPhoto> photo = user.getUserPhotos();
+                                    if (photo.isEmpty()) {
+                                        return DEFAULT_IMAGE_URL;
+                                    } else {
+                                        return photo.get(0).getImageUrl();
+                                    }
+                                }
+                        )
+                );
 
         ChatRoomUser chatRoomUser = chatRoomUserRepository.findById_ChatRoomIdAndId_UserId(roomId, userId);
         chatRoomPersistence.updateChatRoomUserReadStatus(chatRoomUser, true);
@@ -108,16 +120,7 @@ public class MessageUseCase {
         return IntStream.range(0, messageList.size())
                 .mapToObj(i -> {
                     ChatMessage message = messageList.get(i);
-                    User sender = users.get(message.getSenderId());
-
-//                    String imageUrl = userRepository.fetchByIdWithPhotos(sender.getId())
-//                            .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND))
-//                            .getUserPhotos().stream()
-//                            .map(UserPhoto::getImageUrl)
-//                            .toList().get(0);
-                    String imageUrl = userRepository.fetchByIdWithPhotos(sender.getId()).orElseThrow(() ->
-                            new CustomException(ErrorCode.USER_NOT_FOUND)
-                    ).getImageUrl();
+                    String imageUrl = users.get(message.getSenderId());
 
                     boolean isLast = (i == lastIndex) && isEnd;
 
