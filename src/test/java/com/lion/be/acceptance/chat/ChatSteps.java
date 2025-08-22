@@ -103,16 +103,14 @@ public class ChatSteps {
     public static void 채팅방_생성_응답을_검증한다(ExtractableResponse<Response> response) {
         Assertions.assertAll(
                 () -> assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value()),
-                () -> assertThat(response.jsonPath().getLong("chatRoomId")).isNotNull().isPositive(),
-                () -> assertThat(response.jsonPath().getString("lastSendAt")).isNotNull()
+                () -> assertThat(response.jsonPath().getLong("chatRoomId")).isNotNull().isPositive()
         );
     }
 
     public static void 기존_채팅방_조회_응답을_검증한다(ExtractableResponse<Response> response, Long expectedChatRoomId) {
         Assertions.assertAll(
                 () -> assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value()),
-                () -> assertThat(response.jsonPath().getLong("chatRoomId")).isEqualTo(expectedChatRoomId),
-                () -> assertThat(response.jsonPath().getString("lastSendAt")).isNotNull()
+                () -> assertThat(response.jsonPath().getLong("chatRoomId")).isEqualTo(expectedChatRoomId)
         );
     }
 

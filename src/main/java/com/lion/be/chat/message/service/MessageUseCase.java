@@ -58,8 +58,6 @@ public class MessageUseCase {
         try {
             messageService.publishMessage(message, chatRoom, chatRoomSender);
         } catch (Exception e) {
-            log.error("메시지 발행에 실패했습니다. 메시지는 PENDING 상태로 유지됩니다. MessageId: {}, Error: {}",
-                    message.getId(), e.getMessage());
             throw new CustomException(ErrorCode.MESSAGE_PUBLISH_FAILED);
         }
     }
