@@ -32,7 +32,7 @@ public class ChatRoom {
 
     private String recentMessageContent;
 
-    private ZonedDateTime recentMessageDt;
+    private ZonedDateTime recentMessageDt = ZonedDateTime.now();
 
     public void updateRecentMessage(String content, ZonedDateTime dt) {
         this.recentMessageContent = content;
