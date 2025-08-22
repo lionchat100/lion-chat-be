@@ -22,8 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * 사용자 카드 필터링 및 클러스터 기반 추천 시스템
  *
- * 기존의 O(n²) 전체 재클러스터링 방식을 O(1) 시간복잡도로 개선한 시스템
- *
  * 주요 개선사항:
  * - 신규 사용자 가입 시 전체 재클러스터링 → 사전 정의된 클러스터 맵으로 즉시 배정
  * - 1600명 동시 가입 시에도 안정적 성능 보장
@@ -205,7 +203,7 @@ public class UserCardFilterUtil {
 		User targetUser = userRepository.fetchById(userId)
 			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-		// 1단계: 클러스터 기반 추천 (더 많이 가져와서 필터링 여유 확보)
+		// 1단계: 클러스터 기반 추천
 		List<User> clusterBasedUsers = getClusterBasedRecommendations(targetUser, excludeUserIds, size * 3);
 
 		// 2단계: 포지션 필터링
@@ -213,9 +211,6 @@ public class UserCardFilterUtil {
 			.filter(user -> user.getPosition() == filterPosition)
 			.limit(size)
 			.collect(Collectors.toCollection(ArrayList::new));
-
-		log.debug("클러스터 {} + 포지션 {} 필터링 결과: {}명",
-			targetUser.getClusterId(), filterPosition, filteredUsers.size());
 
 		// 3단계: 부족하면 해당 포지션의 랜덤 사용자로 보완
 		if (filteredUsers.size() < size) {
@@ -227,7 +222,6 @@ public class UserCardFilterUtil {
 			List<User> randomUsersByPosition = userRepository.fetchRandomUsersByPositionExcluding(
 				userId, filterPosition, remainingSize, extendedExcludeIds);
 
-			log.debug("포지션 {} 랜덤 보완 결과: {}명", filterPosition, randomUsersByPosition.size());
 			filteredUsers.addAll(randomUsersByPosition);
 		}
 
@@ -240,10 +234,7 @@ public class UserCardFilterUtil {
 	private record UserSimilarity(User user, double similarity) {}
 
 	/**
-	 * 신규 사용자 클러스터 즉시 배정 (핵심 개선 메서드)
-	 *
-	 * 기존: O(n²) 전체 재클러스터링
-	 * 개선: O(1) HashMap 조회로 즉시 배정
+	 * 신규 사용자 클러스터 즉시 배정
 	 *
 	 * @param newUser 신규 사용자
 	 * @return 배정된 클러스터 ID
@@ -270,7 +261,7 @@ public class UserCardFilterUtil {
 	}
 
 	/**
-	 * 벡터 기반 클러스터 맵 생성 (AI 포지션 추가로 10차원으로 확장)
+	 * 벡터 기반 클러스터 맵 생성
 	 *
 	 * 동작 과정:
 	 * 1. 모든 MBTI × Position 조합(96가지)의 10차원 벡터 계산
@@ -281,24 +272,23 @@ public class UserCardFilterUtil {
 	 */
 	private static Map<String, Integer> createVectorBasedClusterMap() {
 		Map<String, Integer> clusterMap = new HashMap<>();
-		UserVectorizer vectorizer = new UserVectorizer(); // 임시 인스턴스
+		UserVectorizer vectorizer = new UserVectorizer();
 
-		// 1단계: 모든 조합의 10차원 벡터 계산 (AI 포지션 추가로 차원 확장)
+		// 1단계: 모든 조합의 10차원 벡터 계산
 		Map<String, double[]> vectorMap = new HashMap<>();
 		for (Mbti mbti : Mbti.values()) {
 			for (Position position : Position.values()) {
 				String key = mbti.name() + "_" + position.name();
 
-				// UserVectorizer의 기존 벡터화 로직 활용 (10차원으로 확장)
-				double[] vector = new double[10]; // 9차원 → 10차원
+				double[] vector = new double[10]; // 10차원
 
 				// MBTI 4차원 추가
 				double[] mbtiBinary = vectorizer.getMbtiBinary(mbti);
 				System.arraycopy(mbtiBinary, 0, vector, 0, 4);
 
-				// Position 6차원 추가 (AI 포지션 추가)
+				// Position 6차원 추가
 				double[] positionVector = vectorizer.getPositionVector(position);
-				System.arraycopy(positionVector, 0, vector, 4, 6); // 5 → 6으로 변경
+				System.arraycopy(positionVector, 0, vector, 4, 6);
 
 				vectorMap.put(key, vector);
 			}
@@ -348,7 +338,7 @@ public class UserCardFilterUtil {
 	}
 
 	/**
-	 * 클러스터 중심점 정의 (AI 포지션 추가로 10차원으로 확장)
+	 * 클러스터 중심점 정의
 	 *
 	 * 10차원 벡터 구조: [E/I, S/N, T/F, J/P, BACKEND, FRONTEND, UX_UI, PM, FULLSTACK, AI]
 	 *

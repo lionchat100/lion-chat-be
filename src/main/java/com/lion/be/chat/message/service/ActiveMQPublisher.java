@@ -2,9 +2,9 @@ package com.lion.be.chat.message.service;
 
 import com.lion.be.chat.message.domain.dto.ChatMessageResponse;
 import com.lion.be.chat.message.domain.entity.ChatMessage;
-import com.lion.be.chat.room.repository.ChatRoomUserRepository;
 import com.lion.be.global.exception.CustomException;
 import com.lion.be.global.exception.ErrorCode;
+import com.lion.be.image.repository.ImageRepository;
 import com.lion.be.user.domain.entity.User;
 import com.lion.be.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,16 +18,20 @@ import org.springframework.stereotype.Service;
 public class ActiveMQPublisher implements MessagePublisher {
 
     private final UserRepository userRepository;
-    private final ChatRoomUserRepository chatRoomUserRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final ImageRepository imageRepository;
+
     private static final String DESTINATION = "/topic/chatroom/";
+    private static final String DEFAULT_IMAGE_URL = "https://tokit-bucket.s3.ap-northeast-2.amazonaws.com/profile/defaultimage.png";
 
     @Override
     public void publishMessage(ChatMessage message) {
         String destination = DESTINATION + message.getChatRoomId();
         User sender = userRepository.findById(message.getSenderId())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        ChatMessageResponse response = ChatMessageResponse.toResponse(message, sender, sender.getImageUrl(), false);
+        String imageUrl = imageRepository.fetchByUserId(message.getSenderId())
+                .orElseThrow(() -> new CustomException(ErrorCode.IMAGE_NOT_FOUND)).getImageUrl();
+        ChatMessageResponse response = ChatMessageResponse.toResponse(message, sender, imageUrl, false);
         messagingTemplate.convertAndSend(destination, response);
     }
 }
