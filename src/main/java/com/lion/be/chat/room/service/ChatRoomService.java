@@ -1,6 +1,7 @@
 package com.lion.be.chat.room.service;
 
 import com.lion.be.chat.message.service.MessageService;
+import com.lion.be.chat.room.domain.dto.ChatRoomInitResponse;
 import com.lion.be.chat.room.domain.dto.ChatRoomParticipantsInfoResponse;
 import com.lion.be.chat.room.domain.dto.ChatRoomResponse;
 import com.lion.be.chat.room.domain.entity.ChatRoom;
@@ -22,6 +23,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -40,12 +42,13 @@ public class ChatRoomService {
     private final MessageService messageService;
 
     @Transactional
-    public Long findOrCreateChatRoom(Long senderId, Long receiverId) {
+    public ChatRoomInitResponse findOrCreateChatRoom(Long senderId, Long receiverId) {
 
         Optional<Long> chatRoomId = chatRoomUserRepository.findChatRoomIdByTwoUserIds(senderId, receiverId);
         if (chatRoomId.isPresent()) {
-            log.info("기존 채팅방이 존재합니다. ChatRoomId: {}", chatRoomId.get());
-            return chatRoomId.get();
+            return ChatRoomInitResponse.toResponse(
+                    chatRoomId.get()
+            );
         } else {
             ChatRoom chatRoom = new ChatRoom();
 
@@ -59,7 +62,6 @@ public class ChatRoomService {
             chatRoom.addUser(user1ChatRoomUser);
             chatRoom.addUser(user2ChatRoomUser);
             chatRoomRepository.save(chatRoom);
-            log.info("새 채팅방을 생성합니다. ChatRoomId: {}", chatRoom.getId());
 
             Notification notification = notificationRepository.save(
                     new Notification(
@@ -74,7 +76,9 @@ public class ChatRoomService {
                     new NotificationEvent(notification.getId(), senderId, receiverId, NotificationType.CHATROOM, chatRoom.getId())
             );
 
-            return chatRoom.getId();
+            return ChatRoomInitResponse.toResponse(
+                    chatRoom.getId()
+            );
         }
     }
 
@@ -128,7 +132,6 @@ public class ChatRoomService {
     public boolean checkUserExistsInChatRoom(Long chatRoomId, Long userId) {
         Set<ChatRoomUser> chatRoomUsers = chatRoomUserRepository.findById_ChatRoomId(chatRoomId);
         if (chatRoomUsers.isEmpty()) {
-            log.info("채팅방에 유저가 없습니다. chatRoomId: {}", chatRoomId);
             return false;
         }
 

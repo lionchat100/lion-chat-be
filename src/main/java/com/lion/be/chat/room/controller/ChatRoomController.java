@@ -9,6 +9,7 @@ import com.lion.be.chat.room.service.ChatRoomService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,10 +40,9 @@ public class ChatRoomController {
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestBody ChatRoomInitRequest request
     ) {
-        Long chatRoomId = chatRoomService.findOrCreateChatRoom(userPrincipal.getId(), request.id());
-        log.info("채팅방 생성 완료: {}", chatRoomId);
+        ChatRoomInitResponse chatRoom = chatRoomService.findOrCreateChatRoom(userPrincipal.getId(), request.id());
         return ResponseEntity.ok(new ChatRoomInitResponse(
-                chatRoomId
+                chatRoom.chatRoomId()
         ));
     }
 
@@ -62,6 +62,7 @@ public class ChatRoomController {
      * @param roomId
      * @return
      */
+    @PreAuthorize("@chatRoomUserRepository.existsById_ChatRoomIdAndId_UserId(#roomId, #userPrincipal.id)")
     @GetMapping("/context")
     public ResponseEntity<ChatRoomParticipantsInfoResponse> getChatRoomParticipants(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
