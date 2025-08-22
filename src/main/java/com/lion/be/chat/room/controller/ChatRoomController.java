@@ -40,10 +40,8 @@ public class ChatRoomController {
             @RequestBody ChatRoomInitRequest request
     ) {
         ChatRoomInitResponse chatRoom = chatRoomService.findOrCreateChatRoom(userPrincipal.getId(), request.id());
-        log.info("채팅방 생성 완료: {}", chatRoom.chatRoomId());
         return ResponseEntity.ok(new ChatRoomInitResponse(
-                chatRoom.chatRoomId(),
-                chatRoom.lastSendAt()
+                chatRoom.chatRoomId()
         ));
     }
 

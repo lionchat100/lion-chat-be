@@ -1,18 +1,13 @@
 package com.lion.be.chat.room.domain.dto;
 
-import java.time.ZonedDateTime;
-
 public record ChatRoomInitResponse(
-        Long chatRoomId,
-        ZonedDateTime lastSendAt
+        Long chatRoomId
 ) {
     public static ChatRoomInitResponse toResponse(
-            Long chatRoomId,
-            ZonedDateTime lastSendAt
+            Long chatRoomId
     ) {
         return new ChatRoomInitResponse(
-                chatRoomId,
-                lastSendAt
+                chatRoomId
         );
     }
 }

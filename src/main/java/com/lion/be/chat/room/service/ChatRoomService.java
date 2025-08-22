@@ -46,10 +46,8 @@ public class ChatRoomService {
 
         Optional<Long> chatRoomId = chatRoomUserRepository.findChatRoomIdByTwoUserIds(senderId, receiverId);
         if (chatRoomId.isPresent()) {
-            log.info("기존 채팅방이 존재합니다. ChatRoomId: {}", chatRoomId.get());
             return ChatRoomInitResponse.toResponse(
-                    chatRoomId.get(),
-                    chatRoomRepository.findById(chatRoomId.get()).get().getRegDt()
+                    chatRoomId.get()
             );
         } else {
             ChatRoom chatRoom = new ChatRoom();
@@ -64,7 +62,6 @@ public class ChatRoomService {
             chatRoom.addUser(user1ChatRoomUser);
             chatRoom.addUser(user2ChatRoomUser);
             chatRoomRepository.save(chatRoom);
-            log.info("새 채팅방을 생성합니다. ChatRoomId: {}", chatRoom.getId());
 
             Notification notification = notificationRepository.save(
                     new Notification(
@@ -80,8 +77,7 @@ public class ChatRoomService {
             );
 
             return ChatRoomInitResponse.toResponse(
-                    chatRoom.getId(),
-                    chatRoom.getRegDt()
+                    chatRoom.getId()
             );
         }
     }
@@ -136,7 +132,6 @@ public class ChatRoomService {
     public boolean checkUserExistsInChatRoom(Long chatRoomId, Long userId) {
         Set<ChatRoomUser> chatRoomUsers = chatRoomUserRepository.findById_ChatRoomId(chatRoomId);
         if (chatRoomUsers.isEmpty()) {
-            log.info("채팅방에 유저가 없습니다. chatRoomId: {}", chatRoomId);
             return false;
         }
 
