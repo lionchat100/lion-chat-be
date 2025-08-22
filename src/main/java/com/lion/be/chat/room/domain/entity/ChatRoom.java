@@ -25,7 +25,7 @@ public class ChatRoom {
 
     private Boolean isDeleted = false;
 
-    private ZonedDateTime regDt;
+    private ZonedDateTime regDt = ZonedDateTime.now();
 
     @OneToMany(mappedBy = "chatRoom", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ChatRoomUser> chatRoomUsers = new ArrayList<>();

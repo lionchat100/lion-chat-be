@@ -1,17 +1,17 @@
 package com.lion.be.acceptance.chat;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import com.lion.be.chat.message.domain.dto.ChatMessageResponse;
 import io.restassured.RestAssured;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
-import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+
+import java.util.List;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ChatSteps {
 
@@ -103,14 +103,16 @@ public class ChatSteps {
     public static void 채팅방_생성_응답을_검증한다(ExtractableResponse<Response> response) {
         Assertions.assertAll(
                 () -> assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value()),
-                () -> assertThat(response.jsonPath().getLong("chatRoomId")).isNotNull().isPositive()
+                () -> assertThat(response.jsonPath().getLong("chatRoomId")).isNotNull().isPositive(),
+                () -> assertThat(response.jsonPath().getString("lastSendAt")).isNotNull()
         );
     }
 
     public static void 기존_채팅방_조회_응답을_검증한다(ExtractableResponse<Response> response, Long expectedChatRoomId) {
         Assertions.assertAll(
                 () -> assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value()),
-                () -> assertThat(response.jsonPath().getLong("chatRoomId")).isEqualTo(expectedChatRoomId)
+                () -> assertThat(response.jsonPath().getLong("chatRoomId")).isEqualTo(expectedChatRoomId),
+                () -> assertThat(response.jsonPath().getString("lastSendAt")).isNotNull()
         );
     }
 
