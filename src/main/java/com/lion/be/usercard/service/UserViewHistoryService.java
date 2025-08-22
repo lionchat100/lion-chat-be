@@ -25,7 +25,7 @@ public class UserViewHistoryService {
 	 */
 	private Duration getTTL(){
 		// int randomTimes = ThreadLocalRandom.current().nextInt(3, 8); // 3-7분 (숫자 조정으로 수정할수있음)
-		 int randomTimes = ThreadLocalRandom.current().nextInt(20, 40); // 20 - 40초
+		 int randomTimes = ThreadLocalRandom.current().nextInt(3, 7); // 20 - 40초
 
 		return Duration.ofSeconds(randomTimes);
 	}

@@ -204,7 +204,7 @@ public class UserCardFilterUtil {
 			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
 		// 1단계: 클러스터 기반 추천
-		List<User> clusterBasedUsers = getClusterBasedRecommendations(targetUser, excludeUserIds, size * 3);
+		List<User> clusterBasedUsers = getClusterBasedRecommendations(targetUser, excludeUserIds, size * 2);
 
 		// 2단계: 포지션 필터링
 		List<User> filteredUsers = clusterBasedUsers.stream()
