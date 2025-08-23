@@ -54,9 +54,6 @@ public class TokenController {
         int cookieMaxAge = (int) (refreshTokenExpireTime / 1000);
         cookieUtil.addCookie(response, "refresh_token", tokens.getRefreshToken(), cookieMaxAge, cookieDomain);
 
-        log.info("[/api/auth/token] ======== 처음 토큰이 생성되었습니다 ======= accessToken: {}, refreshToken: {}", tokens.getAccessToken(),
-                tokens.getRefreshToken());
-
         return ResponseEntity.ok(new AuthTokenResponse(tokens.getAccessToken()));
     }
 
@@ -79,9 +76,6 @@ public class TokenController {
 
         Authentication authentication = jwtTokenProvider.getAuthentication(refreshToken);
         String newAccessToken = jwtTokenProvider.generateAccessToken(authentication);
-
-        log.info("[/api/auth/refresh] ======== 새로운 토큰이 생성되었습니다 ======= accessToken: {}, refreshToken: {}", newAccessToken,
-                refreshToken);
 
         return ResponseEntity.ok(new AuthTokenResponse(newAccessToken));
     }
