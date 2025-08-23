@@ -249,9 +249,6 @@ public class UserCardFilterUtil {
 				return 0;
 			}
 
-			log.info("신규 사용자 ID: {} → 클러스터 {} 즉시 배정 ({})",
-				newUser.getId(), clusterId, clusterKey);
-
 			return clusterId;
 
 		} catch (Exception e) {
