@@ -215,29 +215,42 @@ public class UserCardFilterUtil {
 		User targetUser = userRepository.fetchById(userId)
 			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-		// 1단계: 클러스터 기반 추천
-		List<User> clusterBasedUsers = getClusterBasedRecommendations(targetUser, excludeUserIds, size * 2);
+		int clusterSize = 2;
+		int recentSize = 8;
 
-		// 2단계: 포지션 필터링
-		List<User> filteredUsers = clusterBasedUsers.stream()
+		// 1단계: 클러스터 기반 추천
+		List<User> clusterBasedUsers = getClusterBasedRecommendations(targetUser, excludeUserIds, clusterSize * 3).stream()
 			.filter(user -> user.getPosition() == filterPosition)
-			.limit(size)
+			.limit(clusterSize)
 			.collect(Collectors.toCollection(ArrayList::new));
 
-		// 3단계: 부족하면 해당 포지션의 랜덤 사용자로 보완
-		if (filteredUsers.size() < size) {
-			int remainingSize = size - filteredUsers.size();
+		List<Long> extendedExcludeIds = new ArrayList<>(excludeUserIds != null ? excludeUserIds : List.of());
+		clusterBasedUsers.forEach(user -> extendedExcludeIds.add(user.getId()));
 
-			List<Long> extendedExcludeIds = new ArrayList<>(excludeUserIds != null ? excludeUserIds : List.of());
-			filteredUsers.forEach(user -> extendedExcludeIds.add(user.getId()));
+		List<User> recentUsers = userRepository.fetchRandomUsersByPositionExcluding(
+			userId, filterPosition, recentSize, extendedExcludeIds);
 
-			List<User> randomUsersByPosition = userRepository.fetchRandomUsersByPositionExcluding(
-				userId, filterPosition, remainingSize, extendedExcludeIds);
+		List<User> allUsers = new ArrayList<>(clusterBasedUsers);
+		allUsers.addAll(recentUsers);
 
-			filteredUsers.addAll(randomUsersByPosition);
+		// 3단계: 부족하면 해당 Position의 랜덤 사용자로 보완
+		if (allUsers.size() < size) {
+			int remainingSize = size - allUsers.size();
+
+			List<Long> finalExcludeIds = new ArrayList<>(excludeUserIds != null ? excludeUserIds : List.of());
+			allUsers.forEach(user -> finalExcludeIds.add(user.getId()));
+
+			List<User> additionalUsers = userRepository.fetchRandomUsersByPositionExcluding(
+				userId, filterPosition, remainingSize, finalExcludeIds);
+			allUsers.addAll(additionalUsers);
 		}
 
-		return filteredUsers;
+		// 4단계: 시간 기반 셔플
+		long timeSeed = System.currentTimeMillis() / (10 * 1000);
+		Random random = new Random(timeSeed);
+		Collections.shuffle(allUsers, random);
+
+		return allUsers.stream().limit(size).collect(Collectors.toList());
 	}
 
 	/**
