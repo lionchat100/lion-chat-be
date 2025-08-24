@@ -1,9 +1,6 @@
 package com.lion.be.usercard.util;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
@@ -80,26 +77,40 @@ public class UserCardFilterUtil {
 		User targetUser = userRepository.fetchById(userId)
 			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-		// 1단계: 동일 클러스터 기반 추천
-		List<User> clusterBasedUsers = new ArrayList<>(getClusterBasedRecommendations(targetUser, excludeUserIds, size));
+        int clusterSize = 7; // 클러스터 내 추천 사용자 수
+        int recentSize =3; // 최근 가입자 추천 사용자 수
 
-		log.debug("클러스터 {} 기반 추천 결과: {}명", targetUser.getClusterId(), clusterBasedUsers.size());
+		// 1단계: 동일 클러스터 기반 추천
+		List<User> clusterBasedUsers = new ArrayList<>(getClusterBasedRecommendations(targetUser, excludeUserIds, clusterSize));
+
+        // 최근 가입자 우선 추천
+        List<Long> extendedExcludeIds = new ArrayList<>(excludeUserIds != null ? excludeUserIds : List.of());
+        clusterBasedUsers.forEach(user -> extendedExcludeIds.add(user.getId()));
+
+        List<User> recentUsers = userRepository.fetchRandomUsersExcluding(
+                userId, recentSize, extendedExcludeIds);
+
+        List<User> allUsers = new ArrayList<>(clusterBasedUsers);
+        allUsers.addAll(recentUsers);
 
 		// 2단계: 부족한 경우 랜덤 사용자로 보완
-		if (clusterBasedUsers.size() < size) {
-			int remainingSize = size - clusterBasedUsers.size();
+		if (allUsers.size() < size) {
+            int remainingSize = size - allUsers.size();
 
-			List<Long> extendedExcludeIds = new ArrayList<>(excludeUserIds != null ? excludeUserIds : List.of());
-			clusterBasedUsers.forEach(user -> extendedExcludeIds.add(user.getId()));
+            List<Long> finalExcludeIds  = new ArrayList<>(excludeUserIds != null ? excludeUserIds : List.of());
+            allUsers.forEach(user -> finalExcludeIds.add(user.getId()));
 
-			List<User> randomUsers = userRepository.fetchRandomUsersExcluding(
-				userId, remainingSize, extendedExcludeIds);
-
-			log.debug("랜덤 보완 추천 결과: {}명", randomUsers.size());
-			clusterBasedUsers.addAll(randomUsers);
+            List<User> additionalUsers = userRepository.fetchRandomUsersExcluding(
+                    userId, remainingSize, finalExcludeIds);
+            allUsers.addAll(additionalUsers);
 		}
 
-		return clusterBasedUsers;
+        // 시간 기반 셔플 (10초 다른 순서)
+        long timeSeed = System.currentTimeMillis() / (10 * 1000);
+        Random random = new Random(timeSeed);
+        Collections.shuffle(allUsers, random);
+
+        return allUsers.stream().limit(size).collect(Collectors.toList());
 	}
 
 	/**
@@ -122,9 +133,10 @@ public class UserCardFilterUtil {
 			return new ArrayList<>();
 		}
 
+        int candidateSize = size * 3; // 후보군 3배수 조회 (30)
 		// 동일 클러스터 사용자 조회
 		List<User> sameClusterUsers = userRepository.fetchUsersByClusterExcluding(
-			targetClusterId, targetUser.getId(), excludeUserIds, size);
+			targetClusterId, targetUser.getId(), excludeUserIds, candidateSize);
 
 		if (sameClusterUsers.isEmpty()) {
 			return new ArrayList<>();
@@ -136,7 +148,7 @@ public class UserCardFilterUtil {
 			.sorted((a, b) -> Double.compare(b.similarity, a.similarity))
 			.limit(size)
 			.map(us -> us.user)
-			.toList();
+                .collect(Collectors.toList());
 	}
 
 	/**
