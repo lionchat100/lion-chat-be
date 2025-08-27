@@ -77,7 +77,7 @@ public class MessageUseCase {
         Slice<ChatMessage> messages = messageReadService.getMessages(roomId, lastId);
         boolean isEnd = !messages.hasNext();
 
-        messageReadService.updateMessagesAsRead(messages, userId);
+        messageWriteService.updateMessagesAsRead(messages, userId);
 
         Set<Long> senderIds = messages.stream()
                 .map(ChatMessage::getSenderId)
