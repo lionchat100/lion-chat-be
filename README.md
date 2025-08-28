@@ -138,7 +138,7 @@ TODO
 
 ### 유저
 
-<img width="4386" height="2842" alt="image" src="https://github.com/user-attachments/assets/ffd7baf4-e60d-44d0-8863-fe6cfe214e2c" />
+<img width="897" height="570" alt="스크린샷 2025-08-28 12 22 02" src="https://github.com/user-attachments/assets/8d24866c-75e5-429c-ad9b-f4338d66570f" />
 
 ### 채팅
 
