@@ -178,4 +178,4 @@ Tokit은 멋쟁이사자처럼 전국 대학 해커톤 참가자들의 원활한
 
 ### 피드/피드 댓글
 
-<img width="2709" height="591" alt="Image" src="https://github.com/user-attachments/assets/278d5d34-8177-4e57-a09d-4ededa86bdda" />
+<img width="2614" height="550" alt="Image" src="https://github.com/user-attachments/assets/6638e903-b2d6-41b0-9cd4-e0c21e6558cf" />
