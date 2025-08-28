@@ -124,9 +124,41 @@ Tokit은 멋쟁이사자처럼 전국 대학 해커톤 참가자들의 원활한
 
 ---
 
-## 기술 스택
+## 백엔드 기술 스택
 
-TODO
+### Infra
+
+- AWS
+- Systems Manager
+- Atlas
+- Docker
+- Redis
+- ActiveMQ
+- Road Balancer
+- Auto Scaling
+- GitHub Actions
+
+### Development
+
+- SpringBoot
+- JPA
+- QueryDsl
+- WebSocket
+- Stomp
+- Rest Assured + Rest Docs
+- ActiveMQ
+
+### DB
+
+- MongoDB
+- MySQL
+
+### Monitoring
+
+- Metabase
+- Google Analytics
+- Atlas
+- AWS CloudWatch
 
 ---
 
@@ -142,7 +174,7 @@ TODO
 
 ### 채팅
 
-<img width="373" height="675" alt="스크린샷 2025-08-28 12 05 09" src="https://github.com/user-attachments/assets/ed08df05-e739-459c-9f33-6a93ce1926d7" />
+<img width="4386" height="2842" alt="image" src="https://github.com/user-attachments/assets/ffd7baf4-e60d-44d0-8863-fe6cfe214e2c" />
 
 ### 피드/피드 댓글
 
