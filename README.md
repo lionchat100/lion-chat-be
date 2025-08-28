@@ -118,6 +118,18 @@ Tokit은 멋쟁이사자처럼 전국 대학 해커톤 참가자들의 원활한
 
 ---
 
+## ERD
+
+<img width="1718" height="1712" alt="ERD" src="https://github.com/user-attachments/assets/6b683424-c0a4-403b-af99-c79bc9790426" />
+
+---
+
+## 기술 스택
+
+TODO
+
+---
+
 ## 아키텍처
 
 ### 인프라
@@ -126,18 +138,12 @@ Tokit은 멋쟁이사자처럼 전국 대학 해커톤 참가자들의 원활한
 
 ### 유저
 
-<img width="373" height="675" alt="스크린샷 2025-08-28 12 05 09" src="https://github.com/user-attachments/assets/ed08df05-e739-459c-9f33-6a93ce1926d7" />
+<img width="4386" height="2842" alt="image" src="https://github.com/user-attachments/assets/ffd7baf4-e60d-44d0-8863-fe6cfe214e2c" />
 
 ### 채팅
 
-<img width="4386" height="2842" alt="image" src="https://github.com/user-attachments/assets/ffd7baf4-e60d-44d0-8863-fe6cfe214e2c" />
+<img width="373" height="675" alt="스크린샷 2025-08-28 12 05 09" src="https://github.com/user-attachments/assets/ed08df05-e739-459c-9f33-6a93ce1926d7" />
 
 ### 피드/피드 댓글
-
-- TODO
-
----
-
-### 주요 기능
 
 - TODO
