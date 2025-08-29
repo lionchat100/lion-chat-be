@@ -118,13 +118,11 @@ Tokit은 멋쟁이사자처럼 전국 대학 해커톤 참가자들의 원활한
 
 ---
 
----
-
 ## API 문서
 
-<img width="1710" height="940" alt="Screenshot 2025-08-29 at 10 26 46" src="https://github.com/user-attachments/assets/a5ff8361-da4d-49b3-85b8-5fb7a383d4c3" />
+<img width="1710" height="940" alt="Screenshot 2025-08-29 at 10 26 46" src="https://github.com/user-attachments/assets/a5ff8361-da4d-49b3-85b8-5fb7a383d4c3" />  
 
-- 인수 테스트 성공 시, 자동으로 Rest Docs가 생성되어 서버에 빌드되는 방식 
+- 인수 테스트 성공 시, 자동으로 Rest Docs가 생성되어 서버에 빌드되는 방식
 - https://api.tokit.co.kr/api/docs
 
 ---
@@ -138,15 +136,19 @@ Tokit은 멋쟁이사자처럼 전국 대학 해커톤 참가자들의 원활한
 ## 백엔드 기술 스택
 
 ### Infra
+
 ![AWS](https://img.shields.io/badge/AWS-232F3E?style=flat-square&logo=AmazonAWS&logoColor=white) ![Application Load Balancer](https://img.shields.io/badge/Load%20Balancer-232F3E?style=flat-square&logo=AmazonAWS&logoColor=white) ![Auto Scaling](https://img.shields.io/badge/Auto%20Scaling-232F3E?style=flat-square&logo=AmazonAWS&logoColor=white) ![ElastiCache](https://img.shields.io/badge/ElastiCache-FF4438?style=flat-square&logo=AmazonAWS&logoColor=white) ![AmazonMQ](https://img.shields.io/badge/AmazonMQ-D22128?style=flat-square&logo=AmazonAWS&logoColor=white) ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF?style=flat-square&logo=githubactions&logoColor=white) ![Atlas](https://img.shields.io/badge/Atlas-1A91FF?style=flat-square&logo=atlasos&logoColor=white) ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)
 
 ### Development
+
 ![SpringBoot](https://img.shields.io/badge/SpringBoot-6DB33F?style=flat-square&logo=springboot&logoColor=white) ![JPA](https://img.shields.io/badge/JPA-59666C?style=flat-square&logo=hibernate&logoColor=white) ![QueryDSL](https://img.shields.io/badge/QueryDSL-0769AD?style=flat-square&logo=gradle&logoColor=white) ![WebSocket](https://img.shields.io/badge/WebSocket-010101?style=flat-square&logo=socketdotio&logoColor=white) ![STOMP](https://img.shields.io/badge/STOMP-4A154B?style=flat-square&logo=apachekafka&logoColor=white) ![ActiveMQ](https://img.shields.io/badge/ActiveMQ-D22128?style=flat-square&logo=apache&logoColor=white) ![Rest Assured](https://img.shields.io/badge/Rest%20Assured-6DB33F?style=flat-square&logo=java&logoColor=white) ![Rest Docs](https://img.shields.io/badge/Rest%20Docs-FF6C37?style=flat-square&logo=asciidoctor&logoColor=white)
 
 ### DB
+
 ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white) ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=flat-square&logo=mysql&logoColor=white) ![Redis](https://img.shields.io/badge/Redis-FF4438?style=flat-square&logo=redis&logoColor=white)
 
 ### Monitoring
+
 ![Metabase](https://img.shields.io/badge/Metabase-509EE3?style=flat-square&logo=metabase&logoColor=white) ![Google Analytics](https://img.shields.io/badge/Google%20Analytics-E37400?style=flat-square&logo=googleanalytics&logoColor=white) ![CloudWatch](https://img.shields.io/badge/CloudWatch-232F3E?style=flat-square&logo=AmazonAWS&logoColor=white)
 
 ---
