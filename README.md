@@ -120,7 +120,9 @@ Tokit은 멋쟁이사자처럼 전국 대학 해커톤 참가자들의 원활한
 
 ## API 문서
 
-<img width="1710" height="940" alt="Screenshot 2025-08-29 at 10 26 46" src="https://github.com/user-attachments/assets/a5ff8361-da4d-49b3-85b8-5fb7a383d4c3" />  
+<img width="1710" height="940" alt="Screenshot 2025-08-29 at 10 26 46" src="https://github.com/user-attachments/assets/a5ff8361-da4d-49b3-85b8-5fb7a383d4c3" />
+
+  
 
 - 인수 테스트 성공 시, 자동으로 Rest Docs가 생성되어 서버에 빌드되는 방식
 - https://api.tokit.co.kr/api/docs
